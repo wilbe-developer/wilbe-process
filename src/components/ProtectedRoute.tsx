@@ -1,21 +1,13 @@
 
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { PATHS } from "@/lib/constants";
-import HomePage from "./HomePage";
 
-// This is just a wrapper to redirect to the appropriate page based on auth status
-const Index = () => {
+const ProtectedRoute = () => {
   const { isAuthenticated, loading } = useAuth();
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate(PATHS.LOGIN);
-    }
-  }, [isAuthenticated, loading, navigate]);
-  
+  const location = useLocation();
+
+  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -26,8 +18,14 @@ const Index = () => {
       </div>
     );
   }
-  
-  return <HomePage />;
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to={PATHS.LOGIN} state={{ from: location }} replace />;
+  }
+
+  // Render the protected outlet
+  return <Outlet />;
 };
 
-export default Index;
+export default ProtectedRoute;
