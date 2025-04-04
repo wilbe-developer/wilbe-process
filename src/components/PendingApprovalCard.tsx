@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { PATHS } from "@/lib/constants";
+import { useAuth } from "@/hooks/useAuth";
 
 const PendingApprovalCard = () => {
+  const { logout } = useAuth();
+  
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
@@ -19,9 +22,12 @@ const PendingApprovalCard = () => {
         <p>
           You may unsubscribe using the link at the bottom of email newsletters or contact us anytime if you'd like us to delete your personal information.
         </p>
-        <div className="pt-4">
-          <Button asChild variant="outline">
+        <div className="pt-4 space-y-2">
+          <Button asChild variant="outline" className="w-full">
             <Link to={PATHS.LOGIN}>Return to Login</Link>
+          </Button>
+          <Button onClick={logout} variant="ghost" className="w-full">
+            Logout
           </Button>
         </div>
       </CardContent>

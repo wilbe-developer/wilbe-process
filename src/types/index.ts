@@ -12,6 +12,7 @@ export interface UserProfile {
   approved: boolean;
   createdAt: Date;
   avatar?: string;
+  isAdmin?: boolean;
 }
 
 export interface Module {

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -25,62 +25,66 @@ import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
 import { UserProfile, ApprovalStatus } from "@/types";
 import { useNavigate } from "react-router-dom";
-
-// Mock pending users
-const PENDING_USERS: UserProfile[] = [
-  {
-    id: "pending1",
-    firstName: "Jennifer",
-    lastName: "Liu",
-    email: "jennifer.liu@example.com",
-    linkedIn: "https://linkedin.com/in/jenniferliu",
-    institution: "Stanford University",
-    location: "Palo Alto, USA",
-    role: "Neuroscience PhD Candidate",
-    bio: "Researching neuroplasticity and cognitive adaptation in traumatic brain injury patients.",
-    approved: false,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-  },
-  {
-    id: "pending2",
-    firstName: "Michael",
-    lastName: "Park",
-    email: "michael.park@example.com",
-    linkedIn: "https://linkedin.com/in/michaelpark",
-    institution: "UCLA",
-    location: "Los Angeles, USA",
-    role: "Biomedical Engineering",
-    bio: "Developing novel drug delivery systems for targeted cancer therapy.",
-    approved: false,
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    avatar: "https://randomuser.me/api/portraits/men/22.jpg",
-  },
-  {
-    id: "pending3",
-    firstName: "Priya",
-    lastName: "Sharma",
-    email: "priya.sharma@example.com",
-    linkedIn: "https://linkedin.com/in/priyasharma",
-    institution: "Cambridge University",
-    location: "Cambridge, UK",
-    role: "Biotechnology Researcher",
-    bio: "Working on CRISPR-based genetic therapies for inherited diseases.",
-    approved: false,
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    avatar: "https://randomuser.me/api/portraits/women/57.jpg",
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminPage = () => {
   const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [pendingUsers, setPendingUsers] = useState(PENDING_USERS);
+  const [pendingUsers, setPendingUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [videoLink, setVideoLink] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDescription, setVideoDescription] = useState("");
   const [moduleId, setModuleId] = useState("startup-founder");
+
+  // Fetch pending users on mount
+  useEffect(() => {
+    const fetchPendingUsers = async () => {
+      if (!isAdmin) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('approved', false);
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          // Transform data to match our UserProfile interface
+          const userProfiles: UserProfile[] = data.map(profile => ({
+            id: profile.id,
+            firstName: profile.first_name || '',
+            lastName: profile.last_name || '',
+            email: profile.email || '',
+            linkedIn: profile.linked_in,
+            institution: profile.institution,
+            location: profile.location,
+            role: profile.role,
+            bio: profile.bio,
+            approved: profile.approved,
+            createdAt: new Date(profile.created_at),
+            avatar: profile.avatar || `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 100)}.jpg`
+          }));
+          setPendingUsers(userProfiles);
+        }
+      } catch (error) {
+        console.error('Error fetching pending users:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch pending users",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPendingUsers();
+  }, [isAdmin, toast]);
 
   // Redirect if not admin
   if (!isAdmin) {
@@ -88,16 +92,36 @@ const AdminPage = () => {
     return null;
   }
 
-  const handleApprovalAction = (userId: string, status: ApprovalStatus) => {
-    setPendingUsers(pendingUsers.filter(user => user.id !== userId));
-    
-    toast({
-      title: status === 'approved' ? "User Approved" : "User Rejected",
-      description: `User has been ${status}. ${status === 'approved' ? 'They will be notified by email.' : ''}`,
-    });
-    
-    // In a real app, this would trigger notifications to the user and/or update database
-    console.log(`User ${userId} ${status}. This would trigger a notification to the user.`);
+  const handleApprovalAction = async (userId: string, status: ApprovalStatus) => {
+    try {
+      // Update user approval status in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ approved: status === 'approved' })
+        .eq('id', userId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Remove user from the list
+      setPendingUsers(pendingUsers.filter(user => user.id !== userId));
+      
+      toast({
+        title: status === 'approved' ? "User Approved" : "User Rejected",
+        description: `User has been ${status}. ${status === 'approved' ? 'They will be notified by email.' : ''}`,
+      });
+      
+      // In a real app, this would trigger notifications to the user and/or update database
+      console.log(`User ${userId} ${status}. This would trigger a notification to the user.`);
+    } catch (error) {
+      console.error('Error updating user approval status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user approval status",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleAddVideo = (e: React.FormEvent) => {
@@ -144,7 +168,12 @@ const AdminPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {pendingUsers.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-6">
+                  <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <p className="text-gray-500">Loading pending approvals...</p>
+                </div>
+              ) : pendingUsers.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>

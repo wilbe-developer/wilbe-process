@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS, SAMPLE_USERS } from "@/lib/constants";
 import { UserProfile, UserRole } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { Session, User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -20,22 +22,94 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in on mount
+  // Check if user is logged in on mount and set up auth listener
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("user");
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession);
+        
+        // If signed in, fetch user profile
+        if (newSession?.user) {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', newSession.user.id)
+            .single();
+            
+          if (data) {
+            // Transform database fields to match our UserProfile interface
+            const userProfile: UserProfile = {
+              id: data.id,
+              firstName: data.first_name || '',
+              lastName: data.last_name || '',
+              email: data.email || '',
+              linkedIn: data.linked_in,
+              institution: data.institution,
+              location: data.location,
+              role: data.role,
+              bio: data.bio,
+              approved: data.approved,
+              createdAt: new Date(data.created_at),
+              avatar: data.avatar,
+              isAdmin: data.role === 'admin'
+            };
+            setUser(userProfile);
+          } else if (error) {
+            console.error('Error fetching user profile:', error);
+          }
+        } else {
+          setUser(null);
+        }
       }
-    }
-    setLoading(false);
+    );
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (initialSession?.user) {
+        // Fetch user profile
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', initialSession.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (data) {
+              // Transform database fields to match our UserProfile interface
+              const userProfile: UserProfile = {
+                id: data.id,
+                firstName: data.first_name || '',
+                lastName: data.last_name || '',
+                email: data.email || '',
+                linkedIn: data.linked_in,
+                institution: data.institution,
+                location: data.location,
+                role: data.role,
+                bio: data.bio,
+                approved: data.approved,
+                createdAt: new Date(data.created_at),
+                avatar: data.avatar,
+                isAdmin: data.role === 'admin'
+              };
+              setUser(userProfile);
+            } else if (error) {
+              console.error('Error fetching user profile:', error);
+            }
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Login function
@@ -43,42 +117,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      // In a real app, this would be an API call
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      // Find user by email
-      const foundUser = SAMPLE_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (!foundUser) {
-        throw new Error("Invalid email or password");
+      if (error) {
+        throw error;
       }
       
-      // In a real app, you would check the password here
+      // Get user profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profileError) {
+        throw profileError;
+      }
       
       // Check if the user is approved
-      if (!foundUser.approved) {
+      if (!profileData.approved) {
         toast({
           title: "Account pending approval",
           description: "Your account is still pending approval. You'll be notified once approved.",
           variant: "destructive",
         });
+        
+        await supabase.auth.signOut();
+        setUser(null);
         navigate(PATHS.PENDING);
         return;
       }
       
-      // Add isAdmin field for test purposes
-      const userWithRole = {
-        ...foundUser,
-        isAdmin: foundUser.id === '1', // First user is admin for demo
-      };
-      
-      setUser(userWithRole);
-      localStorage.setItem("user", JSON.stringify(userWithRole));
-      
       toast({
         title: "Login successful",
-        description: `Welcome back, ${foundUser.firstName}!`,
+        description: `Welcome back, ${profileData.first_name}!`,
       });
       
       navigate(PATHS.HOME);
@@ -98,36 +173,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
-      // In a real app, this would be an API call
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Create new user
-      const newUser: UserProfile = {
-        id: Math.random().toString(36).substring(2, 11),
-        firstName: userData.firstName || "",
-        lastName: userData.lastName || "",
+      // Create new user in Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
         email: userData.email || "",
-        linkedIn: userData.linkedIn || "",
-        institution: userData.institution || "",
-        location: userData.location || "",
-        role: userData.role || "",
-        bio: userData.bio || "",
-        approved: false, // Users start unapproved
-        createdAt: new Date(),
-        avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 100)}.jpg`,
-      };
+        password: userData.email?.split('@')[0] + "123456" || "password123", // Simple password for demo
+        options: {
+          data: {
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            linkedIn: userData.linkedIn,
+            institution: userData.institution,
+            location: userData.location,
+            role: userData.role,
+          }
+        }
+      });
       
-      // In a real app, you would add the user to the database here
-      // and trigger notifications to Admin, Slack, Attio CRM, etc.
+      if (error) {
+        throw error;
+      }
+      
+      // The profile will be created automatically via database trigger
       
       toast({
         title: "Registration successful",
         description: "Your account is pending approval. We'll notify you once approved.",
       });
-      
-      console.log("New user registered:", newUser);
-      console.log("This would trigger a notification to Admin, Slack, and Attio CRM");
       
       navigate(PATHS.PENDING);
     } catch (error) {
@@ -142,13 +213,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Logout function
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("user");
+    
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
+    
     navigate(PATHS.LOGIN);
   };
 
@@ -161,17 +234,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error("Not authenticated");
       }
       
-      // In a real app, this would be an API call
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Transform data to match database fields
+      const dbData = {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        linked_in: data.linkedIn,
+        institution: data.institution,
+        location: data.location,
+        role: data.role,
+        bio: data.bio,
+      };
       
+      // Update profile in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update(dbData)
+        .eq('id', user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update local user state
       const updatedUser = {
         ...user,
         ...data,
       };
       
       setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
       
       toast({
         title: "Profile updated",
