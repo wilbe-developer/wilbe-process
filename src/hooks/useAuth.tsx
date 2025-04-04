@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { PATHS, SAMPLE_USERS } from "@/lib/constants";
-import { UserProfile, UserRole } from "@/types";
+import { PATHS } from "@/lib/constants";
+import { UserProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 
@@ -11,7 +11,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
   register: (userData: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               role: data.role,
               bio: data.bio,
               approved: data.approved,
-              createdAt: new Date(data.created_at),
+              createdAt: new Date(data.created_at || new Date()),
               avatar: data.avatar,
               isAdmin: data.role === 'admin'
             };
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 role: data.role,
                 bio: data.bio,
                 approved: data.approved,
-                createdAt: new Date(data.created_at),
+                createdAt: new Date(data.created_at || new Date()),
                 avatar: data.avatar,
                 isAdmin: data.role === 'admin'
               };
@@ -112,54 +112,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Login function
-  const login = async (email: string, password: string) => {
+  // Magic link function
+  const sendMagicLink = async (email: string) => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password
+        options: {
+          emailRedirectTo: window.location.origin + PATHS.HOME,
+        }
       });
       
       if (error) {
         throw error;
       }
       
-      // Get user profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .single();
-      
-      if (profileError) {
-        throw profileError;
-      }
-      
-      // Check if the user is approved
-      if (!profileData.approved) {
-        toast({
-          title: "Account pending approval",
-          description: "Your account is still pending approval. You'll be notified once approved.",
-          variant: "destructive",
-        });
-        
-        await supabase.auth.signOut();
-        setUser(null);
-        navigate(PATHS.PENDING);
-        return;
-      }
-      
       toast({
-        title: "Login successful",
-        description: `Welcome back, ${profileData.first_name}!`,
+        title: "Magic link sent",
+        description: "Check your email for a login link.",
       });
       
-      navigate(PATHS.HOME);
     } catch (error) {
       toast({
-        title: "Login failed",
+        title: "Failed to send magic link",
         description: error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
@@ -173,10 +149,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       
+      // Generate a random password (won't be used with magic links)
+      const randomPassword = Math.random().toString(36).slice(-10);
+      
       // Create new user in Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: userData.email || "",
-        password: userData.email?.split('@')[0] + "123456" || "password123", // Simple password for demo
+        password: randomPassword,
         options: {
           data: {
             firstName: userData.firstName,
@@ -185,15 +164,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             institution: userData.institution,
             location: userData.location,
             role: userData.role,
-          }
+          },
+          emailRedirectTo: window.location.origin + PATHS.PENDING,
         }
       });
       
       if (error) {
         throw error;
       }
-      
-      // The profile will be created automatically via database trigger
       
       toast({
         title: "Registration successful",
@@ -288,7 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated,
         isAdmin,
-        login,
+        sendMagicLink,
         register,
         logout,
         updateProfile,

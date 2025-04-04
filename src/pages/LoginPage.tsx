@@ -7,15 +7,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
 import Logo from "@/components/Logo";
+import { useToast } from "@/components/ui/use-toast";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { login, loading } = useAuth();
+  const { sendMagicLink, loading } = useAuth();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
+    
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    await sendMagicLink(email);
   };
 
   return (
@@ -27,7 +38,7 @@ const LoginPage = () => {
           </div>
           <CardTitle className="text-2xl">Log In</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            Enter your email to receive a magic link
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -45,29 +56,8 @@ const LoginPage = () => {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
-                <Link
-                  to="#"
-                  className="text-sm text-brand-pink hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Logging in..." : "Log In"}
+              {loading ? "Sending magic link..." : "Send Magic Link"}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
@@ -75,6 +65,9 @@ const LoginPage = () => {
             <Link to={PATHS.REGISTER} className="text-brand-pink hover:underline">
               Sign up
             </Link>
+          </div>
+          <div className="mt-2 p-4 bg-gray-50 rounded-md text-sm text-gray-600">
+            <p>You'll receive an email with a login link. No password needed!</p>
           </div>
         </CardContent>
       </Card>
