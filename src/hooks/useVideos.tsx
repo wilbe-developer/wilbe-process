@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import { Video, Module } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { MODULES, VIDEOS } from "@/lib/constants";
 
 export const useVideos = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUsingDummyData, setIsUsingDummyData] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -19,11 +21,40 @@ export const useVideos = () => {
         
         // First check authentication status
         const { data: session } = await supabase.auth.getSession();
-        if (!session?.session?.user) {
-          console.log("No authenticated user found, videos may be limited");
-        } else {
-          console.log("User is authenticated:", session.session.user.id);
+        const isAuthenticated = !!session?.session?.user;
+        
+        if (!isAuthenticated) {
+          console.log("No authenticated user found, falling back to dummy data");
+          
+          // Format the dummy data to match our Video and Module types
+          const dummyVideos: Video[] = VIDEOS.map(video => ({
+            ...video,
+            id: `dummy-${video.id}`, // Mark as dummy data for debugging
+            completed: false
+          }));
+          
+          const dummyModules: Module[] = MODULES.map(module => {
+            const moduleVideos = dummyVideos.filter(v => v.moduleId === module.id);
+            return {
+              ...module,
+              id: `dummy-${module.id}`, // Mark as dummy data for debugging
+              videos: moduleVideos
+            };
+          });
+          
+          console.log("Using dummy data:", { 
+            videosCount: dummyVideos.length,
+            modulesCount: dummyModules.length 
+          });
+          
+          setVideos(dummyVideos);
+          setModules(dummyModules);
+          setIsUsingDummyData(true);
+          setLoading(false);
+          return;
         }
+        
+        console.log("User is authenticated:", session.session.user.id);
         
         // Fetch modules from Supabase - modules must be fetched before videos
         const { data: modulesData, error: modulesError } = await supabase
@@ -103,8 +134,6 @@ export const useVideos = () => {
           } else if (progressError) {
             console.error("Error fetching video progress:", progressError);
           }
-        } else {
-          console.log("User not authenticated, skipping video progress fetch");
         }
         
         // Update video completion status based on progress data
@@ -159,8 +188,33 @@ export const useVideos = () => {
         console.log("Final processed modules:", formattedModules);
         console.log("Final processed videos:", formattedVideos);
         
-        setVideos(formattedVideos);
-        setModules(formattedModules);
+        // If no data was found in Supabase, fall back to dummy data
+        if (formattedVideos.length === 0 && formattedModules.length === 0) {
+          console.warn("No data found in Supabase, falling back to dummy data");
+          
+          const dummyVideos: Video[] = VIDEOS.map(video => ({
+            ...video,
+            id: `dummy-${video.id}`, // Mark as dummy data for debugging
+            completed: false
+          }));
+          
+          const dummyModules: Module[] = MODULES.map(module => {
+            const moduleVideos = dummyVideos.filter(v => v.moduleId === module.id);
+            return {
+              ...module,
+              id: `dummy-${module.id}`, // Mark as dummy data for debugging
+              videos: moduleVideos
+            };
+          });
+          
+          setVideos(dummyVideos);
+          setModules(dummyModules);
+          setIsUsingDummyData(true);
+        } else {
+          setVideos(formattedVideos);
+          setModules(formattedModules);
+          setIsUsingDummyData(false);
+        }
       } catch (err: any) {
         console.error("Error in useVideos hook:", err);
         setError(`Failed to load videos: ${err.message}`);
@@ -169,6 +223,28 @@ export const useVideos = () => {
           title: "Error loading videos",
           description: `Failed to load videos: ${err.message}`
         });
+        
+        // Fall back to dummy data on error
+        console.warn("Error occurred, falling back to dummy data");
+        
+        const dummyVideos: Video[] = VIDEOS.map(video => ({
+          ...video,
+          id: `dummy-${video.id}`, // Mark as dummy data for debugging
+          completed: false
+        }));
+        
+        const dummyModules: Module[] = MODULES.map(module => {
+          const moduleVideos = dummyVideos.filter(v => v.moduleId === module.id);
+          return {
+            ...module,
+            id: `dummy-${module.id}`, // Mark as dummy data for debugging
+            videos: moduleVideos
+          };
+        });
+        
+        setVideos(dummyVideos);
+        setModules(dummyModules);
+        setIsUsingDummyData(true);
       } finally {
         setLoading(false);
       }
@@ -179,6 +255,12 @@ export const useVideos = () => {
 
   // Function to mark a video as completed
   const markVideoAsCompleted = async (videoId: string) => {
+    // Skip for dummy data
+    if (videoId.startsWith('dummy-')) {
+      console.log("Cannot mark dummy video as completed");
+      return;
+    }
+    
     // First update local state
     setVideos(prevVideos => 
       prevVideos.map(video => 
@@ -260,6 +342,7 @@ export const useVideos = () => {
     modules,
     loading,
     error,
+    isUsingDummyData,
     markVideoAsCompleted,
     getVideoById,
     getVideosByModule,

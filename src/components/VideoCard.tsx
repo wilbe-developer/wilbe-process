@@ -16,7 +16,8 @@ const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
     id: video.id, 
     moduleId: video.moduleId || "none", 
     thumbnailUrl: video.thumbnailUrl || "none",
-    youtubeId: video.youtubeId || "none" 
+    youtubeId: video.youtubeId || "none",
+    source: video.id.includes("dummy-") ? "dummy data" : "supabase"
   });
   
   return (

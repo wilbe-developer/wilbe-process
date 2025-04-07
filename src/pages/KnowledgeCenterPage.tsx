@@ -9,6 +9,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { PATHS } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const KnowledgeCenterPage = () => {
   const { videos, modules, loading, error } = useVideos();
@@ -16,8 +17,10 @@ const KnowledgeCenterPage = () => {
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState(tabParam || "all");
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
   
   console.log("KnowledgeCenterPage rendering", { 
+    isAuthenticated,
     videosCount: videos.length,
     modulesCount: modules.length,
     loading,
@@ -43,26 +46,34 @@ const KnowledgeCenterPage = () => {
     }
   }, [error, toast]);
 
-  // Debugging log to check what we have after loading completes
+  // Authentication warning toast
   useEffect(() => {
-    if (!loading) {
-      console.log("Data loaded from Supabase:", {
-        videosCount: videos.length,
-        modulesCount: modules.length,
-        firstModule: modules[0] ? {
-          id: modules[0].id,
-          title: modules[0].title,
-          videoCount: modules[0].videos?.length || 0,
-          firstVideoTitle: modules[0].videos?.[0]?.title || "No videos"
-        } : "No modules",
-        firstVideo: videos[0] ? {
-          id: videos[0].id,
-          title: videos[0].title,
-          moduleId: videos[0].moduleId
-        } : "No videos"
+    if (!isAuthenticated && !loading) {
+      toast({
+        title: "Not authenticated",
+        description: "You're viewing placeholder content. Please log in to see real data.",
+        duration: 5000
       });
     }
-  }, [loading, videos, modules]);
+  }, [isAuthenticated, loading, toast]);
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated && !loading) {
+    return (
+      <div className="max-w-6xl mx-auto py-8 text-center">
+        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+        <p className="mb-6">Please log in to view the actual Knowledge Center content from Supabase.</p>
+        <div className="flex justify-center gap-4">
+          <Button asChild>
+            <Link to={PATHS.LOGIN}>Log In</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to={PATHS.HOME}>Back to Home</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Show empty state if no videos are found after loading
   if (!loading && videos.length === 0 && modules.length === 0) {
@@ -85,6 +96,11 @@ const KnowledgeCenterPage = () => {
         <p className="text-gray-700">
           Browse all the video content on the platform here, or head over to the path-specific structured pages from the Home page.
         </p>
+        {!isAuthenticated && (
+          <div className="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-md border border-yellow-200">
+            <strong>Notice:</strong> You're viewing placeholder content. Please log in to see actual content from the database.
+          </div>
+        )}
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
