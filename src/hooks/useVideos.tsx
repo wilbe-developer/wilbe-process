@@ -17,6 +17,14 @@ export const useVideos = () => {
         setLoading(true);
         console.log("Fetching videos and modules data...");
         
+        // First check authentication status
+        const { data: session } = await supabase.auth.getSession();
+        if (!session?.session?.user) {
+          console.log("No authenticated user found, videos may be limited");
+        } else {
+          console.log("User is authenticated:", session.session.user.id);
+        }
+        
         // Fetch modules from Supabase - modules must be fetched before videos
         const { data: modulesData, error: modulesError } = await supabase
           .from("modules")
@@ -25,10 +33,10 @@ export const useVideos = () => {
         
         if (modulesError) {
           console.error("Error fetching modules:", modulesError);
-          throw modulesError;
+          throw new Error(`Failed to fetch modules: ${modulesError.message}`);
         }
         
-        console.log("Fetched modules:", modulesData?.length || 0, "records", modulesData);
+        console.log("Raw modules data from Supabase:", modulesData);
         
         // Fetch videos from Supabase
         const { data: videosData, error: videosError } = await supabase
@@ -38,10 +46,14 @@ export const useVideos = () => {
         
         if (videosError) {
           console.error("Error fetching videos:", videosError);
-          throw videosError;
+          throw new Error(`Failed to fetch videos: ${videosError.message}`);
         }
         
-        console.log("Fetched videos:", videosData?.length || 0, "records", videosData);
+        console.log("Raw videos data from Supabase:", videosData);
+        
+        if (!videosData || videosData.length === 0) {
+          console.warn("No videos found in database. Check your data, RLS policies, or video status.");
+        }
         
         // Fetch module_videos to connect videos to modules
         const { data: moduleVideosData, error: moduleVideosError } = await supabase
@@ -51,13 +63,13 @@ export const useVideos = () => {
         
         if (moduleVideosError) {
           console.error("Error fetching module_videos:", moduleVideosError);
-          throw moduleVideosError;
+          throw new Error(`Failed to fetch module_videos: ${moduleVideosError.message}`);
         }
         
-        console.log("Fetched module_videos:", moduleVideosData?.length || 0, "records", moduleVideosData);
+        console.log("Raw module_videos data from Supabase:", moduleVideosData);
         
-        if (videosData?.length === 0) {
-          console.warn("No videos found in database. Check your data or RLS policies.");
+        if (!moduleVideosData || moduleVideosData.length === 0) {
+          console.warn("No module_videos associations found. Videos won't be connected to modules.");
         }
         
         // Format videos to match our Video type
@@ -77,25 +89,17 @@ export const useVideos = () => {
         console.log("Formatted videos:", formattedVideos);
         
         // Fetch user's video progress if authenticated
-        const { data: session } = await supabase.auth.getSession();
-        
+        let progressData: any[] = [];
         if (session?.session?.user) {
           console.log("User authenticated, fetching video progress");
-          const { data: progressData, error: progressError } = await supabase
+          const { data: userProgressData, error: progressError } = await supabase
             .from("video_progress")
             .select("*")
             .eq("user_id", session.session.user.id);
           
-          if (!progressError && progressData) {
+          if (!progressError && userProgressData) {
+            progressData = userProgressData;
             console.log("Fetched video progress:", progressData.length, "records");
-            // Update video completion status
-            formattedVideos.forEach(video => {
-              const progress = progressData.find(p => p.video_id === video.id);
-              if (progress) {
-                video.completed = progress.completed || false;
-                console.log(`Video ${video.id} completion status: ${video.completed}`);
-              }
-            });
           } else if (progressError) {
             console.error("Error fetching video progress:", progressError);
           }
@@ -103,12 +107,23 @@ export const useVideos = () => {
           console.log("User not authenticated, skipping video progress fetch");
         }
         
+        // Update video completion status based on progress data
+        formattedVideos.forEach(video => {
+          const progress = progressData.find(p => p.video_id === video.id);
+          if (progress) {
+            video.completed = progress.completed || false;
+            console.log(`Video ${video.id} completion status: ${video.completed}`);
+          }
+        });
+        
         // Format modules to match our Module type
         const formattedModules: Module[] = (modulesData || []).map(module => {
           // Get videos for this module
           const moduleVideoIds = (moduleVideosData || [])
             .filter(mv => mv.module_id === module.id)
             .map(mv => ({ id: mv.video_id, order: mv.order_index || 0 }));
+          
+          console.log(`Module ${module.title} has ${moduleVideoIds.length} videos associated with it`);
           
           const moduleVideos = formattedVideos
             .filter(video => moduleVideoIds.some(mv => mv.id === video.id))
@@ -141,18 +156,18 @@ export const useVideos = () => {
           };
         });
         
-        console.log("Processed videos:", formattedVideos.length);
-        console.log("Processed modules:", formattedModules.length, formattedModules);
+        console.log("Final processed modules:", formattedModules);
+        console.log("Final processed videos:", formattedVideos);
         
         setVideos(formattedVideos);
         setModules(formattedModules);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error in useVideos hook:", err);
-        setError("Failed to load videos. Please try again later.");
+        setError(`Failed to load videos: ${err.message}`);
         toast({
           variant: "destructive",
           title: "Error loading videos",
-          description: "Failed to load videos. Please try again later."
+          description: `Failed to load videos: ${err.message}`
         });
       } finally {
         setLoading(false);

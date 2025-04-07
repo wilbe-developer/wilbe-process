@@ -11,11 +11,12 @@ interface VideoCardProps {
 }
 
 const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
-  console.log("Rendering VideoCard for:", video.title, { 
-    videoId: video.id, 
-    moduleId: video.moduleId, 
-    thumbnailUrl: video.thumbnailUrl,
-    youtubeId: video.youtubeId 
+  console.log("Rendering VideoCard with data:", { 
+    title: video.title,
+    id: video.id, 
+    moduleId: video.moduleId || "none", 
+    thumbnailUrl: video.thumbnailUrl || "none",
+    youtubeId: video.youtubeId || "none" 
   });
   
   return (
@@ -27,7 +28,7 @@ const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
             alt={video.title}
             className="w-full aspect-video object-cover"
             onError={(e) => {
-              console.log("Error loading image, falling back to placeholder", video.thumbnailUrl);
+              console.log("Error loading image, falling back to placeholder for video:", video.title);
               (e.target as HTMLImageElement).src = "/placeholder.svg";
             }}
           />
@@ -45,7 +46,7 @@ const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
         <CardContent className="p-4">
           <div className="text-xs text-gray-500 mb-1">
             {showModule && video.moduleId ? 
-              `Module: ${video.moduleId.substring(0, 8)}...` : 
+              `Module: ${video.moduleId}` : 
               "Member Stories"}
           </div>
           <h3 className="font-medium text-base mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">

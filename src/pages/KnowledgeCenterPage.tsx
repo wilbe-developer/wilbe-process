@@ -22,7 +22,7 @@ const KnowledgeCenterPage = () => {
     modulesCount: modules.length,
     loading,
     error,
-    modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos.length }))
+    modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
   });
 
   // Update active tab when the URL param changes
@@ -42,6 +42,27 @@ const KnowledgeCenterPage = () => {
       });
     }
   }, [error, toast]);
+
+  // Debugging log to check what we have after loading completes
+  useEffect(() => {
+    if (!loading) {
+      console.log("Data loaded from Supabase:", {
+        videosCount: videos.length,
+        modulesCount: modules.length,
+        firstModule: modules[0] ? {
+          id: modules[0].id,
+          title: modules[0].title,
+          videoCount: modules[0].videos?.length || 0,
+          firstVideoTitle: modules[0].videos?.[0]?.title || "No videos"
+        } : "No modules",
+        firstVideo: videos[0] ? {
+          id: videos[0].id,
+          title: videos[0].title,
+          moduleId: videos[0].moduleId
+        } : "No videos"
+      });
+    }
+  }, [loading, videos, modules]);
 
   // Show empty state if no videos are found after loading
   if (!loading && videos.length === 0 && modules.length === 0) {
@@ -119,7 +140,7 @@ const KnowledgeCenterPage = () => {
                     <Skeleton className="h-4 w-2/3 rounded-md" />
                   </div>
                 ))
-            ) : module.videos.length > 0 ? (
+            ) : module.videos && module.videos.length > 0 ? (
               module.videos.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))
