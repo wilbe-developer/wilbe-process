@@ -57,6 +57,12 @@ const KnowledgeCenterPage = () => {
     }
   }, [isAuthenticated, loading, toast]);
 
+  // Get module title by ID
+  const getModuleTitleById = (moduleId: string) => {
+    const module = modules.find(m => m.id === moduleId);
+    return module ? module.title : moduleId;
+  };
+
   // Show login prompt if not authenticated
   if (!isAuthenticated && !loading) {
     return (
@@ -126,7 +132,12 @@ const KnowledgeCenterPage = () => {
               ))
           ) : videos.length > 0 ? (
             videos.map((video) => (
-              <VideoCard key={video.id} video={video} showModule={true} />
+              <VideoCard 
+                key={video.id} 
+                video={video} 
+                showModule={true} 
+                moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
+              />
             ))
           ) : (
             <div className="col-span-3 text-center py-8">
@@ -158,7 +169,7 @@ const KnowledgeCenterPage = () => {
                 ))
             ) : module.videos && module.videos.length > 0 ? (
               module.videos.map((video) => (
-                <VideoCard key={video.id} video={video} />
+                <VideoCard key={video.id} video={video} moduleTitle={module.title} />
               ))
             ) : (
               <div className="col-span-3 text-center py-8">

@@ -8,13 +8,15 @@ import { CheckCircle } from "lucide-react";
 interface VideoCardProps {
   video: Video;
   showModule?: boolean;
+  moduleTitle?: string;
 }
 
-const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
+const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) => {
   console.log("Rendering VideoCard with data:", { 
     title: video.title,
     id: video.id, 
     moduleId: video.moduleId || "none", 
+    moduleTitle: moduleTitle || "none",
     thumbnailUrl: video.thumbnailUrl || "none",
     youtubeId: video.youtubeId || "none",
     source: video.id.includes("dummy-") ? "dummy data" : "supabase"
@@ -47,7 +49,7 @@ const VideoCard = ({ video, showModule = false }: VideoCardProps) => {
         <CardContent className="p-4">
           <div className="text-xs text-gray-500 mb-1">
             {showModule && video.moduleId ? 
-              `Module: ${video.moduleId}` : 
+              `Module: ${moduleTitle || video.moduleId}` : 
               "Member Stories"}
           </div>
           <h3 className="font-medium text-base mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">

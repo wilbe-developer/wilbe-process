@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,10 +15,13 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProfilePage = () => {
   const { user, updateProfile } = useAuth();
   const { toast } = useToast();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user?.avatar || null);
+  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
@@ -33,6 +36,22 @@ const ProfilePage = () => {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        linkedIn: user.linkedIn || "",
+        institution: user.institution || "",
+        location: user.location || "",
+        role: user.role || "",
+        bio: user.bio || "",
+      });
+      setAvatarUrl(user.avatar || null);
+    }
+  }, [user]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -43,7 +62,10 @@ const ProfilePage = () => {
     setIsUpdating(true);
 
     try {
-      await updateProfile(formData);
+      await updateProfile({
+        ...formData,
+        avatar: avatarUrl,
+      });
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
@@ -56,6 +78,59 @@ const ProfilePage = () => {
       });
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+    
+    const file = event.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+    
+    setUploading(true);
+    
+    try {
+      // Check if avatars bucket exists, create if it doesn't
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
+      
+      if (!avatarBucketExists) {
+        // We'll show a message but continue with the upload attempt
+        console.log("Avatars bucket doesn't exist, attempting upload anyway");
+      }
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+        
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      
+      if (data) {
+        setAvatarUrl(data.publicUrl);
+        await updateProfile({ avatar: data.publicUrl });
+        
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been updated successfully."
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your profile picture. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -97,12 +172,30 @@ const ProfilePage = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4 mb-6">
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src={user.avatar} alt={user.firstName} />
+                    <AvatarImage src={avatarUrl || undefined} alt={user.firstName} />
                     <AvatarFallback>{user.firstName?.charAt(0)}{user.lastName?.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" type="button">
-                    Change Avatar
-                  </Button>
+                  <div>
+                    <input
+                      type="file"
+                      id="avatar"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      disabled={uploading}
+                    />
+                    <Label htmlFor="avatar" className="cursor-pointer">
+                      <Button 
+                        variant="outline" 
+                        type="button" 
+                        className="relative" 
+                        disabled={uploading}
+                        onClick={() => document.getElementById('avatar')?.click()}
+                      >
+                        {uploading ? "Uploading..." : "Change Avatar"}
+                      </Button>
+                    </Label>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -177,7 +270,13 @@ const ProfilePage = () => {
                     value={formData.role}
                     onChange={handleInputChange}
                     placeholder="Researcher, Scientist, Student, etc."
+                    disabled={user.isAdmin}
                   />
+                  {user.isAdmin && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Role cannot be changed because you have admin privileges.
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
