@@ -27,90 +27,94 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is logged in on mount and set up auth listener
+  // Setup auth state listener and check initial session
   useEffect(() => {
-    // Set up auth state listener
+    // First, set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
+        console.log("Auth state changed:", event, !!newSession);
         setSession(newSession);
         
         // If signed in, fetch user profile
         if (newSession?.user) {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', newSession.user.id)
-            .single();
-            
-          if (data) {
-            // Transform database fields to match our UserProfile interface
-            const userProfile: UserProfile = {
-              id: data.id,
-              firstName: data.first_name || '',
-              lastName: data.last_name || '',
-              email: data.email || '',
-              linkedIn: data.linked_in,
-              institution: data.institution,
-              location: data.location,
-              role: data.role,
-              bio: data.bio,
-              approved: data.approved,
-              createdAt: new Date(data.created_at || new Date()),
-              avatar: data.avatar,
-              isAdmin: data.role === 'admin'
-            };
-            setUser(userProfile);
-          } else if (error) {
-            console.error('Error fetching user profile:', error);
-          }
+          setTimeout(() => {
+            fetchUserProfile(newSession.user.id);
+          }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      if (initialSession?.user) {
-        // Fetch user profile
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', initialSession.user.id)
-          .single()
-          .then(({ data, error }) => {
-            if (data) {
-              // Transform database fields to match our UserProfile interface
-              const userProfile: UserProfile = {
-                id: data.id,
-                firstName: data.first_name || '',
-                lastName: data.last_name || '',
-                email: data.email || '',
-                linkedIn: data.linked_in,
-                institution: data.institution,
-                location: data.location,
-                role: data.role,
-                bio: data.bio,
-                approved: data.approved,
-                createdAt: new Date(data.created_at || new Date()),
-                avatar: data.avatar,
-                isAdmin: data.role === 'admin'
-              };
-              setUser(userProfile);
-            } else if (error) {
-              console.error('Error fetching user profile:', error);
-            }
-            setLoading(false);
-          });
-      } else {
+    // Then check for existing session
+    const checkSession = async () => {
+      try {
+        console.log("Checking for existing session...");
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        console.log("Existing session:", !!existingSession);
+        
+        if (existingSession?.user) {
+          setSession(existingSession);
+          await fetchUserProfile(existingSession.user.id);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
         setLoading(false);
       }
-    });
+    };
+
+    checkSession();
 
     return () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Separate function to fetch user profile
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      console.log("Fetching user profile for:", userId);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        setLoading(false);
+        return;
+      }
+      
+      if (data) {
+        console.log("User profile found:", data);
+        // Transform database fields to match our UserProfile interface
+        const userProfile: UserProfile = {
+          id: data.id,
+          firstName: data.first_name || '',
+          lastName: data.last_name || '',
+          email: data.email || '',
+          linkedIn: data.linked_in,
+          institution: data.institution,
+          location: data.location,
+          role: data.role,
+          bio: data.bio,
+          approved: data.approved,
+          createdAt: new Date(data.created_at || new Date()),
+          avatar: data.avatar,
+          isAdmin: data.role === 'admin'
+        };
+        setUser(userProfile);
+      }
+    } catch (err) {
+      console.error("Error in fetchUserProfile:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Magic link function
   const sendMagicLink = async (email: string) => {
@@ -192,15 +196,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Logout function
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    
-    navigate(PATHS.LOGIN);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      
+      navigate(PATHS.LOGIN);
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast({
+        title: "Logout failed",
+        description: "An error occurred during logout.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Update profile function
