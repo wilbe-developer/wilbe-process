@@ -17,6 +17,19 @@ export const useVideos = () => {
         setLoading(true);
         console.log("Fetching videos and modules data...");
         
+        // Fetch modules from Supabase - modules must be fetched before videos
+        const { data: modulesData, error: modulesError } = await supabase
+          .from("modules")
+          .select("*")
+          .order("order_index");
+        
+        if (modulesError) {
+          console.error("Error fetching modules:", modulesError);
+          throw modulesError;
+        }
+        
+        console.log("Fetched modules:", modulesData?.length || 0, "records", modulesData);
+        
         // Fetch videos from Supabase
         const { data: videosData, error: videosError } = await supabase
           .from("videos")
@@ -28,20 +41,7 @@ export const useVideos = () => {
           throw videosError;
         }
         
-        console.log("Fetched videos:", videosData?.length || 0, "records");
-        
-        // Fetch modules from Supabase
-        const { data: modulesData, error: modulesError } = await supabase
-          .from("modules")
-          .select("*")
-          .order("order_index");
-        
-        if (modulesError) {
-          console.error("Error fetching modules:", modulesError);
-          throw modulesError;
-        }
-        
-        console.log("Fetched modules:", modulesData?.length || 0, "records");
+        console.log("Fetched videos:", videosData?.length || 0, "records", videosData);
         
         // Fetch module_videos to connect videos to modules
         const { data: moduleVideosData, error: moduleVideosError } = await supabase
@@ -54,10 +54,14 @@ export const useVideos = () => {
           throw moduleVideosError;
         }
         
-        console.log("Fetched module_videos:", moduleVideosData?.length || 0, "records");
+        console.log("Fetched module_videos:", moduleVideosData?.length || 0, "records", moduleVideosData);
+        
+        if (videosData?.length === 0) {
+          console.warn("No videos found in database. Check your data or RLS policies.");
+        }
         
         // Format videos to match our Video type
-        const formattedVideos: Video[] = videosData.map(video => ({
+        const formattedVideos: Video[] = (videosData || []).map(video => ({
           id: video.id,
           moduleId: "", // Will be populated based on module_videos
           title: video.title,
@@ -69,6 +73,8 @@ export const useVideos = () => {
           thumbnailUrl: video.thumbnail_url || "/placeholder.svg",
           completed: false, // Will be updated with user progress
         }));
+
+        console.log("Formatted videos:", formattedVideos);
         
         // Fetch user's video progress if authenticated
         const { data: session } = await supabase.auth.getSession();
@@ -98,9 +104,9 @@ export const useVideos = () => {
         }
         
         // Format modules to match our Module type
-        const formattedModules: Module[] = modulesData.map(module => {
+        const formattedModules: Module[] = (modulesData || []).map(module => {
           // Get videos for this module
-          const moduleVideoIds = moduleVideosData
+          const moduleVideoIds = (moduleVideosData || [])
             .filter(mv => mv.module_id === module.id)
             .map(mv => ({ id: mv.video_id, order: mv.order_index || 0 }));
           
@@ -136,7 +142,7 @@ export const useVideos = () => {
         });
         
         console.log("Processed videos:", formattedVideos.length);
-        console.log("Processed modules:", formattedModules.length);
+        console.log("Processed modules:", formattedModules.length, formattedModules);
         
         setVideos(formattedVideos);
         setModules(formattedModules);

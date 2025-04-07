@@ -21,7 +21,8 @@ const KnowledgeCenterPage = () => {
     videosCount: videos.length,
     modulesCount: modules.length,
     loading,
-    error
+    error,
+    modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos.length }))
   });
 
   // Update active tab when the URL param changes
@@ -43,11 +44,11 @@ const KnowledgeCenterPage = () => {
   }, [error, toast]);
 
   // Show empty state if no videos are found after loading
-  if (!loading && videos.length === 0) {
+  if (!loading && videos.length === 0 && modules.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
         <h2 className="text-2xl font-bold mb-4">No videos found</h2>
-        <p className="mb-6">There are currently no videos available in the knowledge center.</p>
+        <p className="mb-6">There are currently no videos available in the knowledge center or you may need to log in.</p>
         <Button asChild>
           <Link to={PATHS.HOME}>Back to Home</Link>
         </Button>
@@ -92,7 +93,7 @@ const KnowledgeCenterPage = () => {
             ))
           ) : (
             <div className="col-span-3 text-center py-8">
-              <p className="text-gray-500">No videos available</p>
+              <p className="text-gray-500">No videos available. Please check database or login status.</p>
             </div>
           )}
         </TabsContent>
@@ -124,7 +125,7 @@ const KnowledgeCenterPage = () => {
               ))
             ) : (
               <div className="col-span-3 text-center py-8">
-                <p className="text-gray-500">No videos available in this module</p>
+                <p className="text-gray-500">No videos available in this module. Check module_videos associations.</p>
               </div>
             )}
           </TabsContent>
