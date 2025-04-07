@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { UserProfile } from "@/types";
@@ -52,10 +51,16 @@ export const useAuthActions = ({
           location: data.location,
           role: data.role,
           bio: data.bio,
+          about: data.about,
           approved: data.approved,
           createdAt: new Date(data.created_at || new Date()),
           avatar: data.avatar,
-          isAdmin: data.role === 'admin'
+          isAdmin: data.role === 'admin',
+          twitterHandle: data.twitter_handle,
+          expertise: data.expertise,
+          activityStatus: data.activity_status,
+          lastLoginDate: data.last_login_date ? new Date(data.last_login_date) : undefined,
+          status: data.status
         };
         setUser(userProfile);
       }
@@ -187,7 +192,12 @@ export const useAuthActions = ({
       if (data.location !== undefined) dbData.location = data.location;
       if (data.role !== undefined && !user.isAdmin) dbData.role = data.role;
       if (data.bio !== undefined) dbData.bio = data.bio;
+      if (data.about !== undefined) dbData.about = data.about;
       if (data.avatar !== undefined) dbData.avatar = data.avatar;
+      if (data.twitterHandle !== undefined) dbData.twitter_handle = data.twitterHandle;
+      if (data.expertise !== undefined) dbData.expertise = data.expertise;
+      if (data.activityStatus !== undefined) dbData.activity_status = data.activityStatus;
+      if (data.status !== undefined) dbData.status = data.status;
       
       // Update profile in Supabase
       const { error } = await supabase

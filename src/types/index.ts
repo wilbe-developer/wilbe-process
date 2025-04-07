@@ -9,10 +9,16 @@ export interface UserProfile {
   location?: string;
   role?: string;
   bio?: string;
+  about?: string;
   approved: boolean;
   createdAt: Date;
   avatar?: string;
   isAdmin?: boolean;
+  twitterHandle?: string;
+  expertise?: string;
+  activityStatus?: string;
+  lastLoginDate?: Date;
+  status?: string;
 }
 
 export interface Module {

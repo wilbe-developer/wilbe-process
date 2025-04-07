@@ -77,46 +77,64 @@ export type Database = {
       }
       profiles: {
         Row: {
+          about: string | null
+          activity_status: string | null
           approved: boolean | null
           avatar: string | null
           bio: string | null
           created_at: string | null
           email: string | null
+          expertise: string | null
           first_name: string | null
           id: string
           institution: string | null
+          last_login_date: string | null
           last_name: string | null
           linked_in: string | null
           location: string | null
           role: string | null
+          status: string | null
+          twitter_handle: string | null
         }
         Insert: {
+          about?: string | null
+          activity_status?: string | null
           approved?: boolean | null
           avatar?: string | null
           bio?: string | null
           created_at?: string | null
           email?: string | null
+          expertise?: string | null
           first_name?: string | null
           id: string
           institution?: string | null
+          last_login_date?: string | null
           last_name?: string | null
           linked_in?: string | null
           location?: string | null
           role?: string | null
+          status?: string | null
+          twitter_handle?: string | null
         }
         Update: {
+          about?: string | null
+          activity_status?: string | null
           approved?: boolean | null
           avatar?: string | null
           bio?: string | null
           created_at?: string | null
           email?: string | null
+          expertise?: string | null
           first_name?: string | null
           id?: string
           institution?: string | null
+          last_login_date?: string | null
           last_name?: string | null
           linked_in?: string | null
           location?: string | null
           role?: string | null
+          status?: string | null
+          twitter_handle?: string | null
         }
         Relationships: []
       }

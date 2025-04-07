@@ -39,10 +39,16 @@ export const useMembers = () => {
             location: profile.location,
             role: profile.role,
             bio: profile.bio,
+            about: profile.about,
             approved: profile.approved || false,
             createdAt: new Date(profile.created_at || new Date()),
             avatar: profile.avatar,
-            isAdmin: profile.role === 'admin'
+            isAdmin: profile.role === 'admin',
+            twitterHandle: profile.twitter_handle,
+            expertise: profile.expertise,
+            activityStatus: profile.activity_status,
+            lastLoginDate: profile.last_login_date ? new Date(profile.last_login_date) : undefined,
+            status: profile.status
           }));
           
           setMembers(transformedMembers);
@@ -80,7 +86,7 @@ export const useMembers = () => {
     return members.filter(member => 
       member.firstName.toLowerCase().includes(lowercaseQuery) ||
       member.lastName.toLowerCase().includes(lowercaseQuery) ||
-      member.role?.toLowerCase().includes(lowercaseQuery) ||
+      member.expertise?.toLowerCase().includes(lowercaseQuery) ||
       member.institution?.toLowerCase().includes(lowercaseQuery) ||
       member.location?.toLowerCase().includes(lowercaseQuery)
     );

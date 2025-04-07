@@ -1,19 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { AccountSettings } from "@/components/profile/AccountSettings";
@@ -21,7 +8,6 @@ import { PrivacySettings } from "@/components/profile/PrivacySettings";
 
 const ProfilePage = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
 
   if (!user) {
     return (

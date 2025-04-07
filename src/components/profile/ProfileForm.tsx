@@ -34,8 +34,9 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
     linkedIn: user?.linkedIn || "",
     institution: user?.institution || "",
     location: user?.location || "",
-    role: user?.role || "",
-    bio: user?.bio || "",
+    expertise: user?.expertise || "",
+    about: user?.about || "",
+    twitterHandle: user?.twitterHandle || "",
   });
 
   const [isUpdating, setIsUpdating] = useState(false);
@@ -49,8 +50,9 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
         linkedIn: user.linkedIn || "",
         institution: user.institution || "",
         location: user.location || "",
-        role: user.role || "",
-        bio: user.bio || "",
+        expertise: user.expertise || "",
+        about: user.about || "",
+        twitterHandle: user.twitterHandle || "",
       });
       setAvatarUrl(user.avatar || null);
     }
@@ -93,12 +95,12 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
     const file = event.target.files[0];
     const fileExt = file.name.split('.').pop();
     const fileName = `${user?.id}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const filePath = `${fileName}`;
     
     setUploading(true);
     
     try {
-      // Check if avatars bucket exists, create if it doesn't
+      // Create the avatars bucket if it doesn't exist
       const { data: buckets } = await supabase.storage.listBuckets();
       const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
       
@@ -228,6 +230,17 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="twitterHandle">X (Twitter) Handle</Label>
+            <Input
+              id="twitterHandle"
+              name="twitterHandle"
+              value={formData.twitterHandle}
+              onChange={handleInputChange}
+              placeholder="@yourusername"
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="institution">Institution / University</Label>
             <Input
               id="institution"
@@ -249,28 +262,22 @@ export const ProfileForm = ({ user }: ProfileFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Professional Role</Label>
+            <Label htmlFor="expertise">Expertise</Label>
             <Input
-              id="role"
-              name="role"
-              value={formData.role}
+              id="expertise"
+              name="expertise"
+              value={formData.expertise}
               onChange={handleInputChange}
-              placeholder="Researcher, Scientist, Student, etc."
-              disabled={user.isAdmin}
+              placeholder="Your area of expertise"
             />
-            {user.isAdmin && (
-              <p className="text-xs text-gray-500 mt-1">
-                Role cannot be changed because you have admin privileges.
-              </p>
-            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
+            <Label htmlFor="about">About</Label>
             <textarea
-              id="bio"
-              name="bio"
-              value={formData.bio}
+              id="about"
+              name="about"
+              value={formData.about}
               onChange={handleInputChange}
               placeholder="Tell us about yourself, your research, and your interests..."
               className="w-full min-h-[120px] px-3 py-2 border rounded-md resize-y"
