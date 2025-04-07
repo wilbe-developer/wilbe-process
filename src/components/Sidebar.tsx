@@ -4,11 +4,13 @@ import { NAV_ITEMS } from "@/lib/constants";
 import Logo from "./Logo";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Sidebar = () => {
   const { isAuthenticated, user } = useAuth();
+  const isMobile = useIsMobile();
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || isMobile) return null;
 
   return (
     <div className="w-[214px] min-h-screen bg-brand-darkBlue flex flex-col fixed left-0 top-0 text-white">
