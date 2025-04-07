@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -36,26 +35,28 @@ const AdminPage = () => {
   const [videoLink, setVideoLink] = useState("");
   const [videoTitle, setVideoTitle] = useState("");
   const [videoDescription, setVideoDescription] = useState("");
-  const [moduleId, setModuleId] = useState("startup-founder");
+  const [moduleName, setModuleName] = useState("");
+  const [moduleId, setModuleId] = useState("");
+  const [modules, setModules] = useState<{id: string, title: string}[]>([]);
+  const [presenter, setPresenter] = useState("");
+  const [duration, setDuration] = useState("");
 
-  // Fetch pending users on mount
   useEffect(() => {
-    const fetchPendingUsers = async () => {
+    const fetchData = async () => {
       if (!isAdmin) return;
 
       try {
-        const { data, error } = await supabase
+        const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('approved', false);
 
-        if (error) {
-          throw error;
+        if (profileError) {
+          throw profileError;
         }
 
-        if (data) {
-          // Transform data to match our UserProfile interface
-          const userProfiles: UserProfile[] = data.map(profile => ({
+        if (profileData) {
+          const userProfiles: UserProfile[] = profileData.map(profile => ({
             id: profile.id,
             firstName: profile.first_name || '',
             lastName: profile.last_name || '',
@@ -65,17 +66,33 @@ const AdminPage = () => {
             location: profile.location,
             role: profile.role,
             bio: profile.bio,
-            approved: profile.approved,
-            createdAt: new Date(profile.created_at),
+            approved: profile.approved || false,
+            createdAt: new Date(profile.created_at || Date.now()),
             avatar: profile.avatar || `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 100)}.jpg`
           }));
           setPendingUsers(userProfiles);
         }
+
+        const { data: modulesData, error: modulesError } = await supabase
+          .from('modules')
+          .select('id, title')
+          .order('title');
+
+        if (modulesError) {
+          throw modulesError;
+        }
+
+        if (modulesData) {
+          setModules(modulesData);
+          if (modulesData.length > 0) {
+            setModuleId(modulesData[0].id);
+          }
+        }
       } catch (error) {
-        console.error('Error fetching pending users:', error);
+        console.error('Error fetching data:', error);
         toast({
           title: "Error",
-          description: "Failed to fetch pending users",
+          description: "Failed to fetch data",
           variant: "destructive"
         });
       } finally {
@@ -83,10 +100,9 @@ const AdminPage = () => {
       }
     };
 
-    fetchPendingUsers();
+    fetchData();
   }, [isAdmin, toast]);
 
-  // Redirect if not admin
   if (!isAdmin) {
     navigate(PATHS.HOME);
     return null;
@@ -94,7 +110,6 @@ const AdminPage = () => {
 
   const handleApprovalAction = async (userId: string, status: ApprovalStatus) => {
     try {
-      // Update user approval status in Supabase
       const { error } = await supabase
         .from('profiles')
         .update({ approved: status === 'approved' })
@@ -104,7 +119,6 @@ const AdminPage = () => {
         throw error;
       }
 
-      // Remove user from the list
       setPendingUsers(pendingUsers.filter(user => user.id !== userId));
       
       toast({
@@ -112,7 +126,6 @@ const AdminPage = () => {
         description: `User has been ${status}. ${status === 'approved' ? 'They will be notified by email.' : ''}`,
       });
       
-      // In a real app, this would trigger notifications to the user and/or update database
       console.log(`User ${userId} ${status}. This would trigger a notification to the user.`);
     } catch (error) {
       console.error('Error updating user approval status:', error);
@@ -124,23 +137,131 @@ const AdminPage = () => {
     }
   };
 
-  const handleAddVideo = (e: React.FormEvent) => {
+  const extractYoutubeId = (url: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleAddVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real app, this would add the video to the database
-    toast({
-      title: "Video Added",
-      description: "The video has been added to the knowledge center.",
-    });
+    try {
+      setLoading(true);
+      
+      if (!videoTitle || !videoLink || !videoDescription || !moduleId) {
+        toast({
+          title: "Missing Fields",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const youtubeId = extractYoutubeId(videoLink);
+      if (!youtubeId) {
+        toast({
+          title: "Invalid YouTube URL",
+          description: "Please enter a valid YouTube video URL",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
+      
+      const { data: videoData, error: videoError } = await supabase
+        .from('videos')
+        .insert({
+          title: videoTitle,
+          description: videoDescription,
+          youtube_id: youtubeId,
+          thumbnail_url: thumbnailUrl,
+          presenter: presenter,
+          duration: duration,
+          status: 'published'
+        })
+        .select()
+        .single();
+      
+      if (videoError) throw videoError;
+      
+      const { error: moduleVideoError } = await supabase
+        .from('module_videos')
+        .insert({
+          module_id: moduleId,
+          video_id: videoData.id
+        });
+      
+      if (moduleVideoError) throw moduleVideoError;
+      
+      toast({
+        title: "Video Added",
+        description: "The video has been added to the knowledge center.",
+      });
+      
+      setVideoLink("");
+      setVideoTitle("");
+      setVideoDescription("");
+      setPresenter("");
+      setDuration("");
+      
+    } catch (error) {
+      console.error("Error adding video:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add video. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddModule = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // Reset form
-    setVideoLink("");
-    setVideoTitle("");
-    setVideoDescription("");
-    setModuleId("startup-founder");
-    
-    console.log("Video added:", { videoLink, videoTitle, videoDescription, moduleId });
-    console.log("In a real app, this would add the video to the database");
+    try {
+      if (!moduleName) {
+        toast({
+          title: "Module Name Required",
+          description: "Please enter a module name",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const slug = moduleName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      
+      const { data, error } = await supabase
+        .from('modules')
+        .insert({
+          title: moduleName,
+          slug: slug,
+          description: `Content related to ${moduleName}`
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setModules([...modules, { id: data.id, title: data.title }]);
+      
+      toast({
+        title: "Module Added",
+        description: "The new module has been created.",
+      });
+      
+      setModuleName("");
+      
+    } catch (error) {
+      console.error("Error adding module:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add module. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -275,6 +396,26 @@ const AdminPage = () => {
                   </div>
                   
                   <div className="space-y-2">
+                    <Label htmlFor="presenter">Presenter</Label>
+                    <Input
+                      id="presenter"
+                      placeholder="Name of presenter"
+                      value={presenter}
+                      onChange={(e) => setPresenter(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Duration</Label>
+                    <Input
+                      id="duration"
+                      placeholder="e.g. 10:30"
+                      value={duration}
+                      onChange={(e) => setDuration(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
                     <Label htmlFor="videoDescription">Description</Label>
                     <textarea
                       id="videoDescription"
@@ -295,14 +436,15 @@ const AdminPage = () => {
                       onChange={(e) => setModuleId(e.target.value)}
                       required
                     >
-                      <option value="startup-founder">Startup Founder</option>
-                      <option value="entrepreneurial-pi">Entrepreneurial PI</option>
-                      <option value="scientist-at-startup">Scientist at Startup</option>
-                      <option value="product-manager">Product Manager</option>
+                      {modules.map(module => (
+                        <option key={module.id} value={module.id}>
+                          {module.title}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={loading}>
                     Add Video
                   </Button>
                 </form>
@@ -310,6 +452,47 @@ const AdminPage = () => {
             </Card>
             
             <Card>
+              <CardHeader>
+                <CardTitle>Add Module</CardTitle>
+                <CardDescription>
+                  Create a new module to organize videos
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAddModule} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="moduleName">Module Name</Label>
+                    <Input
+                      id="moduleName"
+                      placeholder="E.g. Lab Skills, Research Funding"
+                      value={moduleName}
+                      onChange={(e) => setModuleName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    Add Module
+                  </Button>
+                </form>
+                
+                <div className="mt-8">
+                  <h3 className="font-medium mb-2">Available Modules</h3>
+                  {modules.length > 0 ? (
+                    <div className="space-y-2">
+                      {modules.map(module => (
+                        <div key={module.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <span>{module.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No modules created yet</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Integration Settings</CardTitle>
                 <CardDescription>

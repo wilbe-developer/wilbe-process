@@ -1,17 +1,26 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVideos } from "@/hooks/useVideos";
 import VideoCard from "@/components/VideoCard";
 import ProgressBar from "@/components/ProgressBar";
-import { MODULES, PATHS } from "@/lib/constants";
+import { PATHS } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const KnowledgeCenterPage = () => {
   const { videos, modules, loading } = useVideos();
-  const [activeTab, setActiveTab] = useState("all");
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabParam || "all");
+  
+  // Update active tab when the URL param changes
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -23,7 +32,7 @@ const KnowledgeCenterPage = () => {
         </p>
       </div>
       
-      <Tabs defaultValue="all" onValueChange={setActiveTab} className="mb-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="mb-6">
           <TabsTrigger value="all">All Videos</TabsTrigger>
           {modules.map((module) => (
@@ -73,11 +82,9 @@ const KnowledgeCenterPage = () => {
                   </div>
                 ))
             ) : (
-              videos
-                .filter((video) => video.moduleId === module.id)
-                .map((video) => (
-                  <VideoCard key={video.id} video={video} />
-                ))
+              module.videos.map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))
             )}
           </TabsContent>
         ))}

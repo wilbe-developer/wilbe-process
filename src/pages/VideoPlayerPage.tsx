@@ -24,6 +24,7 @@ const VideoPlayerPage = () => {
     getVideosByModule,
     markVideoAsCompleted,
     loading,
+    modules
   } = useVideos();
   const [video, setVideo] = useState(videoId ? getVideoById(videoId) : null);
   const [module, setModule] = useState(
@@ -99,7 +100,7 @@ const VideoPlayerPage = () => {
           {module?.title && (
             <>
               or go to:{" "}
-              {MODULES.map((m, index) => (
+              {modules.map((m, index) => (
                 <span key={m.id}>
                   {index > 0 && " "}
                   <Link
@@ -108,7 +109,7 @@ const VideoPlayerPage = () => {
                   >
                     {m.title}
                   </Link>
-                  {index < MODULES.length - 1 && " "}
+                  {index < modules.length - 1 && " "}
                 </span>
               ))}
             </>

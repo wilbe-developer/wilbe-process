@@ -1,46 +1,138 @@
 
 import { useState, useEffect } from "react";
-import { VIDEOS, MODULES } from "@/lib/constants";
 import { Video, Module } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 export const useVideos = () => {
   const [videos, setVideos] = useState<Video[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 800));
+        setLoading(true);
         
-        // In a real app, you would fetch these from an API
-        const fetchedVideos = VIDEOS;
-        const fetchedModules = MODULES.map(module => {
-          // Attach videos to each module
-          const moduleVideos = fetchedVideos.filter(video => video.moduleId === module.id);
+        // Fetch videos from Supabase
+        const { data: videosData, error: videosError } = await supabase
+          .from("videos")
+          .select("*")
+          .eq("status", "published");
+        
+        if (videosError) throw videosError;
+        
+        // Fetch modules from Supabase
+        const { data: modulesData, error: modulesError } = await supabase
+          .from("modules")
+          .select("*")
+          .order("order_index");
+        
+        if (modulesError) throw modulesError;
+        
+        // Fetch module_videos to connect videos to modules
+        const { data: moduleVideosData, error: moduleVideosError } = await supabase
+          .from("module_videos")
+          .select("*")
+          .order("order_index");
+        
+        if (moduleVideosError) throw moduleVideosError;
+        
+        // Format videos to match our Video type
+        const formattedVideos: Video[] = videosData.map(video => ({
+          id: video.id,
+          moduleId: "", // Will be populated based on module_videos
+          title: video.title,
+          description: video.description || "",
+          youtubeId: video.youtube_id || "",
+          duration: video.duration || "",
+          order: 0, // Will be populated based on module_videos
+          presenter: video.presenter || "",
+          thumbnailUrl: video.thumbnail_url || "/placeholder.svg",
+          completed: false, // Will be updated with user progress
+        }));
+        
+        // Fetch user's video progress if authenticated
+        const { data: session } = await supabase.auth.getSession();
+        
+        if (session?.session?.user) {
+          const { data: progressData, error: progressError } = await supabase
+            .from("video_progress")
+            .select("*")
+            .eq("user_id", session.session.user.id);
+          
+          if (!progressError && progressData) {
+            // Update video completion status
+            formattedVideos.forEach(video => {
+              const progress = progressData.find(p => p.video_id === video.id);
+              if (progress) {
+                video.completed = progress.completed || false;
+              }
+            });
+          }
+        }
+        
+        // Format modules to match our Module type
+        const formattedModules: Module[] = modulesData.map(module => {
+          // Get videos for this module
+          const moduleVideoIds = moduleVideosData
+            .filter(mv => mv.module_id === module.id)
+            .map(mv => ({ id: mv.video_id, order: mv.order_index || 0 }));
+          
+          const moduleVideos = formattedVideos
+            .filter(video => moduleVideoIds.some(mv => mv.id === video.id))
+            .map(video => {
+              // Find the module_video entry to get the order
+              const moduleVideo = moduleVideoIds.find(mv => mv.id === video.id);
+              return {
+                ...video,
+                moduleId: module.id,
+                order: moduleVideo?.order || 0
+              };
+            })
+            .sort((a, b) => a.order - b.order);
+          
+          // Update moduleId in the main videos array
+          moduleVideos.forEach(video => {
+            const index = formattedVideos.findIndex(v => v.id === video.id);
+            if (index !== -1) {
+              formattedVideos[index].moduleId = module.id;
+              formattedVideos[index].order = video.order;
+            }
+          });
+          
           return {
-            ...module,
-            videos: moduleVideos,
+            id: module.id,
+            title: module.title,
+            slug: module.slug,
+            description: module.description || "",
+            videos: moduleVideos
           };
         });
         
-        setVideos(fetchedVideos);
-        setModules(fetchedModules);
+        setVideos(formattedVideos);
+        setModules(formattedModules);
       } catch (err) {
         console.error("Error fetching videos:", err);
         setError("Failed to load videos. Please try again later.");
+        toast({
+          variant: "destructive",
+          title: "Error loading videos",
+          description: "Failed to load videos. Please try again later."
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [toast]);
 
   // Function to mark a video as completed
-  const markVideoAsCompleted = (videoId: string) => {
+  const markVideoAsCompleted = async (videoId: string) => {
+    // First update local state
     setVideos(prevVideos => 
       prevVideos.map(video => 
         video.id === videoId ? { ...video, completed: true } : video
@@ -56,6 +148,42 @@ export const useVideos = () => {
         )
       }))
     );
+    
+    // Then update in database if user is authenticated
+    const { data: session } = await supabase.auth.getSession();
+    if (session?.session?.user) {
+      const userId = session.session.user.id;
+      
+      // Check if progress record exists
+      const { data: existingProgress } = await supabase
+        .from("video_progress")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("video_id", videoId)
+        .maybeSingle();
+      
+      if (existingProgress) {
+        // Update existing record
+        await supabase
+          .from("video_progress")
+          .update({
+            completed: true,
+            progress_percentage: 100,
+            last_watched_at: new Date().toISOString()
+          })
+          .eq("id", existingProgress.id);
+      } else {
+        // Create new record
+        await supabase
+          .from("video_progress")
+          .insert({
+            user_id: userId,
+            video_id: videoId,
+            completed: true,
+            progress_percentage: 100
+          });
+      }
+    }
   };
 
   // Get a video by ID
