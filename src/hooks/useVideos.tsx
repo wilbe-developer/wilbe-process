@@ -15,6 +15,7 @@ export const useVideos = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log("Fetching videos and modules data...");
         
         // Fetch videos from Supabase
         const { data: videosData, error: videosError } = await supabase
@@ -22,7 +23,12 @@ export const useVideos = () => {
           .select("*")
           .eq("status", "published");
         
-        if (videosError) throw videosError;
+        if (videosError) {
+          console.error("Error fetching videos:", videosError);
+          throw videosError;
+        }
+        
+        console.log("Fetched videos:", videosData?.length || 0, "records");
         
         // Fetch modules from Supabase
         const { data: modulesData, error: modulesError } = await supabase
@@ -30,7 +36,12 @@ export const useVideos = () => {
           .select("*")
           .order("order_index");
         
-        if (modulesError) throw modulesError;
+        if (modulesError) {
+          console.error("Error fetching modules:", modulesError);
+          throw modulesError;
+        }
+        
+        console.log("Fetched modules:", modulesData?.length || 0, "records");
         
         // Fetch module_videos to connect videos to modules
         const { data: moduleVideosData, error: moduleVideosError } = await supabase
@@ -38,7 +49,12 @@ export const useVideos = () => {
           .select("*")
           .order("order_index");
         
-        if (moduleVideosError) throw moduleVideosError;
+        if (moduleVideosError) {
+          console.error("Error fetching module_videos:", moduleVideosError);
+          throw moduleVideosError;
+        }
+        
+        console.log("Fetched module_videos:", moduleVideosData?.length || 0, "records");
         
         // Format videos to match our Video type
         const formattedVideos: Video[] = videosData.map(video => ({
@@ -58,20 +74,27 @@ export const useVideos = () => {
         const { data: session } = await supabase.auth.getSession();
         
         if (session?.session?.user) {
+          console.log("User authenticated, fetching video progress");
           const { data: progressData, error: progressError } = await supabase
             .from("video_progress")
             .select("*")
             .eq("user_id", session.session.user.id);
           
           if (!progressError && progressData) {
+            console.log("Fetched video progress:", progressData.length, "records");
             // Update video completion status
             formattedVideos.forEach(video => {
               const progress = progressData.find(p => p.video_id === video.id);
               if (progress) {
                 video.completed = progress.completed || false;
+                console.log(`Video ${video.id} completion status: ${video.completed}`);
               }
             });
+          } else if (progressError) {
+            console.error("Error fetching video progress:", progressError);
           }
+        } else {
+          console.log("User not authenticated, skipping video progress fetch");
         }
         
         // Format modules to match our Module type
@@ -112,10 +135,13 @@ export const useVideos = () => {
           };
         });
         
+        console.log("Processed videos:", formattedVideos.length);
+        console.log("Processed modules:", formattedModules.length);
+        
         setVideos(formattedVideos);
         setModules(formattedModules);
       } catch (err) {
-        console.error("Error fetching videos:", err);
+        console.error("Error in useVideos hook:", err);
         setError("Failed to load videos. Please try again later.");
         toast({
           variant: "destructive",

@@ -8,19 +8,52 @@ import VideoCard from "@/components/VideoCard";
 import ProgressBar from "@/components/ProgressBar";
 import { PATHS } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
 
 const KnowledgeCenterPage = () => {
-  const { videos, modules, loading } = useVideos();
+  const { videos, modules, loading, error } = useVideos();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState(tabParam || "all");
+  const { toast } = useToast();
   
+  console.log("KnowledgeCenterPage rendering", { 
+    videosCount: videos.length,
+    modulesCount: modules.length,
+    loading,
+    error
+  });
+
   // Update active tab when the URL param changes
   useEffect(() => {
     if (tabParam) {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
+
+  // Show toast if there's an error
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error loading content",
+        description: error
+      });
+    }
+  }, [error, toast]);
+
+  // Show empty state if no videos are found after loading
+  if (!loading && videos.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto py-8 text-center">
+        <h2 className="text-2xl font-bold mb-4">No videos found</h2>
+        <p className="mb-6">There are currently no videos available in the knowledge center.</p>
+        <Button asChild>
+          <Link to={PATHS.HOME}>Back to Home</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -53,10 +86,14 @@ const KnowledgeCenterPage = () => {
                   <Skeleton className="h-4 w-2/3 rounded-md" />
                 </div>
               ))
-          ) : (
+          ) : videos.length > 0 ? (
             videos.map((video) => (
               <VideoCard key={video.id} video={video} showModule={true} />
             ))
+          ) : (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-500">No videos available</p>
+            </div>
           )}
         </TabsContent>
         
@@ -81,10 +118,14 @@ const KnowledgeCenterPage = () => {
                     <Skeleton className="h-4 w-2/3 rounded-md" />
                   </div>
                 ))
-            ) : (
+            ) : module.videos.length > 0 ? (
               module.videos.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))
+            ) : (
+              <div className="col-span-3 text-center py-8">
+                <p className="text-gray-500">No videos available in this module</p>
+              </div>
             )}
           </TabsContent>
         ))}
