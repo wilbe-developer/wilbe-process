@@ -87,11 +87,10 @@ export const PlasmicBsfOld__ArgProps = new Array<ArgPropType>();
 export type PlasmicBsfOld__OverridesType = {
   root?: Flex__<"div">;
   _1440WLight?: Flex__<"div">;
-  background?: Flex__<"div">;
   mainSection?: Flex__<"div">;
   container?: Flex__<"div">;
-  background2?: Flex__<"div">;
   background3?: Flex__<"div">;
+  background2?: Flex__<"div">;
   rectangle?: Flex__<"div">;
   linkApply?: Flex__<"div">;
   container2?: Flex__<"div">;
@@ -101,6 +100,7 @@ export type PlasmicBsfOld__OverridesType = {
   heading1?: Flex__<"div">;
   bsf14BootcampForScientistFounders?: Flex__<"div">;
   mainSection2?: Flex__<"div">;
+  freeBox?: Flex__<"div">;
   container4?: Flex__<"div">;
   background4?: Flex__<"div">;
   container5?: Flex__<"div">;
@@ -518,16 +518,14 @@ export type PlasmicBsfOld__OverridesType = {
   clipPathGroup3?: Flex__<"div">;
   linkApplyNow2?: Flex__<"div">;
   rectangle76?: Flex__<"div">;
-  rectangle77?: Flex__<"div">;
   applyNow2?: Flex__<"div">;
+  rectangle77?: Flex__<"div">;
   footerSection?: Flex__<"div">;
   container41?: Flex__<"div">;
   background31?: Flex__<"div">;
   _2025ByWilbe?: Flex__<"div">;
   wowImagePictureExternalFileEditedJpg?: Flex__<"div">;
   privacyPolicy?: Flex__<"div">;
-  container42?: Flex__<"div">;
-  rectangle78?: Flex__<"div">;
 };
 
 export interface DefaultBsfOldProps {
@@ -587,12 +585,6 @@ function PlasmicBsfOld__RenderFunc(props: {
             className={classNames(projectcss.all, sty._1440WLight)}
           >
             <div
-              data-plasmic-name={"background"}
-              data-plasmic-override={overrides.background}
-              className={classNames(projectcss.all, sty.background)}
-            />
-
-            <div
               data-plasmic-name={"mainSection"}
               data-plasmic-override={overrides.mainSection}
               className={classNames(projectcss.all, sty.mainSection)}
@@ -603,17 +595,17 @@ function PlasmicBsfOld__RenderFunc(props: {
                 className={classNames(projectcss.all, sty.container)}
               >
                 <div
+                  data-plasmic-name={"background3"}
+                  data-plasmic-override={overrides.background3}
+                  className={classNames(projectcss.all, sty.background3)}
+                />
+
+                <div
                   data-plasmic-name={"background2"}
                   data-plasmic-override={overrides.background2}
                   className={classNames(projectcss.all, sty.background2)}
                 />
               </div>
-              <div
-                data-plasmic-name={"background3"}
-                data-plasmic-override={overrides.background3}
-                className={classNames(projectcss.all, sty.background3)}
-              />
-
               <div
                 data-plasmic-name={"rectangle"}
                 data-plasmic-override={overrides.rectangle}
@@ -710,349 +702,357 @@ function PlasmicBsfOld__RenderFunc(props: {
               className={classNames(projectcss.all, sty.mainSection2)}
             >
               <div
-                data-plasmic-name={"container4"}
-                data-plasmic-override={overrides.container4}
-                className={classNames(projectcss.all, sty.container4)}
+                data-plasmic-name={"freeBox"}
+                data-plasmic-override={overrides.freeBox}
+                className={classNames(projectcss.all, sty.freeBox)}
               >
                 <div
-                  data-plasmic-name={"background4"}
-                  data-plasmic-override={overrides.background4}
-                  className={classNames(projectcss.all, sty.background4)}
-                />
-              </div>
-              <div
-                data-plasmic-name={"container5"}
-                data-plasmic-override={overrides.container5}
-                className={classNames(projectcss.all, sty.container5)}
-              >
-                <div
-                  data-plasmic-name={"rectangle2"}
-                  data-plasmic-override={overrides.rectangle2}
-                  className={classNames(projectcss.all, sty.rectangle2)}
-                />
-
-                <div
-                  data-plasmic-name={"heading2AvoidMakingExpensiveMistakes"}
-                  data-plasmic-override={
-                    overrides.heading2AvoidMakingExpensiveMistakes
-                  }
-                  className={classNames(
-                    projectcss.all,
-                    sty.heading2AvoidMakingExpensiveMistakes
-                  )}
+                  data-plasmic-name={"container4"}
+                  data-plasmic-override={overrides.container4}
+                  className={classNames(projectcss.all, sty.container4)}
                 >
                   <div
-                    data-plasmic-name={"heading2AvoidMakingExpensiveMistakes2"}
-                    data-plasmic-override={
-                      overrides.heading2AvoidMakingExpensiveMistakes2
-                    }
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.heading2AvoidMakingExpensiveMistakes2
-                    )}
-                  >
-                    {"Avoid making expensive mistakes"}
-                  </div>
-                </div>
-                <div
-                  data-plasmic-name={"rectangle3"}
-                  data-plasmic-override={overrides.rectangle3}
-                  className={classNames(projectcss.all, sty.rectangle3)}
-                />
-
-                <div
-                  data-plasmic-name={"border"}
-                  data-plasmic-override={overrides.border}
-                  className={classNames(projectcss.all, sty.border)}
-                />
-
-                <div
-                  data-plasmic-name={"frame"}
-                  data-plasmic-override={overrides.frame}
-                  className={classNames(projectcss.all, sty.frame)}
-                >
-                  <GroupIcon
-                    className={classNames(projectcss.all, sty.svg__jUZw)}
-                    role={"img"}
+                    data-plasmic-name={"background4"}
+                    data-plasmic-override={overrides.background4}
+                    className={classNames(projectcss.all, sty.background4)}
                   />
                 </div>
                 <div
-                  data-plasmic-name={"heading5"}
-                  data-plasmic-override={overrides.heading5}
-                  className={classNames(projectcss.all, sty.heading5)}
+                  data-plasmic-name={"container5"}
+                  data-plasmic-override={overrides.container5}
+                  className={classNames(projectcss.all, sty.container5)}
                 >
                   <div
-                    data-plasmic-name={
-                      "howToFrameEffectiveCustomerConversations"
-                    }
+                    data-plasmic-name={"rectangle2"}
+                    data-plasmic-override={overrides.rectangle2}
+                    className={classNames(projectcss.all, sty.rectangle2)}
+                  />
+
+                  <div
+                    data-plasmic-name={"heading2AvoidMakingExpensiveMistakes"}
                     data-plasmic-override={
-                      overrides.howToFrameEffectiveCustomerConversations
+                      overrides.heading2AvoidMakingExpensiveMistakes
                     }
                     className={classNames(
                       projectcss.all,
-                      sty.howToFrameEffectiveCustomerConversations
+                      sty.heading2AvoidMakingExpensiveMistakes
                     )}
                   >
                     <div
+                      data-plasmic-name={
+                        "heading2AvoidMakingExpensiveMistakes2"
+                      }
+                      data-plasmic-override={
+                        overrides.heading2AvoidMakingExpensiveMistakes2
+                      }
                       className={classNames(
                         projectcss.all,
                         projectcss.__wab_text,
-                        sty.text__jwQ3
+                        sty.heading2AvoidMakingExpensiveMistakes2
                       )}
                     >
-                      {"How to frame effective\ncustomer conversations"}
+                      {"Avoid making expensive mistakes"}
                     </div>
                   </div>
-                </div>
-                <div
-                  data-plasmic-name={"heading11"}
-                  data-plasmic-override={overrides.heading11}
-                  className={classNames(projectcss.all, sty.heading11)}
-                >
                   <div
-                    data-plasmic-name={"heading12"}
-                    data-plasmic-override={overrides.heading12}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.heading12
-                    )}
-                  >
-                    {"1"}
-                  </div>
-                </div>
-                <div
-                  data-plasmic-name={"rectangle4"}
-                  data-plasmic-override={overrides.rectangle4}
-                  className={classNames(projectcss.all, sty.rectangle4)}
-                />
-
-                <div
-                  data-plasmic-name={"border2"}
-                  data-plasmic-override={overrides.border2}
-                  className={classNames(projectcss.all, sty.border2)}
-                />
-
-                <div
-                  data-plasmic-name={"frame2"}
-                  data-plasmic-override={overrides.frame2}
-                  className={classNames(projectcss.all, sty.frame2)}
-                >
-                  <GroupIcon
-                    className={classNames(projectcss.all, sty.svg__onIdm)}
-                    role={"img"}
+                    data-plasmic-name={"rectangle3"}
+                    data-plasmic-override={overrides.rectangle3}
+                    className={classNames(projectcss.all, sty.rectangle3)}
                   />
-                </div>
-                <div
-                  data-plasmic-name={"heading6"}
-                  data-plasmic-override={overrides.heading6}
-                  className={classNames(projectcss.all, sty.heading6)}
-                >
+
                   <div
-                    data-plasmic-name={"howToSecureTheRightInvestors"}
-                    data-plasmic-override={
-                      overrides.howToSecureTheRightInvestors
-                    }
-                    className={classNames(
-                      projectcss.all,
-                      sty.howToSecureTheRightInvestors
-                    )}
+                    data-plasmic-name={"border"}
+                    data-plasmic-override={overrides.border}
+                    className={classNames(projectcss.all, sty.border)}
+                  />
+
+                  <div
+                    data-plasmic-name={"frame"}
+                    data-plasmic-override={overrides.frame}
+                    className={classNames(projectcss.all, sty.frame)}
+                  >
+                    <GroupIcon
+                      className={classNames(projectcss.all, sty.svg__jUZw)}
+                      role={"img"}
+                    />
+                  </div>
+                  <div
+                    data-plasmic-name={"heading5"}
+                    data-plasmic-override={overrides.heading5}
+                    className={classNames(projectcss.all, sty.heading5)}
                   >
                     <div
+                      data-plasmic-name={
+                        "howToFrameEffectiveCustomerConversations"
+                      }
+                      data-plasmic-override={
+                        overrides.howToFrameEffectiveCustomerConversations
+                      }
                       className={classNames(
                         projectcss.all,
-                        projectcss.__wab_text,
-                        sty.text___0LlCj
+                        sty.howToFrameEffectiveCustomerConversations
                       )}
                     >
-                      {"How to secure the right\ninvestors"}
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__jwQ3
+                        )}
+                      >
+                        {"How to frame effective\ncustomer conversations"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  data-plasmic-name={"heading13"}
-                  data-plasmic-override={overrides.heading13}
-                  className={classNames(projectcss.all, sty.heading13)}
-                >
                   <div
-                    data-plasmic-name={"heading14"}
-                    data-plasmic-override={overrides.heading14}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.heading14
-                    )}
-                  >
-                    {"2"}
-                  </div>
-                </div>
-                <div
-                  data-plasmic-name={"rectangle5"}
-                  data-plasmic-override={overrides.rectangle5}
-                  className={classNames(projectcss.all, sty.rectangle5)}
-                />
-
-                <div
-                  data-plasmic-name={"border3"}
-                  data-plasmic-override={overrides.border3}
-                  className={classNames(projectcss.all, sty.border3)}
-                />
-
-                <div
-                  data-plasmic-name={"frame3"}
-                  data-plasmic-override={overrides.frame3}
-                  className={classNames(projectcss.all, sty.frame3)}
-                >
-                  <GroupIcon
-                    className={classNames(projectcss.all, sty.svg__lntOf)}
-                    role={"img"}
-                  />
-                </div>
-                <div
-                  data-plasmic-name={"heading7"}
-                  data-plasmic-override={overrides.heading7}
-                  className={classNames(projectcss.all, sty.heading7)}
-                >
-                  <div
-                    data-plasmic-name={"howToTellYourBestStory"}
-                    data-plasmic-override={overrides.howToTellYourBestStory}
-                    className={classNames(
-                      projectcss.all,
-                      sty.howToTellYourBestStory
-                    )}
+                    data-plasmic-name={"heading11"}
+                    data-plasmic-override={overrides.heading11}
+                    className={classNames(projectcss.all, sty.heading11)}
                   >
                     <div
+                      data-plasmic-name={"heading12"}
+                      data-plasmic-override={overrides.heading12}
                       className={classNames(
                         projectcss.all,
                         projectcss.__wab_text,
-                        sty.text__drp4G
+                        sty.heading12
                       )}
                     >
-                      {"How to tell\nyour best\nstory"}
+                      {"1"}
                     </div>
                   </div>
-                </div>
-                <div
-                  data-plasmic-name={"heading15"}
-                  data-plasmic-override={overrides.heading15}
-                  className={classNames(projectcss.all, sty.heading15)}
-                >
                   <div
-                    data-plasmic-name={"heading16"}
-                    data-plasmic-override={overrides.heading16}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.heading16
-                    )}
-                  >
-                    {"3"}
-                  </div>
-                </div>
-                <div
-                  data-plasmic-name={"rectangle6"}
-                  data-plasmic-override={overrides.rectangle6}
-                  className={classNames(projectcss.all, sty.rectangle6)}
-                />
-
-                <div
-                  data-plasmic-name={"border4"}
-                  data-plasmic-override={overrides.border4}
-                  className={classNames(projectcss.all, sty.border4)}
-                />
-
-                <div
-                  data-plasmic-name={"frame4"}
-                  data-plasmic-override={overrides.frame4}
-                  className={classNames(projectcss.all, sty.frame4)}
-                >
-                  <GroupIcon
-                    className={classNames(projectcss.all, sty.svg__wvcAo)}
-                    role={"img"}
+                    data-plasmic-name={"rectangle4"}
+                    data-plasmic-override={overrides.rectangle4}
+                    className={classNames(projectcss.all, sty.rectangle4)}
                   />
-                </div>
-                <div
-                  data-plasmic-name={"heading8"}
-                  data-plasmic-override={overrides.heading8}
-                  className={classNames(projectcss.all, sty.heading8)}
-                >
+
                   <div
-                    data-plasmic-name={
-                      "howToSetUpTheRightCompanyInfrastructure"
-                    }
-                    data-plasmic-override={
-                      overrides.howToSetUpTheRightCompanyInfrastructure
-                    }
-                    className={classNames(
-                      projectcss.all,
-                      sty.howToSetUpTheRightCompanyInfrastructure
-                    )}
+                    data-plasmic-name={"border2"}
+                    data-plasmic-override={overrides.border2}
+                    className={classNames(projectcss.all, sty.border2)}
+                  />
+
+                  <div
+                    data-plasmic-name={"frame2"}
+                    data-plasmic-override={overrides.frame2}
+                    className={classNames(projectcss.all, sty.frame2)}
+                  >
+                    <GroupIcon
+                      className={classNames(projectcss.all, sty.svg__onIdm)}
+                      role={"img"}
+                    />
+                  </div>
+                  <div
+                    data-plasmic-name={"heading6"}
+                    data-plasmic-override={overrides.heading6}
+                    className={classNames(projectcss.all, sty.heading6)}
                   >
                     <div
+                      data-plasmic-name={"howToSecureTheRightInvestors"}
+                      data-plasmic-override={
+                        overrides.howToSecureTheRightInvestors
+                      }
                       className={classNames(
                         projectcss.all,
-                        projectcss.__wab_text,
-                        sty.text__klIfX
+                        sty.howToSecureTheRightInvestors
                       )}
                     >
-                      {"How to set up the right\ncompany infrastructure"}
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text___0LlCj
+                        )}
+                      >
+                        {"How to secure the right\ninvestors"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  data-plasmic-name={"heading17"}
-                  data-plasmic-override={overrides.heading17}
-                  className={classNames(projectcss.all, sty.heading17)}
-                >
                   <div
-                    data-plasmic-name={"heading18"}
-                    data-plasmic-override={overrides.heading18}
-                    className={classNames(
-                      projectcss.all,
-                      projectcss.__wab_text,
-                      sty.heading18
-                    )}
-                  >
-                    {"4"}
-                  </div>
-                </div>
-                <div
-                  data-plasmic-name={"rectangle7"}
-                  data-plasmic-override={overrides.rectangle7}
-                  className={classNames(projectcss.all, sty.rectangle7)}
-                />
-
-                <div
-                  data-plasmic-name={"linkApplyNow"}
-                  data-plasmic-override={overrides.linkApplyNow}
-                  className={classNames(projectcss.all, sty.linkApplyNow)}
-                >
-                  <div
-                    data-plasmic-name={"rectangle8"}
-                    data-plasmic-override={overrides.rectangle8}
-                    className={classNames(projectcss.all, sty.rectangle8)}
-                  />
-
-                  <div
-                    data-plasmic-name={"rectangle9"}
-                    data-plasmic-override={overrides.rectangle9}
-                    className={classNames(projectcss.all, sty.rectangle9)}
-                  />
-
-                  <div
-                    data-plasmic-name={"applyNow"}
-                    data-plasmic-override={overrides.applyNow}
-                    className={classNames(projectcss.all, sty.applyNow)}
+                    data-plasmic-name={"heading13"}
+                    data-plasmic-override={overrides.heading13}
+                    className={classNames(projectcss.all, sty.heading13)}
                   >
                     <div
+                      data-plasmic-name={"heading14"}
+                      data-plasmic-override={overrides.heading14}
                       className={classNames(
                         projectcss.all,
                         projectcss.__wab_text,
-                        sty.text__pr9E
+                        sty.heading14
                       )}
                     >
-                      {"Apply Now"}
+                      {"2"}
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"rectangle5"}
+                    data-plasmic-override={overrides.rectangle5}
+                    className={classNames(projectcss.all, sty.rectangle5)}
+                  />
+
+                  <div
+                    data-plasmic-name={"border3"}
+                    data-plasmic-override={overrides.border3}
+                    className={classNames(projectcss.all, sty.border3)}
+                  />
+
+                  <div
+                    data-plasmic-name={"frame3"}
+                    data-plasmic-override={overrides.frame3}
+                    className={classNames(projectcss.all, sty.frame3)}
+                  >
+                    <GroupIcon
+                      className={classNames(projectcss.all, sty.svg__lntOf)}
+                      role={"img"}
+                    />
+                  </div>
+                  <div
+                    data-plasmic-name={"heading7"}
+                    data-plasmic-override={overrides.heading7}
+                    className={classNames(projectcss.all, sty.heading7)}
+                  >
+                    <div
+                      data-plasmic-name={"howToTellYourBestStory"}
+                      data-plasmic-override={overrides.howToTellYourBestStory}
+                      className={classNames(
+                        projectcss.all,
+                        sty.howToTellYourBestStory
+                      )}
+                    >
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__drp4G
+                        )}
+                      >
+                        {"How to tell\nyour best\nstory"}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"heading15"}
+                    data-plasmic-override={overrides.heading15}
+                    className={classNames(projectcss.all, sty.heading15)}
+                  >
+                    <div
+                      data-plasmic-name={"heading16"}
+                      data-plasmic-override={overrides.heading16}
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.heading16
+                      )}
+                    >
+                      {"3"}
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"rectangle6"}
+                    data-plasmic-override={overrides.rectangle6}
+                    className={classNames(projectcss.all, sty.rectangle6)}
+                  />
+
+                  <div
+                    data-plasmic-name={"border4"}
+                    data-plasmic-override={overrides.border4}
+                    className={classNames(projectcss.all, sty.border4)}
+                  />
+
+                  <div
+                    data-plasmic-name={"frame4"}
+                    data-plasmic-override={overrides.frame4}
+                    className={classNames(projectcss.all, sty.frame4)}
+                  >
+                    <GroupIcon
+                      className={classNames(projectcss.all, sty.svg__wvcAo)}
+                      role={"img"}
+                    />
+                  </div>
+                  <div
+                    data-plasmic-name={"heading8"}
+                    data-plasmic-override={overrides.heading8}
+                    className={classNames(projectcss.all, sty.heading8)}
+                  >
+                    <div
+                      data-plasmic-name={
+                        "howToSetUpTheRightCompanyInfrastructure"
+                      }
+                      data-plasmic-override={
+                        overrides.howToSetUpTheRightCompanyInfrastructure
+                      }
+                      className={classNames(
+                        projectcss.all,
+                        sty.howToSetUpTheRightCompanyInfrastructure
+                      )}
+                    >
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__klIfX
+                        )}
+                      >
+                        {"How to set up the right\ncompany infrastructure"}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"heading17"}
+                    data-plasmic-override={overrides.heading17}
+                    className={classNames(projectcss.all, sty.heading17)}
+                  >
+                    <div
+                      data-plasmic-name={"heading18"}
+                      data-plasmic-override={overrides.heading18}
+                      className={classNames(
+                        projectcss.all,
+                        projectcss.__wab_text,
+                        sty.heading18
+                      )}
+                    >
+                      {"4"}
+                    </div>
+                  </div>
+                  <div
+                    data-plasmic-name={"rectangle7"}
+                    data-plasmic-override={overrides.rectangle7}
+                    className={classNames(projectcss.all, sty.rectangle7)}
+                  />
+
+                  <div
+                    data-plasmic-name={"linkApplyNow"}
+                    data-plasmic-override={overrides.linkApplyNow}
+                    className={classNames(projectcss.all, sty.linkApplyNow)}
+                  >
+                    <div
+                      data-plasmic-name={"rectangle8"}
+                      data-plasmic-override={overrides.rectangle8}
+                      className={classNames(projectcss.all, sty.rectangle8)}
+                    />
+
+                    <div
+                      data-plasmic-name={"rectangle9"}
+                      data-plasmic-override={overrides.rectangle9}
+                      className={classNames(projectcss.all, sty.rectangle9)}
+                    />
+
+                    <div
+                      data-plasmic-name={"applyNow"}
+                      data-plasmic-override={overrides.applyNow}
+                      className={classNames(projectcss.all, sty.applyNow)}
+                    >
+                      <div
+                        className={classNames(
+                          projectcss.all,
+                          projectcss.__wab_text,
+                          sty.text__pr9E
+                        )}
+                      >
+                        {"Apply Now"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -4817,12 +4817,6 @@ function PlasmicBsfOld__RenderFunc(props: {
                     />
 
                     <div
-                      data-plasmic-name={"rectangle77"}
-                      data-plasmic-override={overrides.rectangle77}
-                      className={classNames(projectcss.all, sty.rectangle77)}
-                    />
-
-                    <div
                       data-plasmic-name={"applyNow2"}
                       data-plasmic-override={overrides.applyNow2}
                       className={classNames(projectcss.all, sty.applyNow2)}
@@ -4837,6 +4831,11 @@ function PlasmicBsfOld__RenderFunc(props: {
                         {"Apply Now"}
                       </div>
                     </div>
+                    <div
+                      data-plasmic-name={"rectangle77"}
+                      data-plasmic-override={overrides.rectangle77}
+                      className={classNames(projectcss.all, sty.rectangle77)}
+                    />
                   </div>
                 </div>
               </div>
@@ -4899,17 +4898,6 @@ function PlasmicBsfOld__RenderFunc(props: {
                 </div>
               </div>
             </div>
-            <div
-              data-plasmic-name={"container42"}
-              data-plasmic-override={overrides.container42}
-              className={classNames(projectcss.all, sty.container42)}
-            >
-              <div
-                data-plasmic-name={"rectangle78"}
-                data-plasmic-override={overrides.rectangle78}
-                className={classNames(projectcss.all, sty.rectangle78)}
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -4921,11 +4909,10 @@ const PlasmicDescendants = {
   root: [
     "root",
     "_1440WLight",
-    "background",
     "mainSection",
     "container",
-    "background2",
     "background3",
+    "background2",
     "rectangle",
     "linkApply",
     "container2",
@@ -4935,6 +4922,7 @@ const PlasmicDescendants = {
     "heading1",
     "bsf14BootcampForScientistFounders",
     "mainSection2",
+    "freeBox",
     "container4",
     "background4",
     "container5",
@@ -5352,24 +5340,21 @@ const PlasmicDescendants = {
     "clipPathGroup3",
     "linkApplyNow2",
     "rectangle76",
-    "rectangle77",
     "applyNow2",
+    "rectangle77",
     "footerSection",
     "container41",
     "background31",
     "_2025ByWilbe",
     "wowImagePictureExternalFileEditedJpg",
-    "privacyPolicy",
-    "container42",
-    "rectangle78"
+    "privacyPolicy"
   ],
   _1440WLight: [
     "_1440WLight",
-    "background",
     "mainSection",
     "container",
-    "background2",
     "background3",
+    "background2",
     "rectangle",
     "linkApply",
     "container2",
@@ -5379,6 +5364,7 @@ const PlasmicDescendants = {
     "heading1",
     "bsf14BootcampForScientistFounders",
     "mainSection2",
+    "freeBox",
     "container4",
     "background4",
     "container5",
@@ -5796,23 +5782,20 @@ const PlasmicDescendants = {
     "clipPathGroup3",
     "linkApplyNow2",
     "rectangle76",
-    "rectangle77",
     "applyNow2",
+    "rectangle77",
     "footerSection",
     "container41",
     "background31",
     "_2025ByWilbe",
     "wowImagePictureExternalFileEditedJpg",
-    "privacyPolicy",
-    "container42",
-    "rectangle78"
+    "privacyPolicy"
   ],
-  background: ["background"],
   mainSection: [
     "mainSection",
     "container",
-    "background2",
     "background3",
+    "background2",
     "rectangle",
     "linkApply",
     "container2",
@@ -5822,9 +5805,9 @@ const PlasmicDescendants = {
     "heading1",
     "bsf14BootcampForScientistFounders"
   ],
-  container: ["container", "background2"],
-  background2: ["background2"],
+  container: ["container", "background3", "background2"],
   background3: ["background3"],
+  background2: ["background2"],
   rectangle: ["rectangle"],
   linkApply: ["linkApply", "container2", "container3", "apply"],
   container2: ["container2", "container3", "apply"],
@@ -5837,6 +5820,49 @@ const PlasmicDescendants = {
   bsf14BootcampForScientistFounders: ["bsf14BootcampForScientistFounders"],
   mainSection2: [
     "mainSection2",
+    "freeBox",
+    "container4",
+    "background4",
+    "container5",
+    "rectangle2",
+    "heading2AvoidMakingExpensiveMistakes",
+    "heading2AvoidMakingExpensiveMistakes2",
+    "rectangle3",
+    "border",
+    "frame",
+    "heading5",
+    "howToFrameEffectiveCustomerConversations",
+    "heading11",
+    "heading12",
+    "rectangle4",
+    "border2",
+    "frame2",
+    "heading6",
+    "howToSecureTheRightInvestors",
+    "heading13",
+    "heading14",
+    "rectangle5",
+    "border3",
+    "frame3",
+    "heading7",
+    "howToTellYourBestStory",
+    "heading15",
+    "heading16",
+    "rectangle6",
+    "border4",
+    "frame4",
+    "heading8",
+    "howToSetUpTheRightCompanyInfrastructure",
+    "heading17",
+    "heading18",
+    "rectangle7",
+    "linkApplyNow",
+    "rectangle8",
+    "rectangle9",
+    "applyNow"
+  ],
+  freeBox: [
+    "freeBox",
     "container4",
     "background4",
     "container5",
@@ -7751,8 +7777,8 @@ const PlasmicDescendants = {
     "clipPathGroup3",
     "linkApplyNow2",
     "rectangle76",
-    "rectangle77",
-    "applyNow2"
+    "applyNow2",
+    "rectangle77"
   ],
   section: [
     "section",
@@ -7767,8 +7793,8 @@ const PlasmicDescendants = {
     "clipPathGroup3",
     "linkApplyNow2",
     "rectangle76",
-    "rectangle77",
-    "applyNow2"
+    "applyNow2",
+    "rectangle77"
   ],
   container39: ["container39", "background29"],
   background29: ["background29"],
@@ -7782,8 +7808,8 @@ const PlasmicDescendants = {
     "clipPathGroup3",
     "linkApplyNow2",
     "rectangle76",
-    "rectangle77",
-    "applyNow2"
+    "applyNow2",
+    "rectangle77"
   ],
   background30: ["background30"],
   link: ["link", "group", "clipPathGroup", "clipPathGroup2", "clipPathGroup3"],
@@ -7791,10 +7817,10 @@ const PlasmicDescendants = {
   clipPathGroup: ["clipPathGroup"],
   clipPathGroup2: ["clipPathGroup2"],
   clipPathGroup3: ["clipPathGroup3"],
-  linkApplyNow2: ["linkApplyNow2", "rectangle76", "rectangle77", "applyNow2"],
+  linkApplyNow2: ["linkApplyNow2", "rectangle76", "applyNow2", "rectangle77"],
   rectangle76: ["rectangle76"],
-  rectangle77: ["rectangle77"],
   applyNow2: ["applyNow2"],
+  rectangle77: ["rectangle77"],
   footerSection: [
     "footerSection",
     "container41",
@@ -7809,9 +7835,7 @@ const PlasmicDescendants = {
   wowImagePictureExternalFileEditedJpg: [
     "wowImagePictureExternalFileEditedJpg"
   ],
-  privacyPolicy: ["privacyPolicy"],
-  container42: ["container42", "rectangle78"],
-  rectangle78: ["rectangle78"]
+  privacyPolicy: ["privacyPolicy"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
 type DescendantsType<T extends NodeNameType> =
@@ -7819,11 +7843,10 @@ type DescendantsType<T extends NodeNameType> =
 type NodeDefaultElementType = {
   root: "div";
   _1440WLight: "div";
-  background: "div";
   mainSection: "div";
   container: "div";
-  background2: "div";
   background3: "div";
+  background2: "div";
   rectangle: "div";
   linkApply: "div";
   container2: "div";
@@ -7833,6 +7856,7 @@ type NodeDefaultElementType = {
   heading1: "div";
   bsf14BootcampForScientistFounders: "div";
   mainSection2: "div";
+  freeBox: "div";
   container4: "div";
   background4: "div";
   container5: "div";
@@ -8250,16 +8274,14 @@ type NodeDefaultElementType = {
   clipPathGroup3: "div";
   linkApplyNow2: "div";
   rectangle76: "div";
-  rectangle77: "div";
   applyNow2: "div";
+  rectangle77: "div";
   footerSection: "div";
   container41: "div";
   background31: "div";
   _2025ByWilbe: "div";
   wowImagePictureExternalFileEditedJpg: "div";
   privacyPolicy: "div";
-  container42: "div";
-  rectangle78: "div";
 };
 
 type ReservedPropsType = "variants" | "args" | "overrides";
@@ -8323,11 +8345,10 @@ export const PlasmicBsfOld = Object.assign(
   {
     // Helper components rendering sub-elements
     _1440WLight: makeNodeComponent("_1440WLight"),
-    background: makeNodeComponent("background"),
     mainSection: makeNodeComponent("mainSection"),
     container: makeNodeComponent("container"),
-    background2: makeNodeComponent("background2"),
     background3: makeNodeComponent("background3"),
+    background2: makeNodeComponent("background2"),
     rectangle: makeNodeComponent("rectangle"),
     linkApply: makeNodeComponent("linkApply"),
     container2: makeNodeComponent("container2"),
@@ -8342,6 +8363,7 @@ export const PlasmicBsfOld = Object.assign(
       "bsf14BootcampForScientistFounders"
     ),
     mainSection2: makeNodeComponent("mainSection2"),
+    freeBox: makeNodeComponent("freeBox"),
     container4: makeNodeComponent("container4"),
     background4: makeNodeComponent("background4"),
     container5: makeNodeComponent("container5"),
@@ -8905,8 +8927,8 @@ export const PlasmicBsfOld = Object.assign(
     clipPathGroup3: makeNodeComponent("clipPathGroup3"),
     linkApplyNow2: makeNodeComponent("linkApplyNow2"),
     rectangle76: makeNodeComponent("rectangle76"),
-    rectangle77: makeNodeComponent("rectangle77"),
     applyNow2: makeNodeComponent("applyNow2"),
+    rectangle77: makeNodeComponent("rectangle77"),
     footerSection: makeNodeComponent("footerSection"),
     container41: makeNodeComponent("container41"),
     background31: makeNodeComponent("background31"),
@@ -8915,8 +8937,6 @@ export const PlasmicBsfOld = Object.assign(
       "wowImagePictureExternalFileEditedJpg"
     ),
     privacyPolicy: makeNodeComponent("privacyPolicy"),
-    container42: makeNodeComponent("container42"),
-    rectangle78: makeNodeComponent("rectangle78"),
 
     // Metadata about props expected for PlasmicBsfOld
     internalVariantProps: PlasmicBsfOld__VariantProps,

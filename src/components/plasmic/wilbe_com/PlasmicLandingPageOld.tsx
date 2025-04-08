@@ -78,8 +78,6 @@ export type PlasmicLandingPageOld__OverridesType = {
   _1440WLight?: Flex__<"div">;
   background?: Flex__<"div">;
   mainSection?: Flex__<"div">;
-  rectangle?: Flex__<"div">;
-  background2?: Flex__<"div">;
   container?: Flex__<"div">;
   rectangle2?: Flex__<"div">;
   container2?: Flex__<"div">;
@@ -159,9 +157,6 @@ export type PlasmicLandingPageOld__OverridesType = {
   rectangle23?: Flex__<"div">;
   exploreSandbox?: Flex__<"div">;
   mainSection2?: Flex__<"div">;
-  container16?: Flex__<"div">;
-  background8?: Flex__<"div">;
-  rectangle24?: Flex__<"div">;
   container17?: Flex__<"div">;
   rectangle25?: Flex__<"div">;
   iframeHtml?: Flex__<"div">;
@@ -190,22 +185,8 @@ export type PlasmicLandingPageOld__OverridesType = {
   wilbeScience2?: Flex__<"div">;
   buttonMenuShare2?: Flex__<"div">;
   image4?: Flex__<"div">;
-  iframeHtml3?: Flex__<"div">;
-  bodyBody3?: Flex__<"div">;
-  youTubeVideoPlayer3?: Flex__<"div">;
-  image5?: Flex__<"div">;
-  container22?: Flex__<"div">;
-  link5?: Flex__<"div">;
-  becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny?: Flex__<"div">;
-  container23?: Flex__<"div">;
-  linkPhotoImageOfWilbeScience3?: Flex__<"div">;
-  link6?: Flex__<"div">;
-  wilbeScience3?: Flex__<"div">;
-  buttonMenuShare3?: Flex__<"div">;
-  image6?: Flex__<"div">;
   mainSection3?: Flex__<"div">;
   container24?: Flex__<"div">;
-  background9?: Flex__<"div">;
   container25?: Flex__<"div">;
   background10?: Flex__<"div">;
   container26?: Flex__<"div">;
@@ -506,8 +487,6 @@ export type PlasmicLandingPageOld__OverridesType = {
   imageBackground3?: Flex__<"div">;
   imageBackground4?: Flex__<"div">;
   mainSection4?: Flex__<"div">;
-  container135?: Flex__<"div">;
-  background12?: Flex__<"div">;
   container136?: Flex__<"div">;
   rectangle27?: Flex__<"div">;
   linkExploreSandbox2?: Flex__<"div">;
@@ -520,7 +499,6 @@ export type PlasmicLandingPageOld__OverridesType = {
   container138?: Flex__<"div">;
   background13?: Flex__<"div">;
   _2025ByWilbe?: Flex__<"div">;
-  wowImagePictureExternalFileEditedJpg?: Flex__<"div">;
   privacyPolicy?: Flex__<"div">;
 };
 
@@ -591,18 +569,6 @@ function PlasmicLandingPageOld__RenderFunc(props: {
               data-plasmic-override={overrides.mainSection}
               className={classNames(projectcss.all, sty.mainSection)}
             >
-              <div
-                data-plasmic-name={"rectangle"}
-                data-plasmic-override={overrides.rectangle}
-                className={classNames(projectcss.all, sty.rectangle)}
-              />
-
-              <div
-                data-plasmic-name={"background2"}
-                data-plasmic-override={overrides.background2}
-                className={classNames(projectcss.all, sty.background2)}
-              />
-
               <div
                 data-plasmic-name={"container"}
                 data-plasmic-override={overrides.container}
@@ -1365,23 +1331,6 @@ function PlasmicLandingPageOld__RenderFunc(props: {
               className={classNames(projectcss.all, sty.mainSection2)}
             >
               <div
-                data-plasmic-name={"container16"}
-                data-plasmic-override={overrides.container16}
-                className={classNames(projectcss.all, sty.container16)}
-              >
-                <div
-                  data-plasmic-name={"background8"}
-                  data-plasmic-override={overrides.background8}
-                  className={classNames(projectcss.all, sty.background8)}
-                />
-              </div>
-              <div
-                data-plasmic-name={"rectangle24"}
-                data-plasmic-override={overrides.rectangle24}
-                className={classNames(projectcss.all, sty.rectangle24)}
-              />
-
-              <div
                 data-plasmic-name={"container17"}
                 data-plasmic-override={overrides.container17}
                 className={classNames(projectcss.all, sty.container17)}
@@ -1697,159 +1646,6 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                   </div>
                 </div>
               </div>
-              <div
-                data-plasmic-name={"iframeHtml3"}
-                data-plasmic-override={overrides.iframeHtml3}
-                className={classNames(projectcss.all, sty.iframeHtml3)}
-              >
-                <div
-                  data-plasmic-name={"bodyBody3"}
-                  data-plasmic-override={overrides.bodyBody3}
-                  className={classNames(projectcss.all, sty.bodyBody3)}
-                >
-                  <div
-                    data-plasmic-name={"youTubeVideoPlayer3"}
-                    data-plasmic-override={overrides.youTubeVideoPlayer3}
-                    className={classNames(
-                      projectcss.all,
-                      sty.youTubeVideoPlayer3
-                    )}
-                  >
-                    <div
-                      data-plasmic-name={"image5"}
-                      data-plasmic-override={overrides.image5}
-                      className={classNames(projectcss.all, sty.image5)}
-                    />
-
-                    <div
-                      data-plasmic-name={"container22"}
-                      data-plasmic-override={overrides.container22}
-                      className={classNames(projectcss.all, sty.container22)}
-                    >
-                      <div
-                        data-plasmic-name={"link5"}
-                        data-plasmic-override={overrides.link5}
-                        className={classNames(projectcss.all, sty.link5)}
-                      >
-                        <div
-                          data-plasmic-name={
-                            "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny"
-                          }
-                          data-plasmic-override={
-                            overrides.becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny
-                          }
-                          className={classNames(
-                            projectcss.all,
-                            sty.becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny
-                          )}
-                        >
-                          <div
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.text__e5Orj
-                            )}
-                          >
-                            {
-                              "Becoming a Scientist\nFounder is a hell of a journey\noften with an uncanny\u2026"
-                            }
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      data-plasmic-name={"container23"}
-                      data-plasmic-override={overrides.container23}
-                      className={classNames(projectcss.all, sty.container23)}
-                    >
-                      <div
-                        data-plasmic-name={"linkPhotoImageOfWilbeScience3"}
-                        data-plasmic-override={
-                          overrides.linkPhotoImageOfWilbeScience3
-                        }
-                        className={classNames(
-                          projectcss.all,
-                          sty.linkPhotoImageOfWilbeScience3
-                        )}
-                      />
-
-                      <div
-                        data-plasmic-name={"link6"}
-                        data-plasmic-override={overrides.link6}
-                        className={classNames(projectcss.all, sty.link6)}
-                      >
-                        <div
-                          data-plasmic-name={"wilbeScience3"}
-                          data-plasmic-override={overrides.wilbeScience3}
-                          className={classNames(
-                            projectcss.all,
-                            sty.wilbeScience3
-                          )}
-                        >
-                          <div
-                            className={classNames(
-                              projectcss.all,
-                              projectcss.__wab_text,
-                              sty.text__mMqlf
-                            )}
-                          >
-                            {"Wilbe Science"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      data-plasmic-name={"buttonMenuShare3"}
-                      data-plasmic-override={overrides.buttonMenuShare3}
-                      className={classNames(
-                        projectcss.all,
-                        sty.buttonMenuShare3
-                      )}
-                    >
-                      <PlasmicImg__
-                        alt={""}
-                        className={classNames(sty.img__oHx4D)}
-                        displayHeight={"36px"}
-                        displayMaxHeight={"none"}
-                        displayMaxWidth={"100%"}
-                        displayMinHeight={"0"}
-                        displayMinWidth={"0"}
-                        displayWidth={"36px"}
-                        loading={"lazy"}
-                        src={{
-                          src: "data:image/svg+xml;base64,PHN2ZyBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzNiAzNiI+CiAgPHBhdGggZD0iTTIwLjIgMTQuMTlWOS43NGw3Ljc5IDcuNzktNy43OSA3Ljc5di00LjU2Yy0zLjkzLS4wNy04LjEgMS4wNS0xMC44NiA0LS41NC4zNy0xLjc0IDIuNTMtMS4yMi44OS45Ni00LjMzIDMuNjgtOC40NyA3Ljg2LTEwLjI3IDEuMzMtLjYgMi43Ni0uOTggNC4yMS0xLjE5aC4wMXoiIGZpbGw9IiNmZmYiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9Ii4xNSIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPHBhdGggZD0iTTIwLjIgMTQuMTlWOS43NGw3Ljc5IDcuNzktNy43OSA3Ljc5di00LjU2Yy0zLjkzLS4wNy04LjEgMS4wNS0xMC44NiA0LS41NC4zNy0xLjc0IDIuNTMtMS4yMi44OS45Ni00LjMzIDMuNjgtOC40NyA3Ljg2LTEwLjI3IDEuMzMtLjYgMi43Ni0uOTggNC4yMS0xLjE5aC4wMXoiIGZpbGw9IiNmZmYiLz4KPC9zdmc+Cg==",
-                          fullWidth: 36,
-                          fullHeight: 36,
-                          aspectRatio: 1
-                        }}
-                      />
-                    </div>
-                    <div
-                      data-plasmic-name={"image6"}
-                      data-plasmic-override={overrides.image6}
-                      className={classNames(projectcss.all, sty.image6)}
-                    />
-
-                    <PlasmicImg__
-                      alt={""}
-                      className={classNames(sty.img___99Y6H)}
-                      displayHeight={"90px"}
-                      displayMaxHeight={"none"}
-                      displayMaxWidth={"100%"}
-                      displayMinHeight={"0"}
-                      displayMinWidth={"0"}
-                      displayWidth={"68px"}
-                      loading={"lazy"}
-                      src={{
-                        src: "data:image/svg+xml;base64,PHN2ZyBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2OCA5MCI+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik02NS42NDcgOC41MDdjNC43NiA4LjE1MiAyLjA1NiAxOC42NDEtNi4wNDIgMjMuNDMybC01LjYzNSAzLjMzOCA0LjAwMiAxLjgxM2M1Ljc5MiAyLjYyNiA5LjY1MyA4LjI5MyA5Ljk5NyAxNC42ODcuMzQ0IDYuMzg1LTIuODg0IDEyLjQ0My04LjM2MyAxNS42ODZsLTM0IDIwLjExMWMtOC4wOSA0Ljc5MS0xOC41MDkgMi4wNjQtMjMuMjYxLTYuMDg4LTQuNzUyLTguMTUzLTIuMDU2LTE4LjY0MiA2LjA0Mi0yMy40MzNsNS42MzUtMy4zMzgtNC4wMDItMS44MTNDNC4yMyA1MC4yNzYuMzY3IDQ0LjYxLjAyMyAzOC4yMTZjLS4zMzYtNi4zODYgMi44ODUtMTIuNDQ0IDguMzY0LTE1LjY4N2wzNC0yMC4xMTFjOC4wOS00Ljc4NCAxOC41MDgtMi4wNjQgMjMuMjYgNi4wODl6IiBmaWxsPSJyZWQiLz4KICA8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTI1Ljc5MyA1Ny44OTdWMzIuMTAzTDQ3LjY3OCA0NSAyNS43OTMgNTcuODk3eiIgZmlsbD0iI2ZmZiIvPgo8L3N2Zz4K",
-                        fullWidth: 68,
-                        fullHeight: 90,
-                        aspectRatio: 0.755556
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
             </div>
             <div
               data-plasmic-name={"mainSection3"}
@@ -1860,13 +1656,8 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                 data-plasmic-name={"container24"}
                 data-plasmic-override={overrides.container24}
                 className={classNames(projectcss.all, sty.container24)}
-              >
-                <div
-                  data-plasmic-name={"background9"}
-                  data-plasmic-override={overrides.background9}
-                  className={classNames(projectcss.all, sty.background9)}
-                />
-              </div>
+              />
+
               <div
                 data-plasmic-name={"container25"}
                 data-plasmic-override={overrides.container25}
@@ -5594,17 +5385,6 @@ function PlasmicLandingPageOld__RenderFunc(props: {
               className={classNames(projectcss.all, sty.mainSection4)}
             >
               <div
-                data-plasmic-name={"container135"}
-                data-plasmic-override={overrides.container135}
-                className={classNames(projectcss.all, sty.container135)}
-              >
-                <div
-                  data-plasmic-name={"background12"}
-                  data-plasmic-override={overrides.background12}
-                  className={classNames(projectcss.all, sty.background12)}
-                />
-              </div>
-              <div
                 data-plasmic-name={"container136"}
                 data-plasmic-override={overrides.container136}
                 className={classNames(projectcss.all, sty.container136)}
@@ -5715,17 +5495,6 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                 </div>
               </div>
               <div
-                data-plasmic-name={"wowImagePictureExternalFileEditedJpg"}
-                data-plasmic-override={
-                  overrides.wowImagePictureExternalFileEditedJpg
-                }
-                className={classNames(
-                  projectcss.all,
-                  sty.wowImagePictureExternalFileEditedJpg
-                )}
-              />
-
-              <div
                 data-plasmic-name={"privacyPolicy"}
                 data-plasmic-override={overrides.privacyPolicy}
                 className={classNames(projectcss.all, sty.privacyPolicy)}
@@ -5754,8 +5523,6 @@ const PlasmicDescendants = {
     "_1440WLight",
     "background",
     "mainSection",
-    "rectangle",
-    "background2",
     "container",
     "rectangle2",
     "container2",
@@ -5835,9 +5602,6 @@ const PlasmicDescendants = {
     "rectangle23",
     "exploreSandbox",
     "mainSection2",
-    "container16",
-    "background8",
-    "rectangle24",
     "container17",
     "rectangle25",
     "iframeHtml",
@@ -5866,22 +5630,8 @@ const PlasmicDescendants = {
     "wilbeScience2",
     "buttonMenuShare2",
     "image4",
-    "iframeHtml3",
-    "bodyBody3",
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6",
     "mainSection3",
     "container24",
-    "background9",
     "container25",
     "background10",
     "container26",
@@ -6182,8 +5932,6 @@ const PlasmicDescendants = {
     "imageBackground3",
     "imageBackground4",
     "mainSection4",
-    "container135",
-    "background12",
     "container136",
     "rectangle27",
     "linkExploreSandbox2",
@@ -6196,15 +5944,12 @@ const PlasmicDescendants = {
     "container138",
     "background13",
     "_2025ByWilbe",
-    "wowImagePictureExternalFileEditedJpg",
     "privacyPolicy"
   ],
   _1440WLight: [
     "_1440WLight",
     "background",
     "mainSection",
-    "rectangle",
-    "background2",
     "container",
     "rectangle2",
     "container2",
@@ -6284,9 +6029,6 @@ const PlasmicDescendants = {
     "rectangle23",
     "exploreSandbox",
     "mainSection2",
-    "container16",
-    "background8",
-    "rectangle24",
     "container17",
     "rectangle25",
     "iframeHtml",
@@ -6315,22 +6057,8 @@ const PlasmicDescendants = {
     "wilbeScience2",
     "buttonMenuShare2",
     "image4",
-    "iframeHtml3",
-    "bodyBody3",
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6",
     "mainSection3",
     "container24",
-    "background9",
     "container25",
     "background10",
     "container26",
@@ -6631,8 +6359,6 @@ const PlasmicDescendants = {
     "imageBackground3",
     "imageBackground4",
     "mainSection4",
-    "container135",
-    "background12",
     "container136",
     "rectangle27",
     "linkExploreSandbox2",
@@ -6645,14 +6371,11 @@ const PlasmicDescendants = {
     "container138",
     "background13",
     "_2025ByWilbe",
-    "wowImagePictureExternalFileEditedJpg",
     "privacyPolicy"
   ],
   background: ["background"],
   mainSection: [
     "mainSection",
-    "rectangle",
-    "background2",
     "container",
     "rectangle2",
     "container2",
@@ -6732,8 +6455,6 @@ const PlasmicDescendants = {
     "rectangle23",
     "exploreSandbox"
   ],
-  rectangle: ["rectangle"],
-  background2: ["background2"],
   container: [
     "container",
     "rectangle2",
@@ -7123,9 +6844,6 @@ const PlasmicDescendants = {
   exploreSandbox: ["exploreSandbox"],
   mainSection2: [
     "mainSection2",
-    "container16",
-    "background8",
-    "rectangle24",
     "container17",
     "rectangle25",
     "iframeHtml",
@@ -7153,24 +6871,8 @@ const PlasmicDescendants = {
     "link4",
     "wilbeScience2",
     "buttonMenuShare2",
-    "image4",
-    "iframeHtml3",
-    "bodyBody3",
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6"
+    "image4"
   ],
-  container16: ["container16", "background8"],
-  background8: ["background8"],
-  rectangle24: ["rectangle24"],
   container17: [
     "container17",
     "rectangle25",
@@ -7325,76 +7027,9 @@ const PlasmicDescendants = {
   wilbeScience2: ["wilbeScience2"],
   buttonMenuShare2: ["buttonMenuShare2"],
   image4: ["image4"],
-  iframeHtml3: [
-    "iframeHtml3",
-    "bodyBody3",
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6"
-  ],
-  bodyBody3: [
-    "bodyBody3",
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6"
-  ],
-  youTubeVideoPlayer3: [
-    "youTubeVideoPlayer3",
-    "image5",
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny",
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3",
-    "buttonMenuShare3",
-    "image6"
-  ],
-  image5: ["image5"],
-  container22: [
-    "container22",
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny"
-  ],
-  link5: [
-    "link5",
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny"
-  ],
-  becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny: [
-    "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny"
-  ],
-  container23: [
-    "container23",
-    "linkPhotoImageOfWilbeScience3",
-    "link6",
-    "wilbeScience3"
-  ],
-  linkPhotoImageOfWilbeScience3: ["linkPhotoImageOfWilbeScience3"],
-  link6: ["link6", "wilbeScience3"],
-  wilbeScience3: ["wilbeScience3"],
-  buttonMenuShare3: ["buttonMenuShare3"],
-  image6: ["image6"],
   mainSection3: [
     "mainSection3",
     "container24",
-    "background9",
     "container25",
     "background10",
     "container26",
@@ -7695,8 +7330,7 @@ const PlasmicDescendants = {
     "imageBackground3",
     "imageBackground4"
   ],
-  container24: ["container24", "background9"],
-  background9: ["background9"],
+  container24: ["container24"],
   container25: [
     "container25",
     "background10",
@@ -10752,8 +10386,6 @@ const PlasmicDescendants = {
   imageBackground4: ["imageBackground4"],
   mainSection4: [
     "mainSection4",
-    "container135",
-    "background12",
     "container136",
     "rectangle27",
     "linkExploreSandbox2",
@@ -10763,8 +10395,6 @@ const PlasmicDescendants = {
     "container137",
     "communityNoteSandboxIsDedicatedToScientistsAtAllStageOfTheirEducationAndProfessionalCareerWhoAreActivelyPursuingResearchInAcademiaOrWithinIndustryIfYouAreAScientistAndAMemberOfATechTransferOfficeTtoWeOfferOpportunitiesToLearnHowToBetterAlignWithTheInterestsOfScientistFoundersYouCanSubmitATtoInterestFormHereIfYouAreAnInvestorOrSomeoneWhoWantsToSupportScientistFoundersInOtherWaysOrYouThinkYouWouldBeAValuableMemberOfTheWilbeEcosystemTellUsMoreByRegisteringWithThisForm"
   ],
-  container135: ["container135", "background12"],
-  background12: ["background12"],
   container136: [
     "container136",
     "rectangle27",
@@ -10798,15 +10428,11 @@ const PlasmicDescendants = {
     "container138",
     "background13",
     "_2025ByWilbe",
-    "wowImagePictureExternalFileEditedJpg",
     "privacyPolicy"
   ],
   container138: ["container138", "background13"],
   background13: ["background13"],
   _2025ByWilbe: ["_2025ByWilbe"],
-  wowImagePictureExternalFileEditedJpg: [
-    "wowImagePictureExternalFileEditedJpg"
-  ],
   privacyPolicy: ["privacyPolicy"]
 } as const;
 type NodeNameType = keyof typeof PlasmicDescendants;
@@ -10817,8 +10443,6 @@ type NodeDefaultElementType = {
   _1440WLight: "div";
   background: "div";
   mainSection: "div";
-  rectangle: "div";
-  background2: "div";
   container: "div";
   rectangle2: "div";
   container2: "div";
@@ -10898,9 +10522,6 @@ type NodeDefaultElementType = {
   rectangle23: "div";
   exploreSandbox: "div";
   mainSection2: "div";
-  container16: "div";
-  background8: "div";
-  rectangle24: "div";
   container17: "div";
   rectangle25: "div";
   iframeHtml: "div";
@@ -10929,22 +10550,8 @@ type NodeDefaultElementType = {
   wilbeScience2: "div";
   buttonMenuShare2: "div";
   image4: "div";
-  iframeHtml3: "div";
-  bodyBody3: "div";
-  youTubeVideoPlayer3: "div";
-  image5: "div";
-  container22: "div";
-  link5: "div";
-  becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny: "div";
-  container23: "div";
-  linkPhotoImageOfWilbeScience3: "div";
-  link6: "div";
-  wilbeScience3: "div";
-  buttonMenuShare3: "div";
-  image6: "div";
   mainSection3: "div";
   container24: "div";
-  background9: "div";
   container25: "div";
   background10: "div";
   container26: "div";
@@ -11245,8 +10852,6 @@ type NodeDefaultElementType = {
   imageBackground3: "div";
   imageBackground4: "div";
   mainSection4: "div";
-  container135: "div";
-  background12: "div";
   container136: "div";
   rectangle27: "div";
   linkExploreSandbox2: "div";
@@ -11259,7 +10864,6 @@ type NodeDefaultElementType = {
   container138: "div";
   background13: "div";
   _2025ByWilbe: "div";
-  wowImagePictureExternalFileEditedJpg: "div";
   privacyPolicy: "div";
 };
 
@@ -11326,8 +10930,6 @@ export const PlasmicLandingPageOld = Object.assign(
     _1440WLight: makeNodeComponent("_1440WLight"),
     background: makeNodeComponent("background"),
     mainSection: makeNodeComponent("mainSection"),
-    rectangle: makeNodeComponent("rectangle"),
-    background2: makeNodeComponent("background2"),
     container: makeNodeComponent("container"),
     rectangle2: makeNodeComponent("rectangle2"),
     container2: makeNodeComponent("container2"),
@@ -11431,9 +11033,6 @@ export const PlasmicLandingPageOld = Object.assign(
     rectangle23: makeNodeComponent("rectangle23"),
     exploreSandbox: makeNodeComponent("exploreSandbox"),
     mainSection2: makeNodeComponent("mainSection2"),
-    container16: makeNodeComponent("container16"),
-    background8: makeNodeComponent("background8"),
-    rectangle24: makeNodeComponent("rectangle24"),
     container17: makeNodeComponent("container17"),
     rectangle25: makeNodeComponent("rectangle25"),
     iframeHtml: makeNodeComponent("iframeHtml"),
@@ -11471,27 +11070,8 @@ export const PlasmicLandingPageOld = Object.assign(
     wilbeScience2: makeNodeComponent("wilbeScience2"),
     buttonMenuShare2: makeNodeComponent("buttonMenuShare2"),
     image4: makeNodeComponent("image4"),
-    iframeHtml3: makeNodeComponent("iframeHtml3"),
-    bodyBody3: makeNodeComponent("bodyBody3"),
-    youTubeVideoPlayer3: makeNodeComponent("youTubeVideoPlayer3"),
-    image5: makeNodeComponent("image5"),
-    container22: makeNodeComponent("container22"),
-    link5: makeNodeComponent("link5"),
-    becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny:
-      makeNodeComponent(
-        "becomingAScientistFounderIsAHellOfAJourneyOftenWithAnUncanny"
-      ),
-    container23: makeNodeComponent("container23"),
-    linkPhotoImageOfWilbeScience3: makeNodeComponent(
-      "linkPhotoImageOfWilbeScience3"
-    ),
-    link6: makeNodeComponent("link6"),
-    wilbeScience3: makeNodeComponent("wilbeScience3"),
-    buttonMenuShare3: makeNodeComponent("buttonMenuShare3"),
-    image6: makeNodeComponent("image6"),
     mainSection3: makeNodeComponent("mainSection3"),
     container24: makeNodeComponent("container24"),
-    background9: makeNodeComponent("background9"),
     container25: makeNodeComponent("container25"),
     background10: makeNodeComponent("background10"),
     container26: makeNodeComponent("container26"),
@@ -12066,8 +11646,6 @@ export const PlasmicLandingPageOld = Object.assign(
     imageBackground3: makeNodeComponent("imageBackground3"),
     imageBackground4: makeNodeComponent("imageBackground4"),
     mainSection4: makeNodeComponent("mainSection4"),
-    container135: makeNodeComponent("container135"),
-    background12: makeNodeComponent("background12"),
     container136: makeNodeComponent("container136"),
     rectangle27: makeNodeComponent("rectangle27"),
     linkExploreSandbox2: makeNodeComponent("linkExploreSandbox2"),
@@ -12083,9 +11661,6 @@ export const PlasmicLandingPageOld = Object.assign(
     container138: makeNodeComponent("container138"),
     background13: makeNodeComponent("background13"),
     _2025ByWilbe: makeNodeComponent("_2025ByWilbe"),
-    wowImagePictureExternalFileEditedJpg: makeNodeComponent(
-      "wowImagePictureExternalFileEditedJpg"
-    ),
     privacyPolicy: makeNodeComponent("privacyPolicy"),
 
     // Metadata about props expected for PlasmicLandingPageOld

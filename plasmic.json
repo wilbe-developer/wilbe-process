@@ -7,7 +7,7 @@
   },
   "style": {
     "scheme": "css-modules",
-    "defaultStyleCssFilePath": "plasmic/plasmic__default_style.css"
+    "defaultStyleCssFilePath": "plasmic/plasmic__default_style.module.css"
   },
   "images": {
     "scheme": "inlined",
@@ -45,7 +45,8 @@
           }
         }
       ],
-      "customFunctions": []
+      "customFunctions": [],
+      "jsBundleThemes": []
     },
     {
       "projectId": "eUaJVzKX5KPEdJDEL9nAXX",
@@ -234,7 +235,7 @@
         {
           "id": "WQIpe26n8quQ",
           "name": "Image 3",
-          "filePath": "plasmic/wilbe_com/images/image3.jpeg"
+          "filePath": "plasmic/wilbe_com/images/image3.jpg"
         },
         {
           "id": "iYVEo4opYOSh",
