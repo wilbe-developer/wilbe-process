@@ -15,6 +15,7 @@ export const PATHS = {
   REGISTER: "/register",
   LOGIN: "/login",
   PENDING: "/pending",
+  LANDING_PAGE: "/landing-page",
 };
 
 export const NAV_ITEMS = [
