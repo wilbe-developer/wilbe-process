@@ -2,5 +2,5 @@ import * as React from "react";
 import PlasmicBsfPage from "@/components/plasmic/wilbe_com/PlasmicBsfOld";
 
 export default function LandingPage() {
-  return <PlasmicBsfOld />;
+  return <PlasmicBsfPage />;
 }
