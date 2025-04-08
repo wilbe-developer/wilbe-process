@@ -22,6 +22,7 @@ import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import LandingPage from "@/pages/LandingPage";
+import BsfPage from "@/pages/BsfPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -40,7 +41,8 @@ const App = () => (
             <Route path={PATHS.LOGIN} element={<LoginPage />} />
             <Route path={PATHS.REGISTER} element={<RegisterPage />} />
             <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
-            <Route path="/landing-page" element={<LandingPage />} />
+            <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
+            <Route path={PATHS.BSF_PAGE} element={<LandingPage />} />
             
             {/* Protected routes */}
             <Route element={<Layout />}>
