@@ -1,6 +1,6 @@
 import * as React from "react";
 import PlasmicBsfPage from "@/components/plasmic/wilbe_com/PlasmicBsfOld";
 
-export default function LandingPage() {
+export default function BsfPage() {
   return <PlasmicBsfPage />;
 }
