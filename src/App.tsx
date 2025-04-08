@@ -21,8 +21,8 @@ import PendingApprovalPage from "@/pages/PendingApprovalPage";
 import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFoundPage from "@/pages/NotFoundPage";
-import LandingPage from "@/pages/LandingPage";
-import BsfPage from "@/pages/BsfPage";
+import LandingPage from "@/components/LandingPageOld";
+import BsfPage from "@/components/BsfOld";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
