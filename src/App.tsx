@@ -21,6 +21,7 @@ import PendingApprovalPage from "@/pages/PendingApprovalPage";
 import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFoundPage from "@/pages/NotFoundPage";
+import LandingPage from "@/pages/LandingPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
