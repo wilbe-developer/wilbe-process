@@ -1,0 +1,378 @@
+{
+  "platform": "react",
+  "code": {
+    "lang": "ts",
+    "scheme": "blackbox",
+    "reactRuntime": "classic"
+  },
+  "style": {
+    "scheme": "css-modules",
+    "defaultStyleCssFilePath": "plasmic/plasmic__default_style.css"
+  },
+  "images": {
+    "scheme": "inlined",
+    "publicDir": "../public",
+    "publicUrlPrefix": "/static/"
+  },
+  "tokens": {
+    "scheme": "theo",
+    "tokensFilePath": "plasmic-tokens.theo.json"
+  },
+  "srcDir": "src/components",
+  "defaultPlasmicDir": "./plasmic",
+  "projects": [
+    {
+      "projectId": "r3ASNrnyvLLLAtDvzUioQ",
+      "projectApiToken": "eSFGpQaYCtO9sRbPuQ2Ll9dmLOg8I4oKhx6e1PuCrsfmUIVbFbSXcy32UrPTwF9zX2HVXA0xaIKJNhCMHvA",
+      "projectName": "react-slick",
+      "version": ">0.0.0",
+      "cssFilePath": "plasmic/react_slick/plasmic.module.css",
+      "components": [],
+      "icons": [],
+      "images": [],
+      "indirect": true,
+      "globalContextsFilePath": "",
+      "splitsProviderFilePath": "",
+      "codeComponents": [
+        {
+          "id": "HOQUyOpClJ",
+          "name": "SliderWrapper",
+          "displayName": "hostless-slider",
+          "componentImportPath": "@plasmicpkgs/react-slick",
+          "helper": {
+            "name": "sliderHelpers",
+            "importPath": "@plasmicpkgs/react-slick"
+          }
+        }
+      ],
+      "customFunctions": []
+    },
+    {
+      "projectId": "eUaJVzKX5KPEdJDEL9nAXX",
+      "projectApiToken": "RFbvujJSAKYQd6DipTIeBQVlwpjH3vl1L1cGGwIkOf9AZOzBpcP6AOnSOA9zB4JOjGcKhgUA88FBAuLpm6BA",
+      "projectName": "Wilbe.com",
+      "version": "latest",
+      "cssFilePath": "plasmic/wilbe_com/plasmic.module.css",
+      "components": [
+        {
+          "id": "vnZ9SM-OL4Rz",
+          "name": "BsfOld",
+          "type": "managed",
+          "projectId": "eUaJVzKX5KPEdJDEL9nAXX",
+          "renderModuleFilePath": "plasmic/wilbe_com/PlasmicBsfOld.tsx",
+          "importSpec": {
+            "modulePath": "BsfOld.tsx"
+          },
+          "cssFilePath": "plasmic/wilbe_com/PlasmicBsfOld.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/bsf"
+        },
+        {
+          "id": "GzKZkU9nFmWI",
+          "name": "LandingPageOld",
+          "type": "managed",
+          "projectId": "eUaJVzKX5KPEdJDEL9nAXX",
+          "renderModuleFilePath": "plasmic/wilbe_com/PlasmicLandingPageOld.tsx",
+          "importSpec": {
+            "modulePath": "LandingPageOld.tsx"
+          },
+          "cssFilePath": "plasmic/wilbe_com/PlasmicLandingPageOld.module.css",
+          "scheme": "blackbox",
+          "componentType": "page",
+          "path": "/landing-page"
+        }
+      ],
+      "icons": [
+        {
+          "id": "0CRxQUyi2z-4",
+          "name": "GroupIcon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Group.tsx"
+        },
+        {
+          "id": "Jb41rCAQ1rW1",
+          "name": "Group2Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Group2.tsx"
+        },
+        {
+          "id": "W8JWn1bkyReA",
+          "name": "Group3Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Group3.tsx"
+        },
+        {
+          "id": "lchI6Izvk7Z5",
+          "name": "Group4Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Group4.tsx"
+        },
+        {
+          "id": "FbDf8-n55CMH",
+          "name": "VectorIcon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector.tsx"
+        },
+        {
+          "id": "8XFjoECPaHT7",
+          "name": "Vector2Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector2.tsx"
+        },
+        {
+          "id": "yMzQgYFlR0QL",
+          "name": "Vector3Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector3.tsx"
+        },
+        {
+          "id": "ejzZcxcGdPFf",
+          "name": "Vector4Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector4.tsx"
+        },
+        {
+          "id": "UugoyK7lLCZA",
+          "name": "Vector5Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector5.tsx"
+        },
+        {
+          "id": "BoEKwcktoJgd",
+          "name": "_9B5E72760347448D9D504F4738Cc6Ff1CompM0Mgtati2Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon___9B5E72760347448D9D504F4738Cc6Ff1CompM0Mgtati2.tsx"
+        },
+        {
+          "id": "N0GNACeQnF0Q",
+          "name": "Vector6Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector6.tsx"
+        },
+        {
+          "id": "GGZj5u_m270n",
+          "name": "Vector7Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector7.tsx"
+        },
+        {
+          "id": "WWCdjXdVtEsi",
+          "name": "Vector8Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Vector8.tsx"
+        },
+        {
+          "id": "CsecWVI0DlJH",
+          "name": "Svg2Icon",
+          "moduleFilePath": "plasmic/wilbe_com/icons/PlasmicIcon__Svg2.tsx"
+        }
+      ],
+      "images": [
+        {
+          "id": "SQFpGd3XIGee",
+          "name": "wow-image → Picture → external-file_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/wowImagePictureExternalFileEditedJpg.png"
+        },
+        {
+          "id": "aGHjeW1EglPT",
+          "name": "wow-image → Picture → 20191005-0113._2jpg.jpg",
+          "filePath": "plasmic/wilbe_com/images/wowImagePicture2019100501132JpgJpg.png"
+        },
+        {
+          "id": "kNZuqwmD97vO",
+          "name": "List - Social Bar → Item → Link - LinkedIn → wow-image → LinkedIn",
+          "filePath": "plasmic/wilbe_com/images/listSocialBarItemLinkLinkedInWowImageLinkedIn.png"
+        },
+        {
+          "id": "FhKta-ZE3qgK",
+          "name": "wow-image → Picture → 1692550273707.jpeg",
+          "filePath": "plasmic/wilbe_com/images/wowImagePicture1692550273707Jpeg.png"
+        },
+        {
+          "id": "Fjx3COr0NBfh",
+          "name": "wow-image → Picture → Assia Kasdi.jpg",
+          "filePath": "plasmic/wilbe_com/images/wowImagePictureAssiaKasdiJpg.png"
+        },
+        {
+          "id": "O1TYMf_q1WHz",
+          "name": "wow-image → Picture → 1704554192778.jpeg",
+          "filePath": "plasmic/wilbe_com/images/wowImagePicture1704554192778Jpeg.png"
+        },
+        {
+          "id": "LzuV6fOzpL2C",
+          "name": "Annalisa Jenkins_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/annalisaJenkinsEditedJpg.png"
+        },
+        {
+          "id": "aQXWtEl2laVY",
+          "name": "mythic-therapeutics-brian-fiske_edited_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/mythicTherapeuticsBrianFiskeEditedEditedJpg.png"
+        },
+        {
+          "id": "4fbUrwBzFEQT",
+          "name": "1571674483794_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/_1571674483794EditedJpg.png"
+        },
+        {
+          "id": "lSqCK7loS2K9",
+          "name": "Joshua Mckenty_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/joshuaMckentyEditedJpg.png"
+        },
+        {
+          "id": "qLjRwCJ31Kgh",
+          "name": "Lita Nelson2_edited.jpg",
+          "filePath": "plasmic/wilbe_com/images/litaNelson2EditedJpg.png"
+        },
+        {
+          "id": "t0ZdjUn7ow2q",
+          "name": "Ilan Gur.jpg",
+          "filePath": "plasmic/wilbe_com/images/ilanGurJpg.png"
+        },
+        {
+          "id": "V8sovHq79O0k",
+          "name": "Picture → Wilbe Logo",
+          "filePath": "plasmic/wilbe_com/images/pictureWilbeLogo.png"
+        },
+        {
+          "id": "8JnRg4O-xAvd",
+          "name": "wow-image → Picture → Wilbe Community of Scientist Leaders",
+          "filePath": "plasmic/wilbe_com/images/wowImagePictureWilbeCommunityOfScientistLeaders.png"
+        },
+        {
+          "id": "th1kPLE_o6mi",
+          "name": "Image",
+          "filePath": "plasmic/wilbe_com/images/image.png"
+        },
+        {
+          "id": "WQIpe26n8quQ",
+          "name": "Image 3",
+          "filePath": "plasmic/wilbe_com/images/image3.jpeg"
+        },
+        {
+          "id": "iYVEo4opYOSh",
+          "name": "Image 5",
+          "filePath": "plasmic/wilbe_com/images/image5.jpeg"
+        },
+        {
+          "id": "JjmH-p2JuNLb",
+          "name": "Image 2",
+          "filePath": "plasmic/wilbe_com/images/image2.jpeg"
+        },
+        {
+          "id": "CM3VMFlDzi3M",
+          "name": "Link - Photo image of Wilbe Science",
+          "filePath": "plasmic/wilbe_com/images/linkPhotoImageOfWilbeScience.jpeg"
+        },
+        {
+          "id": "r0G91tCWMR1p",
+          "name": "Background",
+          "filePath": "plasmic/wilbe_com/images/background.jpeg"
+        },
+        {
+          "id": "3Ek8EYCr9Fp8",
+          "name": "Image+Background",
+          "filePath": "plasmic/wilbe_com/images/imageBackground.jpeg"
+        },
+        {
+          "id": "lA7htNIIHo5v",
+          "name": "Image+Background 5",
+          "filePath": "plasmic/wilbe_com/images/imageBackground5.jpeg"
+        },
+        {
+          "id": "-vctotc6s1un",
+          "name": "Image+Background 2",
+          "filePath": "plasmic/wilbe_com/images/imageBackground2.jpeg"
+        },
+        {
+          "id": "w3aGb98v-N3q",
+          "name": "Image+Background 3",
+          "filePath": "plasmic/wilbe_com/images/imageBackground3.jpeg"
+        },
+        {
+          "id": "VdAyALiNC501",
+          "name": "ce26f5_7ddeea0525cd45e187334ffd164bef6d~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F57Ddeea0525Cd45E187334Ffd164Bef6DMv2Jpg.png"
+        },
+        {
+          "id": "P8E4q5dvvykE",
+          "name": "ce26f5_290967e7640841dab85692cbcd719ec3~mv2.jpeg",
+          "filePath": "plasmic/wilbe_com/images/ce26F5290967E7640841Dab85692Cbcd719Ec3Mv2Jpeg.png"
+        },
+        {
+          "id": "jPyZD7shXRou",
+          "name": "ce26f5_741f4509d4364631af35474aabf4b0e7~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F5741F4509D4364631Af35474Aabf4B0E7Mv2Jpg.png"
+        },
+        {
+          "id": "gVJ001HG4U5l",
+          "name": "ce26f5_25f39f2bf42d4965a47d48700cbf9cc5~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F525F39F2Bf42D4965A47D48700Cbf9Cc5Mv2Jpg.png"
+        },
+        {
+          "id": "n759QTLfwpQr",
+          "name": "ce26f5_53d88bab8de945bc9d54a666b5976285~mv2.jpeg",
+          "filePath": "plasmic/wilbe_com/images/ce26F553D88Bab8De945Bc9D54A666B5976285Mv2Jpeg.png"
+        },
+        {
+          "id": "BEp37XfUguDo",
+          "name": "ce26f5_8d00d297c0ef4cab8f6482383664107a~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F58D00D297C0Ef4Cab8F6482383664107AMv2Jpg.png"
+        },
+        {
+          "id": "fis4iYwcpby8",
+          "name": "ce26f5_7f08cb7c0c4147f18203a3a1f675a325~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F57F08Cb7C0C4147F18203A3A1F675A325Mv2Jpg.png"
+        },
+        {
+          "id": "o4u0EnBPO_ja",
+          "name": "ce26f5_e542a039e63c4c30b66a7576841d3b68~mv2.jpeg",
+          "filePath": "plasmic/wilbe_com/images/ce26F5E542A039E63C4C30B66A7576841D3B68Mv2Jpeg.png"
+        },
+        {
+          "id": "YzOD_vQTUyoA",
+          "name": "ce26f5_312cb4300aa44d44a68819391846b770~mv2.jpg",
+          "filePath": "plasmic/wilbe_com/images/ce26F5312Cb4300Aa44D44A68819391846B770Mv2Jpg.png"
+        },
+        {
+          "id": "NlSgChS8uDIG",
+          "name": "SVG",
+          "filePath": "plasmic/wilbe_com/images/svg.svg"
+        },
+        {
+          "id": "78OyG-BgmkcA",
+          "name": "Button - Play → SVG",
+          "filePath": "plasmic/wilbe_com/images/buttonPlaySvg.svg"
+        },
+        {
+          "id": "M4QQgVvXAZRF",
+          "name": "Wilbe logo (new-blue).png",
+          "filePath": "plasmic/wilbe_com/images/wilbeLogoNewBluePng.png"
+        },
+        {
+          "id": "G22kN4AEvhIU",
+          "name": "Wilbe logo (new).png",
+          "filePath": "plasmic/wilbe_com/images/wilbeLogoNewPng.png"
+        }
+      ],
+      "indirect": false,
+      "globalContextsFilePath": "",
+      "splitsProviderFilePath": "",
+      "codeComponents": [
+        {
+          "id": "jFpXnXLfg32Z",
+          "name": "PlasmicHead",
+          "displayName": "hostless-plasmic-head",
+          "componentImportPath": "@plasmicapp/react-web"
+        },
+        {
+          "id": "FXkd-SdKfJUG",
+          "name": "Fetcher",
+          "displayName": "plasmic-data-source-fetcher",
+          "componentImportPath": "@plasmicapp/react-web/lib/data-sources"
+        }
+      ],
+      "customFunctions": []
+    }
+  ],
+  "globalVariants": {
+    "variantGroups": [
+      {
+        "id": "G-BOHIVJ3D86",
+        "name": "Screen",
+        "projectId": "eUaJVzKX5KPEdJDEL9nAXX",
+        "contextFilePath": "plasmic/wilbe_com/PlasmicGlobalVariant__Screen.tsx"
+      }
+    ]
+  },
+  "wrapPagesWithGlobalContexts": true,
+  "cliVersion": "0.1.337",
+  "$schema": "https://unpkg.com/@plasmicapp/cli@0.1.337/dist/plasmic.schema.json"
+}
