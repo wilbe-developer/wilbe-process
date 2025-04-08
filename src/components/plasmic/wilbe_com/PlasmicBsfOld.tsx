@@ -93,7 +93,7 @@ export type PlasmicBsfOld__OverridesType = {
   background2?: Flex__<"div">;
   rectangle?: Flex__<"div">;
   linkApply?: Flex__<"div">;
-  container2?: Flex__<"div">;
+  container2?: Flex__<"button">;
   container3?: Flex__<"div">;
   apply?: Flex__<"div">;
   aProgramInFastAndPracticalDecisionMakingForScientistFounders?: Flex__<"div">;
@@ -516,7 +516,7 @@ export type PlasmicBsfOld__OverridesType = {
   clipPathGroup?: Flex__<"div">;
   clipPathGroup2?: Flex__<"div">;
   clipPathGroup3?: Flex__<"div">;
-  linkApplyNow2?: Flex__<"div">;
+  linkApplyNow2?: Flex__<"button">;
   rectangle76?: Flex__<"div">;
   applyNow2?: Flex__<"div">;
   rectangle77?: Flex__<"div">;
@@ -617,10 +617,49 @@ function PlasmicBsfOld__RenderFunc(props: {
                 data-plasmic-override={overrides.linkApply}
                 className={classNames(projectcss.all, sty.linkApply)}
               >
-                <div
+                <button
                   data-plasmic-name={"container2"}
                   data-plasmic-override={overrides.container2}
-                  className={classNames(projectcss.all, sty.container2)}
+                  className={classNames(
+                    projectcss.all,
+                    projectcss.button,
+                    sty.container2
+                  )}
+                  onClick={async event => {
+                    const $steps = {};
+
+                    $steps["goToProcessWilbeCom"] = true
+                      ? (() => {
+                          const actionArgs = {
+                            destination: "process.wilbe.com"
+                          };
+                          return (({ destination }) => {
+                            if (
+                              typeof destination === "string" &&
+                              destination.startsWith("#")
+                            ) {
+                              document
+                                .getElementById(destination.substr(1))
+                                .scrollIntoView({ behavior: "smooth" });
+                            } else {
+                              location.assign(destination);
+                            }
+                          })?.apply(null, [actionArgs]);
+                        })()
+                      : undefined;
+                    if (
+                      $steps["goToProcessWilbeCom"] != null &&
+                      typeof $steps["goToProcessWilbeCom"] === "object" &&
+                      typeof $steps["goToProcessWilbeCom"].then === "function"
+                    ) {
+                      $steps["goToProcessWilbeCom"] = await $steps[
+                        "goToProcessWilbeCom"
+                      ];
+                    }
+                  }}
+                  ref={ref => {
+                    $refs["container2"] = ref;
+                  }}
                 >
                   <div
                     data-plasmic-name={"container3"}
@@ -643,7 +682,7 @@ function PlasmicBsfOld__RenderFunc(props: {
                       </div>
                     </div>
                   </div>
-                </div>
+                </button>
               </div>
               <div
                 data-plasmic-name={
@@ -1044,15 +1083,49 @@ function PlasmicBsfOld__RenderFunc(props: {
                       data-plasmic-override={overrides.applyNow}
                       className={classNames(projectcss.all, sty.applyNow)}
                     >
-                      <div
+                      <button
                         className={classNames(
                           projectcss.all,
+                          projectcss.button,
                           projectcss.__wab_text,
-                          sty.text__pr9E
+                          sty.button__pr9E
                         )}
+                        onClick={async event => {
+                          const $steps = {};
+
+                          $steps["goToProcessWilbeCom"] = true
+                            ? (() => {
+                                const actionArgs = {
+                                  destination: "process.wilbe.com"
+                                };
+                                return (({ destination }) => {
+                                  if (
+                                    typeof destination === "string" &&
+                                    destination.startsWith("#")
+                                  ) {
+                                    document
+                                      .getElementById(destination.substr(1))
+                                      .scrollIntoView({ behavior: "smooth" });
+                                  } else {
+                                    location.assign(destination);
+                                  }
+                                })?.apply(null, [actionArgs]);
+                              })()
+                            : undefined;
+                          if (
+                            $steps["goToProcessWilbeCom"] != null &&
+                            typeof $steps["goToProcessWilbeCom"] === "object" &&
+                            typeof $steps["goToProcessWilbeCom"].then ===
+                              "function"
+                          ) {
+                            $steps["goToProcessWilbeCom"] = await $steps[
+                              "goToProcessWilbeCom"
+                            ];
+                          }
+                        }}
                       >
                         {"Apply Now"}
-                      </div>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -4805,10 +4878,49 @@ function PlasmicBsfOld__RenderFunc(props: {
                       </div>
                     </div>
                   </div>
-                  <div
+                  <button
                     data-plasmic-name={"linkApplyNow2"}
                     data-plasmic-override={overrides.linkApplyNow2}
-                    className={classNames(projectcss.all, sty.linkApplyNow2)}
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.button,
+                      sty.linkApplyNow2
+                    )}
+                    onClick={async event => {
+                      const $steps = {};
+
+                      $steps["goToProcessWilbeCom"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              destination: "process.wilbe.com"
+                            };
+                            return (({ destination }) => {
+                              if (
+                                typeof destination === "string" &&
+                                destination.startsWith("#")
+                              ) {
+                                document
+                                  .getElementById(destination.substr(1))
+                                  .scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                location.assign(destination);
+                              }
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["goToProcessWilbeCom"] != null &&
+                        typeof $steps["goToProcessWilbeCom"] === "object" &&
+                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                      ) {
+                        $steps["goToProcessWilbeCom"] = await $steps[
+                          "goToProcessWilbeCom"
+                        ];
+                      }
+                    }}
+                    ref={ref => {
+                      $refs["linkApplyNow2"] = ref;
+                    }}
                   >
                     <div
                       data-plasmic-name={"rectangle76"}
@@ -4836,7 +4948,7 @@ function PlasmicBsfOld__RenderFunc(props: {
                       data-plasmic-override={overrides.rectangle77}
                       className={classNames(projectcss.all, sty.rectangle77)}
                     />
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -7849,7 +7961,7 @@ type NodeDefaultElementType = {
   background2: "div";
   rectangle: "div";
   linkApply: "div";
-  container2: "div";
+  container2: "button";
   container3: "div";
   apply: "div";
   aProgramInFastAndPracticalDecisionMakingForScientistFounders: "div";
@@ -8272,7 +8384,7 @@ type NodeDefaultElementType = {
   clipPathGroup: "div";
   clipPathGroup2: "div";
   clipPathGroup3: "div";
-  linkApplyNow2: "div";
+  linkApplyNow2: "button";
   rectangle76: "div";
   applyNow2: "div";
   rectangle77: "div";

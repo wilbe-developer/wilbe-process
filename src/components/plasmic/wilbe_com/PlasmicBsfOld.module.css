@@ -671,7 +671,7 @@
   flex-direction: column;
   justify-content: center;
 }
-.text__pr9E {
+.button__pr9E {
   display: block;
   font-size: 18px;
   text-align: center;
@@ -680,6 +680,8 @@
   letter-spacing: 0em;
   line-height: 28.799999237060547px;
   color: rgba(255, 255, 255, 1);
+  max-width: 188px;
+  width: 150px;
 }
 .mainSection3 {
   transform: translate(0px, -0.139892578125px);

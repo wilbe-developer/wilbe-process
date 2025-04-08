@@ -84,20 +84,16 @@ export type PlasmicLandingPageOld__OverridesType = {
   rectangle3?: Flex__<"div">;
   pictureWilbeLogo?: Flex__<"div">;
   rectangle4?: Flex__<"div">;
-  linkLogin?: Flex__<"div">;
+  linkLogin?: Flex__<"button">;
   rectangle5?: Flex__<"div">;
   rectangle6?: Flex__<"div">;
   login?: Flex__<"div">;
-  buttonDialogJoin?: Flex__<"div">;
+  buttonDialogJoin?: Flex__<"a">;
   rectangle7?: Flex__<"div">;
   rectangle8?: Flex__<"div">;
   join?: Flex__<"div">;
   container3?: Flex__<"div">;
   rectangle9?: Flex__<"div">;
-  linkAndApplyToBootcampForScientistFounders?: Flex__<"div">;
-  rectangle10?: Flex__<"div">;
-  rectangle11?: Flex__<"div">;
-  AndApplyToBootcampForScientistFounders?: Flex__<"div">;
   container4?: Flex__<"div">;
   border?: Flex__<"div">;
   heading1?: Flex__<"div">;
@@ -113,7 +109,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   heading2Hub2?: Flex__<"div">;
   container8?: Flex__<"div">;
   acceleratingEntrepreneurialShift?: Flex__<"div">;
-  linkWilbeSandbox?: Flex__<"div">;
+  linkWilbeSandbox?: Flex__<"button">;
   rectangle14?: Flex__<"div">;
   rectangle15?: Flex__<"div">;
   wilbeSandbox?: Flex__<"div">;
@@ -125,7 +121,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   heading2Fund2?: Flex__<"div">;
   container11?: Flex__<"div">;
   capitalForScientistLedVentures?: Flex__<"div">;
-  linkWilbeCapital?: Flex__<"div">;
+  linkWilbeCapital?: Flex__<"button">;
   rectangle17?: Flex__<"div">;
   rectangle18?: Flex__<"div">;
   wilbeCapital?: Flex__<"div">;
@@ -137,7 +133,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   heading2Labs2?: Flex__<"div">;
   container14?: Flex__<"div">;
   searchAndSecureBeautifulLabs?: Flex__<"div">;
-  linkWilbeLabs?: Flex__<"div">;
+  linkWilbeLabs?: Flex__<"button">;
   rectangle20?: Flex__<"div">;
   rectangle21?: Flex__<"div">;
   wilbeLabs?: Flex__<"div">;
@@ -152,7 +148,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   thereAre88MillionResearchersInTheWorldAndWeLoveToImagineAFutureWhereEveryScientistIsInControlOfTheirResearchAndCareerToThisEndWeHaveNowOpenSourcedAsMuchAsWeCanOfTheBusinessTrainingMaterialsNegotiationPlaybooksAndToolsThatWeHaveUsedWithOurFoundersIfYouAreAPracticingResearcherBuildingACompanyOrExploringACareerMoveWeLookForwardToSeeingYouInTheSandboxSoon?: Flex__<"div">;
   buttonDialogAleDeeTheWilbeTeam?: Flex__<"div">;
   buttonDialogAleDeeTheWilbeTeam2?: Flex__<"div">;
-  linkExploreSandbox?: Flex__<"div">;
+  linkExploreSandbox?: Flex__<"button">;
   rectangle22?: Flex__<"div">;
   rectangle23?: Flex__<"div">;
   exploreSandbox?: Flex__<"div">;
@@ -489,7 +485,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   mainSection4?: Flex__<"div">;
   container136?: Flex__<"div">;
   rectangle27?: Flex__<"div">;
-  linkExploreSandbox2?: Flex__<"div">;
+  linkExploreSandbox2?: Flex__<"button">;
   rectangle28?: Flex__<"div">;
   rectangle29?: Flex__<"div">;
   exploreSandbox2?: Flex__<"div">;
@@ -603,10 +599,49 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                     className={classNames(projectcss.all, sty.rectangle4)}
                   />
 
-                  <div
+                  <button
                     data-plasmic-name={"linkLogin"}
                     data-plasmic-override={overrides.linkLogin}
-                    className={classNames(projectcss.all, sty.linkLogin)}
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.button,
+                      sty.linkLogin
+                    )}
+                    onClick={async event => {
+                      const $steps = {};
+
+                      $steps["goToProcessWilbeCom"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              destination: "process.wilbe.com"
+                            };
+                            return (({ destination }) => {
+                              if (
+                                typeof destination === "string" &&
+                                destination.startsWith("#")
+                              ) {
+                                document
+                                  .getElementById(destination.substr(1))
+                                  .scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                location.assign(destination);
+                              }
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["goToProcessWilbeCom"] != null &&
+                        typeof $steps["goToProcessWilbeCom"] === "object" &&
+                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                      ) {
+                        $steps["goToProcessWilbeCom"] = await $steps[
+                          "goToProcessWilbeCom"
+                        ];
+                      }
+                    }}
+                    ref={ref => {
+                      $refs["linkLogin"] = ref;
+                    }}
                   >
                     <div
                       data-plasmic-name={"rectangle5"}
@@ -635,11 +670,17 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         {"Login"}
                       </div>
                     </div>
-                  </div>
-                  <div
+                  </button>
+                  <PlasmicLink__
                     data-plasmic-name={"buttonDialogJoin"}
                     data-plasmic-override={overrides.buttonDialogJoin}
-                    className={classNames(projectcss.all, sty.buttonDialogJoin)}
+                    className={classNames(
+                      projectcss.all,
+                      projectcss.a,
+                      sty.buttonDialogJoin
+                    )}
+                    href={"process.wilbe.com"}
+                    platform={"react"}
                   >
                     <div
                       data-plasmic-name={"rectangle7"}
@@ -668,7 +709,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         {"Join"}
                       </div>
                     </div>
-                  </div>
+                  </PlasmicLink__>
                 </div>
                 <div
                   data-plasmic-name={"container3"}
@@ -679,54 +720,51 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                     data-plasmic-name={"rectangle9"}
                     data-plasmic-override={overrides.rectangle9}
                     className={classNames(projectcss.all, sty.rectangle9)}
-                  />
-
-                  <div
-                    data-plasmic-name={
-                      "linkAndApplyToBootcampForScientistFounders"
-                    }
-                    data-plasmic-override={
-                      overrides.linkAndApplyToBootcampForScientistFounders
-                    }
-                    className={classNames(
-                      projectcss.all,
-                      sty.linkAndApplyToBootcampForScientistFounders
-                    )}
                   >
-                    <div
-                      data-plasmic-name={"rectangle10"}
-                      data-plasmic-override={overrides.rectangle10}
-                      className={classNames(projectcss.all, sty.rectangle10)}
-                    />
-
-                    <div
-                      data-plasmic-name={"rectangle11"}
-                      data-plasmic-override={overrides.rectangle11}
-                      className={classNames(projectcss.all, sty.rectangle11)}
-                    />
-
-                    <div
-                      data-plasmic-name={
-                        "AndApplyToBootcampForScientistFounders"
-                      }
-                      data-plasmic-override={
-                        overrides.AndApplyToBootcampForScientistFounders
-                      }
+                    <button
                       className={classNames(
                         projectcss.all,
-                        sty.andApplyToBootcampForScientistFounders
+                        projectcss.button,
+                        projectcss.__wab_text,
+                        sty.button__yDlcD
                       )}
+                      onClick={async event => {
+                        const $steps = {};
+
+                        $steps["goToProcessWilbeComBsf"] = true
+                          ? (() => {
+                              const actionArgs = {
+                                destination: "process.wilbe.com/bsf"
+                              };
+                              return (({ destination }) => {
+                                if (
+                                  typeof destination === "string" &&
+                                  destination.startsWith("#")
+                                ) {
+                                  document
+                                    .getElementById(destination.substr(1))
+                                    .scrollIntoView({ behavior: "smooth" });
+                                } else {
+                                  location.assign(destination);
+                                }
+                              })?.apply(null, [actionArgs]);
+                            })()
+                          : undefined;
+                        if (
+                          $steps["goToProcessWilbeComBsf"] != null &&
+                          typeof $steps["goToProcessWilbeComBsf"] ===
+                            "object" &&
+                          typeof $steps["goToProcessWilbeComBsf"].then ===
+                            "function"
+                        ) {
+                          $steps["goToProcessWilbeComBsf"] = await $steps[
+                            "goToProcessWilbeComBsf"
+                          ];
+                        }
+                      }}
                     >
-                      <div
-                        className={classNames(
-                          projectcss.all,
-                          projectcss.__wab_text,
-                          sty.text__yDlcD
-                        )}
-                      >
-                        {"\u2192 and apply to Bootcamp for Scientist Founders"}
-                      </div>
-                    </div>
+                      {"\u2192 and apply to Bootcamp for Scientist Founders"}
+                    </button>
                   </div>
                 </div>
                 <div
@@ -867,13 +905,51 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                             </div>
                           </div>
                         </div>
-                        <div
+                        <button
                           data-plasmic-name={"linkWilbeSandbox"}
                           data-plasmic-override={overrides.linkWilbeSandbox}
                           className={classNames(
                             projectcss.all,
+                            projectcss.button,
                             sty.linkWilbeSandbox
                           )}
+                          onClick={async event => {
+                            const $steps = {};
+
+                            $steps["goToProcessWilbeCom"] = true
+                              ? (() => {
+                                  const actionArgs = {
+                                    destination: "process.wilbe.com"
+                                  };
+                                  return (({ destination }) => {
+                                    if (
+                                      typeof destination === "string" &&
+                                      destination.startsWith("#")
+                                    ) {
+                                      document
+                                        .getElementById(destination.substr(1))
+                                        .scrollIntoView({ behavior: "smooth" });
+                                    } else {
+                                      location.assign(destination);
+                                    }
+                                  })?.apply(null, [actionArgs]);
+                                })()
+                              : undefined;
+                            if (
+                              $steps["goToProcessWilbeCom"] != null &&
+                              typeof $steps["goToProcessWilbeCom"] ===
+                                "object" &&
+                              typeof $steps["goToProcessWilbeCom"].then ===
+                                "function"
+                            ) {
+                              $steps["goToProcessWilbeCom"] = await $steps[
+                                "goToProcessWilbeCom"
+                              ];
+                            }
+                          }}
+                          ref={ref => {
+                            $refs["linkWilbeSandbox"] = ref;
+                          }}
                         >
                           <div
                             data-plasmic-name={"rectangle14"}
@@ -911,7 +987,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                               {"Wilbe Sandbox"}
                             </div>
                           </div>
-                        </div>
+                        </button>
                       </div>
                     </div>
                     <div
@@ -988,13 +1064,50 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                             </div>
                           </div>
                         </div>
-                        <div
+                        <button
                           data-plasmic-name={"linkWilbeCapital"}
                           data-plasmic-override={overrides.linkWilbeCapital}
                           className={classNames(
                             projectcss.all,
+                            projectcss.button,
                             sty.linkWilbeCapital
                           )}
+                          onClick={async event => {
+                            const $steps = {};
+
+                            $steps["goToWilbeCapital"] = true
+                              ? (() => {
+                                  const actionArgs = {
+                                    destination: "wilbe.capital"
+                                  };
+                                  return (({ destination }) => {
+                                    if (
+                                      typeof destination === "string" &&
+                                      destination.startsWith("#")
+                                    ) {
+                                      document
+                                        .getElementById(destination.substr(1))
+                                        .scrollIntoView({ behavior: "smooth" });
+                                    } else {
+                                      location.assign(destination);
+                                    }
+                                  })?.apply(null, [actionArgs]);
+                                })()
+                              : undefined;
+                            if (
+                              $steps["goToWilbeCapital"] != null &&
+                              typeof $steps["goToWilbeCapital"] === "object" &&
+                              typeof $steps["goToWilbeCapital"].then ===
+                                "function"
+                            ) {
+                              $steps["goToWilbeCapital"] = await $steps[
+                                "goToWilbeCapital"
+                              ];
+                            }
+                          }}
+                          ref={ref => {
+                            $refs["linkWilbeCapital"] = ref;
+                          }}
                         >
                           <div
                             data-plasmic-name={"rectangle17"}
@@ -1032,7 +1145,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                               {"Wilbe Capital"}
                             </div>
                           </div>
-                        </div>
+                        </button>
                       </div>
                     </div>
                     <div
@@ -1109,13 +1222,50 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                             </div>
                           </div>
                         </div>
-                        <div
+                        <button
                           data-plasmic-name={"linkWilbeLabs"}
                           data-plasmic-override={overrides.linkWilbeLabs}
                           className={classNames(
                             projectcss.all,
+                            projectcss.button,
                             sty.linkWilbeLabs
                           )}
+                          onClick={async event => {
+                            const $steps = {};
+
+                            $steps["goToWilbelabCom"] = true
+                              ? (() => {
+                                  const actionArgs = {
+                                    destination: "wilbelab.com"
+                                  };
+                                  return (({ destination }) => {
+                                    if (
+                                      typeof destination === "string" &&
+                                      destination.startsWith("#")
+                                    ) {
+                                      document
+                                        .getElementById(destination.substr(1))
+                                        .scrollIntoView({ behavior: "smooth" });
+                                    } else {
+                                      location.assign(destination);
+                                    }
+                                  })?.apply(null, [actionArgs]);
+                                })()
+                              : undefined;
+                            if (
+                              $steps["goToWilbelabCom"] != null &&
+                              typeof $steps["goToWilbelabCom"] === "object" &&
+                              typeof $steps["goToWilbelabCom"].then ===
+                                "function"
+                            ) {
+                              $steps["goToWilbelabCom"] = await $steps[
+                                "goToWilbelabCom"
+                              ];
+                            }
+                          }}
+                          ref={ref => {
+                            $refs["linkWilbeLabs"] = ref;
+                          }}
                         >
                           <div
                             data-plasmic-name={"rectangle20"}
@@ -1153,7 +1303,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                               {"Wilbe Labs"}
                             </div>
                           </div>
-                        </div>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1286,13 +1436,49 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                       </div>
                     </div>
                   </div>
-                  <div
+                  <button
                     data-plasmic-name={"linkExploreSandbox"}
                     data-plasmic-override={overrides.linkExploreSandbox}
                     className={classNames(
                       projectcss.all,
+                      projectcss.button,
                       sty.linkExploreSandbox
                     )}
+                    onClick={async event => {
+                      const $steps = {};
+
+                      $steps["goToProcessWilbeCom"] = true
+                        ? (() => {
+                            const actionArgs = {
+                              destination: "process.wilbe.com"
+                            };
+                            return (({ destination }) => {
+                              if (
+                                typeof destination === "string" &&
+                                destination.startsWith("#")
+                              ) {
+                                document
+                                  .getElementById(destination.substr(1))
+                                  .scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                location.assign(destination);
+                              }
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["goToProcessWilbeCom"] != null &&
+                        typeof $steps["goToProcessWilbeCom"] === "object" &&
+                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                      ) {
+                        $steps["goToProcessWilbeCom"] = await $steps[
+                          "goToProcessWilbeCom"
+                        ];
+                      }
+                    }}
+                    ref={ref => {
+                      $refs["linkExploreSandbox"] = ref;
+                    }}
                   >
                     <div
                       data-plasmic-name={"rectangle22"}
@@ -1321,7 +1507,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         {"Explore Sandbox"}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -5395,13 +5581,49 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                   className={classNames(projectcss.all, sty.rectangle27)}
                 />
 
-                <div
+                <button
                   data-plasmic-name={"linkExploreSandbox2"}
                   data-plasmic-override={overrides.linkExploreSandbox2}
                   className={classNames(
                     projectcss.all,
+                    projectcss.button,
                     sty.linkExploreSandbox2
                   )}
+                  onClick={async event => {
+                    const $steps = {};
+
+                    $steps["goToProcessWilbeCom"] = true
+                      ? (() => {
+                          const actionArgs = {
+                            destination: "process.wilbe.com"
+                          };
+                          return (({ destination }) => {
+                            if (
+                              typeof destination === "string" &&
+                              destination.startsWith("#")
+                            ) {
+                              document
+                                .getElementById(destination.substr(1))
+                                .scrollIntoView({ behavior: "smooth" });
+                            } else {
+                              location.assign(destination);
+                            }
+                          })?.apply(null, [actionArgs]);
+                        })()
+                      : undefined;
+                    if (
+                      $steps["goToProcessWilbeCom"] != null &&
+                      typeof $steps["goToProcessWilbeCom"] === "object" &&
+                      typeof $steps["goToProcessWilbeCom"].then === "function"
+                    ) {
+                      $steps["goToProcessWilbeCom"] = await $steps[
+                        "goToProcessWilbeCom"
+                      ];
+                    }
+                  }}
+                  ref={ref => {
+                    $refs["linkExploreSandbox2"] = ref;
+                  }}
                 >
                   <div
                     data-plasmic-name={"rectangle28"}
@@ -5430,7 +5652,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                       {"Explore Sandbox"}
                     </div>
                   </div>
-                </div>
+                </button>
                 <div
                   data-plasmic-name={"container137"}
                   data-plasmic-override={overrides.container137}
@@ -5539,10 +5761,6 @@ const PlasmicDescendants = {
     "join",
     "container3",
     "rectangle9",
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders",
     "container4",
     "border",
     "heading1",
@@ -5966,10 +6184,6 @@ const PlasmicDescendants = {
     "join",
     "container3",
     "rectangle9",
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders",
     "container4",
     "border",
     "heading1",
@@ -6392,10 +6606,6 @@ const PlasmicDescendants = {
     "join",
     "container3",
     "rectangle9",
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders",
     "container4",
     "border",
     "heading1",
@@ -6472,10 +6682,6 @@ const PlasmicDescendants = {
     "join",
     "container3",
     "rectangle9",
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders",
     "container4",
     "border",
     "heading1",
@@ -6561,26 +6767,8 @@ const PlasmicDescendants = {
   rectangle7: ["rectangle7"],
   rectangle8: ["rectangle8"],
   join: ["join"],
-  container3: [
-    "container3",
-    "rectangle9",
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders"
-  ],
+  container3: ["container3", "rectangle9"],
   rectangle9: ["rectangle9"],
-  linkAndApplyToBootcampForScientistFounders: [
-    "linkAndApplyToBootcampForScientistFounders",
-    "rectangle10",
-    "rectangle11",
-    "AndApplyToBootcampForScientistFounders"
-  ],
-  rectangle10: ["rectangle10"],
-  rectangle11: ["rectangle11"],
-  AndApplyToBootcampForScientistFounders: [
-    "AndApplyToBootcampForScientistFounders"
-  ],
   container4: [
     "container4",
     "border",
@@ -10449,20 +10637,16 @@ type NodeDefaultElementType = {
   rectangle3: "div";
   pictureWilbeLogo: "div";
   rectangle4: "div";
-  linkLogin: "div";
+  linkLogin: "button";
   rectangle5: "div";
   rectangle6: "div";
   login: "div";
-  buttonDialogJoin: "div";
+  buttonDialogJoin: "a";
   rectangle7: "div";
   rectangle8: "div";
   join: "div";
   container3: "div";
   rectangle9: "div";
-  linkAndApplyToBootcampForScientistFounders: "div";
-  rectangle10: "div";
-  rectangle11: "div";
-  AndApplyToBootcampForScientistFounders: "div";
   container4: "div";
   border: "div";
   heading1: "div";
@@ -10478,7 +10662,7 @@ type NodeDefaultElementType = {
   heading2Hub2: "div";
   container8: "div";
   acceleratingEntrepreneurialShift: "div";
-  linkWilbeSandbox: "div";
+  linkWilbeSandbox: "button";
   rectangle14: "div";
   rectangle15: "div";
   wilbeSandbox: "div";
@@ -10490,7 +10674,7 @@ type NodeDefaultElementType = {
   heading2Fund2: "div";
   container11: "div";
   capitalForScientistLedVentures: "div";
-  linkWilbeCapital: "div";
+  linkWilbeCapital: "button";
   rectangle17: "div";
   rectangle18: "div";
   wilbeCapital: "div";
@@ -10502,7 +10686,7 @@ type NodeDefaultElementType = {
   heading2Labs2: "div";
   container14: "div";
   searchAndSecureBeautifulLabs: "div";
-  linkWilbeLabs: "div";
+  linkWilbeLabs: "button";
   rectangle20: "div";
   rectangle21: "div";
   wilbeLabs: "div";
@@ -10517,7 +10701,7 @@ type NodeDefaultElementType = {
   thereAre88MillionResearchersInTheWorldAndWeLoveToImagineAFutureWhereEveryScientistIsInControlOfTheirResearchAndCareerToThisEndWeHaveNowOpenSourcedAsMuchAsWeCanOfTheBusinessTrainingMaterialsNegotiationPlaybooksAndToolsThatWeHaveUsedWithOurFoundersIfYouAreAPracticingResearcherBuildingACompanyOrExploringACareerMoveWeLookForwardToSeeingYouInTheSandboxSoon: "div";
   buttonDialogAleDeeTheWilbeTeam: "div";
   buttonDialogAleDeeTheWilbeTeam2: "div";
-  linkExploreSandbox: "div";
+  linkExploreSandbox: "button";
   rectangle22: "div";
   rectangle23: "div";
   exploreSandbox: "div";
@@ -10854,7 +11038,7 @@ type NodeDefaultElementType = {
   mainSection4: "div";
   container136: "div";
   rectangle27: "div";
-  linkExploreSandbox2: "div";
+  linkExploreSandbox2: "button";
   rectangle28: "div";
   rectangle29: "div";
   exploreSandbox2: "div";
@@ -10946,14 +11130,6 @@ export const PlasmicLandingPageOld = Object.assign(
     join: makeNodeComponent("join"),
     container3: makeNodeComponent("container3"),
     rectangle9: makeNodeComponent("rectangle9"),
-    linkAndApplyToBootcampForScientistFounders: makeNodeComponent(
-      "linkAndApplyToBootcampForScientistFounders"
-    ),
-    rectangle10: makeNodeComponent("rectangle10"),
-    rectangle11: makeNodeComponent("rectangle11"),
-    AndApplyToBootcampForScientistFounders: makeNodeComponent(
-      "AndApplyToBootcampForScientistFounders"
-    ),
     container4: makeNodeComponent("container4"),
     border: makeNodeComponent("border"),
     heading1: makeNodeComponent("heading1"),
