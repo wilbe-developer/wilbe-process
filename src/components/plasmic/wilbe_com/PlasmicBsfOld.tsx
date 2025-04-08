@@ -628,11 +628,9 @@ function PlasmicBsfOld__RenderFunc(props: {
                   onClick={async event => {
                     const $steps = {};
 
-                    $steps["goToProcessWilbeCom"] = true
+                    $steps["goTo"] = true
                       ? (() => {
-                          const actionArgs = {
-                            destination: "process.wilbe.com"
-                          };
+                          const actionArgs = { destination: "/" };
                           return (({ destination }) => {
                             if (
                               typeof destination === "string" &&
@@ -648,13 +646,11 @@ function PlasmicBsfOld__RenderFunc(props: {
                         })()
                       : undefined;
                     if (
-                      $steps["goToProcessWilbeCom"] != null &&
-                      typeof $steps["goToProcessWilbeCom"] === "object" &&
-                      typeof $steps["goToProcessWilbeCom"].then === "function"
+                      $steps["goTo"] != null &&
+                      typeof $steps["goTo"] === "object" &&
+                      typeof $steps["goTo"].then === "function"
                     ) {
-                      $steps["goToProcessWilbeCom"] = await $steps[
-                        "goToProcessWilbeCom"
-                      ];
+                      $steps["goTo"] = await $steps["goTo"];
                     }
                   }}
                   ref={ref => {
@@ -1095,9 +1091,7 @@ function PlasmicBsfOld__RenderFunc(props: {
 
                           $steps["goToProcessWilbeCom"] = true
                             ? (() => {
-                                const actionArgs = {
-                                  destination: "process.wilbe.com"
-                                };
+                                const actionArgs = { destination: "/" };
                                 return (({ destination }) => {
                                   if (
                                     typeof destination === "string" &&
@@ -4886,14 +4880,13 @@ function PlasmicBsfOld__RenderFunc(props: {
                       projectcss.button,
                       sty.linkApplyNow2
                     )}
+                    disabled={true}
                     onClick={async event => {
                       const $steps = {};
 
-                      $steps["goToProcessWilbeCom"] = true
+                      $steps["goTo"] = true
                         ? (() => {
-                            const actionArgs = {
-                              destination: "process.wilbe.com"
-                            };
+                            const actionArgs = { destination: "/" };
                             return (({ destination }) => {
                               if (
                                 typeof destination === "string" &&
@@ -4909,13 +4902,11 @@ function PlasmicBsfOld__RenderFunc(props: {
                           })()
                         : undefined;
                       if (
-                        $steps["goToProcessWilbeCom"] != null &&
-                        typeof $steps["goToProcessWilbeCom"] === "object" &&
-                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                        $steps["goTo"] != null &&
+                        typeof $steps["goTo"] === "object" &&
+                        typeof $steps["goTo"].then === "function"
                       ) {
-                        $steps["goToProcessWilbeCom"] = await $steps[
-                          "goToProcessWilbeCom"
-                        ];
+                        $steps["goTo"] = await $steps["goTo"];
                       }
                     }}
                     ref={ref => {

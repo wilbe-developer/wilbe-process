@@ -88,7 +88,7 @@ export type PlasmicLandingPageOld__OverridesType = {
   rectangle5?: Flex__<"div">;
   rectangle6?: Flex__<"div">;
   login?: Flex__<"div">;
-  buttonDialogJoin?: Flex__<"a">;
+  buttonDialogJoin?: Flex__<"button">;
   rectangle7?: Flex__<"div">;
   rectangle8?: Flex__<"div">;
   join?: Flex__<"div">;
@@ -610,11 +610,9 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                     onClick={async event => {
                       const $steps = {};
 
-                      $steps["goToProcessWilbeCom"] = true
+                      $steps["goTo"] = true
                         ? (() => {
-                            const actionArgs = {
-                              destination: "process.wilbe.com"
-                            };
+                            const actionArgs = { destination: "/" };
                             return (({ destination }) => {
                               if (
                                 typeof destination === "string" &&
@@ -630,13 +628,11 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                           })()
                         : undefined;
                       if (
-                        $steps["goToProcessWilbeCom"] != null &&
-                        typeof $steps["goToProcessWilbeCom"] === "object" &&
-                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                        $steps["goTo"] != null &&
+                        typeof $steps["goTo"] === "object" &&
+                        typeof $steps["goTo"].then === "function"
                       ) {
-                        $steps["goToProcessWilbeCom"] = await $steps[
-                          "goToProcessWilbeCom"
-                        ];
+                        $steps["goTo"] = await $steps["goTo"];
                       }
                     }}
                     ref={ref => {
@@ -671,16 +667,45 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                       </div>
                     </div>
                   </button>
-                  <PlasmicLink__
+                  <button
                     data-plasmic-name={"buttonDialogJoin"}
                     data-plasmic-override={overrides.buttonDialogJoin}
                     className={classNames(
                       projectcss.all,
-                      projectcss.a,
+                      projectcss.button,
                       sty.buttonDialogJoin
                     )}
-                    href={"process.wilbe.com"}
-                    platform={"react"}
+                    onClick={async event => {
+                      const $steps = {};
+
+                      $steps["goTo"] = true
+                        ? (() => {
+                            const actionArgs = { destination: "/" };
+                            return (({ destination }) => {
+                              if (
+                                typeof destination === "string" &&
+                                destination.startsWith("#")
+                              ) {
+                                document
+                                  .getElementById(destination.substr(1))
+                                  .scrollIntoView({ behavior: "smooth" });
+                              } else {
+                                location.assign(destination);
+                              }
+                            })?.apply(null, [actionArgs]);
+                          })()
+                        : undefined;
+                      if (
+                        $steps["goTo"] != null &&
+                        typeof $steps["goTo"] === "object" &&
+                        typeof $steps["goTo"].then === "function"
+                      ) {
+                        $steps["goTo"] = await $steps["goTo"];
+                      }
+                    }}
+                    ref={ref => {
+                      $refs["buttonDialogJoin"] = ref;
+                    }}
                   >
                     <div
                       data-plasmic-name={"rectangle7"}
@@ -709,7 +734,7 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         {"Join"}
                       </div>
                     </div>
-                  </PlasmicLink__>
+                  </button>
                 </div>
                 <div
                   data-plasmic-name={"container3"}
@@ -731,11 +756,9 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                       onClick={async event => {
                         const $steps = {};
 
-                        $steps["goToProcessWilbeComBsf"] = true
+                        $steps["goToBsfOld"] = true
                           ? (() => {
-                              const actionArgs = {
-                                destination: "process.wilbe.com/bsf"
-                              };
+                              const actionArgs = { destination: `/bsf` };
                               return (({ destination }) => {
                                 if (
                                   typeof destination === "string" &&
@@ -751,15 +774,11 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                             })()
                           : undefined;
                         if (
-                          $steps["goToProcessWilbeComBsf"] != null &&
-                          typeof $steps["goToProcessWilbeComBsf"] ===
-                            "object" &&
-                          typeof $steps["goToProcessWilbeComBsf"].then ===
-                            "function"
+                          $steps["goToBsfOld"] != null &&
+                          typeof $steps["goToBsfOld"] === "object" &&
+                          typeof $steps["goToBsfOld"].then === "function"
                         ) {
-                          $steps["goToProcessWilbeComBsf"] = await $steps[
-                            "goToProcessWilbeComBsf"
-                          ];
+                          $steps["goToBsfOld"] = await $steps["goToBsfOld"];
                         }
                       }}
                     >
@@ -1447,11 +1466,9 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                     onClick={async event => {
                       const $steps = {};
 
-                      $steps["goToProcessWilbeCom"] = true
+                      $steps["goTo"] = true
                         ? (() => {
-                            const actionArgs = {
-                              destination: "process.wilbe.com"
-                            };
+                            const actionArgs = { destination: "/" };
                             return (({ destination }) => {
                               if (
                                 typeof destination === "string" &&
@@ -1467,13 +1484,11 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                           })()
                         : undefined;
                       if (
-                        $steps["goToProcessWilbeCom"] != null &&
-                        typeof $steps["goToProcessWilbeCom"] === "object" &&
-                        typeof $steps["goToProcessWilbeCom"].then === "function"
+                        $steps["goTo"] != null &&
+                        typeof $steps["goTo"] === "object" &&
+                        typeof $steps["goTo"].then === "function"
                       ) {
-                        $steps["goToProcessWilbeCom"] = await $steps[
-                          "goToProcessWilbeCom"
-                        ];
+                        $steps["goTo"] = await $steps["goTo"];
                       }
                     }}
                     ref={ref => {
@@ -5592,11 +5607,9 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                   onClick={async event => {
                     const $steps = {};
 
-                    $steps["goToProcessWilbeCom"] = true
+                    $steps["goTo"] = true
                       ? (() => {
-                          const actionArgs = {
-                            destination: "process.wilbe.com"
-                          };
+                          const actionArgs = { destination: "/" };
                           return (({ destination }) => {
                             if (
                               typeof destination === "string" &&
@@ -5612,13 +5625,11 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         })()
                       : undefined;
                     if (
-                      $steps["goToProcessWilbeCom"] != null &&
-                      typeof $steps["goToProcessWilbeCom"] === "object" &&
-                      typeof $steps["goToProcessWilbeCom"].then === "function"
+                      $steps["goTo"] != null &&
+                      typeof $steps["goTo"] === "object" &&
+                      typeof $steps["goTo"].then === "function"
                     ) {
-                      $steps["goToProcessWilbeCom"] = await $steps[
-                        "goToProcessWilbeCom"
-                      ];
+                      $steps["goTo"] = await $steps["goTo"];
                     }
                   }}
                   ref={ref => {
@@ -10641,7 +10652,7 @@ type NodeDefaultElementType = {
   rectangle5: "div";
   rectangle6: "div";
   login: "div";
-  buttonDialogJoin: "a";
+  buttonDialogJoin: "button";
   rectangle7: "div";
   rectangle8: "div";
   join: "div";
