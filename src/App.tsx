@@ -22,6 +22,7 @@ import AdminPage from "@/pages/AdminPage";
 import ProfilePage from "@/pages/ProfilePage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import LandingPage from "@/pages/LandingPage";
+import LandingPage from "@/pages/BSFPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
