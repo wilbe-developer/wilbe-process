@@ -42,7 +42,7 @@ const App = () => (
             <Route path={PATHS.REGISTER} element={<RegisterPage />} />
             <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
             <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
-            <Route path={PATHS.BSF_PAGE} element={<LandingPage />} />
+            <Route path={PATHS.BSF_PAGE} element={<BsfPage />} />
             
             {/* Protected routes */}
             <Route element={<Layout />}>
