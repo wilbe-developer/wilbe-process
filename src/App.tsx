@@ -40,7 +40,7 @@ const App = () => (
             <Route path={PATHS.LOGIN} element={<LoginPage />} />
             <Route path={PATHS.REGISTER} element={<RegisterPage />} />
             <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
-            <Route path="/landing-page" element={<LandingPage />} />
+            <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
             
             {/* Protected routes */}
             <Route element={<Layout />}>
