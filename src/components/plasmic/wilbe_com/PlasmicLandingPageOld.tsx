@@ -935,11 +935,9 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                           onClick={async event => {
                             const $steps = {};
 
-                            $steps["goToProcessWilbeCom"] = true
+                            $steps["goTo"] = true
                               ? (() => {
-                                  const actionArgs = {
-                                    destination: "process.wilbe.com"
-                                  };
+                                  const actionArgs = { destination: "/" };
                                   return (({ destination }) => {
                                     if (
                                       typeof destination === "string" &&
@@ -955,15 +953,11 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                                 })()
                               : undefined;
                             if (
-                              $steps["goToProcessWilbeCom"] != null &&
-                              typeof $steps["goToProcessWilbeCom"] ===
-                                "object" &&
-                              typeof $steps["goToProcessWilbeCom"].then ===
-                                "function"
+                              $steps["goTo"] != null &&
+                              typeof $steps["goTo"] === "object" &&
+                              typeof $steps["goTo"].then === "function"
                             ) {
-                              $steps["goToProcessWilbeCom"] = await $steps[
-                                "goToProcessWilbeCom"
-                              ];
+                              $steps["goTo"] = await $steps["goTo"];
                             }
                           }}
                           ref={ref => {
@@ -1094,34 +1088,27 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                           onClick={async event => {
                             const $steps = {};
 
-                            $steps["goToWilbeCapital"] = true
+                            $steps["runCode"] = true
                               ? (() => {
                                   const actionArgs = {
-                                    destination: "wilbe.capital"
-                                  };
-                                  return (({ destination }) => {
-                                    if (
-                                      typeof destination === "string" &&
-                                      destination.startsWith("#")
-                                    ) {
-                                      document
-                                        .getElementById(destination.substr(1))
-                                        .scrollIntoView({ behavior: "smooth" });
-                                    } else {
-                                      location.assign(destination);
+                                    customFunction: async () => {
+                                      return (() => {
+                                        return (window.location.href =
+                                          "https://wilbe.capital");
+                                      })();
                                     }
+                                  };
+                                  return (({ customFunction }) => {
+                                    return customFunction();
                                   })?.apply(null, [actionArgs]);
                                 })()
                               : undefined;
                             if (
-                              $steps["goToWilbeCapital"] != null &&
-                              typeof $steps["goToWilbeCapital"] === "object" &&
-                              typeof $steps["goToWilbeCapital"].then ===
-                                "function"
+                              $steps["runCode"] != null &&
+                              typeof $steps["runCode"] === "object" &&
+                              typeof $steps["runCode"].then === "function"
                             ) {
-                              $steps["goToWilbeCapital"] = await $steps[
-                                "goToWilbeCapital"
-                              ];
+                              $steps["runCode"] = await $steps["runCode"];
                             }
                           }}
                           ref={ref => {
@@ -1252,34 +1239,27 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                           onClick={async event => {
                             const $steps = {};
 
-                            $steps["goToWilbelabCom"] = true
+                            $steps["runCode"] = true
                               ? (() => {
                                   const actionArgs = {
-                                    destination: "wilbelab.com"
-                                  };
-                                  return (({ destination }) => {
-                                    if (
-                                      typeof destination === "string" &&
-                                      destination.startsWith("#")
-                                    ) {
-                                      document
-                                        .getElementById(destination.substr(1))
-                                        .scrollIntoView({ behavior: "smooth" });
-                                    } else {
-                                      location.assign(destination);
+                                    customFunction: async () => {
+                                      return (() => {
+                                        return (window.location.href =
+                                          "https://wilbelab.com");
+                                      })();
                                     }
+                                  };
+                                  return (({ customFunction }) => {
+                                    return customFunction();
                                   })?.apply(null, [actionArgs]);
                                 })()
                               : undefined;
                             if (
-                              $steps["goToWilbelabCom"] != null &&
-                              typeof $steps["goToWilbelabCom"] === "object" &&
-                              typeof $steps["goToWilbelabCom"].then ===
-                                "function"
+                              $steps["runCode"] != null &&
+                              typeof $steps["runCode"] === "object" &&
+                              typeof $steps["runCode"].then === "function"
                             ) {
-                              $steps["goToWilbelabCom"] = await $steps[
-                                "goToWilbelabCom"
-                              ];
+                              $steps["runCode"] = await $steps["runCode"];
                             }
                           }}
                           ref={ref => {
@@ -1671,6 +1651,32 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         data-plasmic-name={"image2"}
                         data-plasmic-override={overrides.image2}
                         className={classNames(projectcss.all, sty.image2)}
+                        onClick={async event => {
+                          const $steps = {};
+
+                          $steps["runCode"] = true
+                            ? (() => {
+                                const actionArgs = {
+                                  customFunction: async () => {
+                                    return (() => {
+                                      return (window.location.href =
+                                        "https://www.youtube.com/@wilbescience");
+                                    })();
+                                  }
+                                };
+                                return (({ customFunction }) => {
+                                  return customFunction();
+                                })?.apply(null, [actionArgs]);
+                              })()
+                            : undefined;
+                          if (
+                            $steps["runCode"] != null &&
+                            typeof $steps["runCode"] === "object" &&
+                            typeof $steps["runCode"].then === "function"
+                          ) {
+                            $steps["runCode"] = await $steps["runCode"];
+                          }
+                        }}
                       />
 
                       <PlasmicImg__
@@ -1824,6 +1830,32 @@ function PlasmicLandingPageOld__RenderFunc(props: {
                         data-plasmic-name={"image4"}
                         data-plasmic-override={overrides.image4}
                         className={classNames(projectcss.all, sty.image4)}
+                        onClick={async event => {
+                          const $steps = {};
+
+                          $steps["runCode"] = true
+                            ? (() => {
+                                const actionArgs = {
+                                  customFunction: async () => {
+                                    return (() => {
+                                      return (window.location.href =
+                                        "https://www.youtube.com/@wilbescience");
+                                    })();
+                                  }
+                                };
+                                return (({ customFunction }) => {
+                                  return customFunction();
+                                })?.apply(null, [actionArgs]);
+                              })()
+                            : undefined;
+                          if (
+                            $steps["runCode"] != null &&
+                            typeof $steps["runCode"] === "object" &&
+                            typeof $steps["runCode"].then === "function"
+                          ) {
+                            $steps["runCode"] = await $steps["runCode"];
+                          }
+                        }}
                       />
 
                       <PlasmicImg__
