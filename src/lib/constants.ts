@@ -16,6 +16,7 @@ export const PATHS = {
   LOGIN: "/login",
   PENDING: "/pending",
   LANDING_PAGE: "/landing-page",
+  BSF_PAGE: "/bsf"
 };
 
 export const NAV_ITEMS = [
