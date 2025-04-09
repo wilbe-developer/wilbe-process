@@ -10,7 +10,7 @@ const HomePage = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <section className="mb-10">
-        <h1 className="text-3xl font-bold mb-4">Welcome{user ? `, ${user.firstName}` : ""}</h1>
+        <h1 className="text-3xl font-bold mb-4">Welcome to Wilbe{user ? `, ${user.firstName}` : ""}</h1>
         <p className="text-lg mb-6">
           Your professional network for scientists exploring alternative careers in innovation and entrepreneurship.
         </p>

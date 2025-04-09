@@ -67,7 +67,7 @@ const KnowledgeCenterPage = () => {
   if (!isAuthenticated && !loading) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+        <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
         <p className="mb-6">Please log in to view the actual Knowledge Center content from Supabase.</p>
         <div className="flex justify-center gap-4">
           <Button asChild>
@@ -85,7 +85,7 @@ const KnowledgeCenterPage = () => {
   if (!loading && videos.length === 0 && modules.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">No videos found</h2>
+        <h1 className="text-2xl font-bold mb-4">No videos found</h1>
         <p className="mb-6">There are currently no videos available in the knowledge center or you may need to log in.</p>
         <Button asChild>
           <Link to={PATHS.HOME}>Back to Home</Link>
@@ -97,6 +97,8 @@ const KnowledgeCenterPage = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <ProgressBar />
+      
+      <h1 className="text-3xl font-bold mb-6">Knowledge Center</h1>
       
       <div className="mb-8">
         <p className="text-gray-700">
