@@ -1,8 +1,7 @@
 import * as React from "react";
 import {
   PlasmicBsfOld,
-  DefaultBsfOldProps,
-  pageMetadata
+  DefaultBsfOldProps
 } from "./plasmic/wilbe_com/PlasmicBsfOld";
 import { HTMLElementRefOf } from "@plasmicapp/react-web";
 import { Helmet } from "react-helmet";
@@ -10,6 +9,8 @@ import { Helmet } from "react-helmet";
 export interface BsfOldProps extends DefaultBsfOldProps {}
 
 function BsfOld_(props: BsfOldProps, ref: HTMLElementRefOf<"div">) {
+  const { pageMetadata } = PlasmicBsfOld;
+
   return (
     <>
       <Helmet>
