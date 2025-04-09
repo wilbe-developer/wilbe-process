@@ -1,8 +1,7 @@
 import * as React from "react";
 import {
   PlasmicLandingPageOld,
-  DefaultLandingPageOldProps,
-  pageMetadata
+  DefaultLandingPageOldProps
 } from "./plasmic/wilbe_com/PlasmicLandingPageOld";
 import { HTMLElementRefOf } from "@plasmicapp/react-web";
 import { Helmet } from "react-helmet";
@@ -13,6 +12,8 @@ function LandingPageOld_(
   props: LandingPageOldProps,
   ref: HTMLElementRefOf<"div">
 ) {
+  const { pageMetadata } = PlasmicLandingPageOld;
+
   return (
     <>
       <Helmet>
