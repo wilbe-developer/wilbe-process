@@ -1,8 +1,8 @@
 import { Helmet } from "react-helmet";
-import { pageMetadata } from "@/lib/pageMetadata";
+import { PAGE_METADATA } from "@/lib/pageMetadata";
 
-export default function Meta({ page }: { page: keyof typeof pageMetadata }) {
-  const meta = pageMetadata[page];
+export default function Meta({ page }: { page: keyof typeof PAGE_METADATA }) {
+  const meta = PAGE_METADATA[page];
 
   if (!meta) return null;
 
