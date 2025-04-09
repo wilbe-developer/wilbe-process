@@ -21,6 +21,7 @@ function LandingPageOld_(
         <meta property="og:title" content={pageMetadata.title} />
         <meta property="og:description" content={pageMetadata.description} />
         <meta property="og:image" content={pageMetadata.ogImageSrc} />
+        <link rel="canonical" href={pageMetadata.canonical} />
       </Helmet>
       <PlasmicLandingPageOld root={{ ref }} {...props} />
     </>
