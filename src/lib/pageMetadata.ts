@@ -10,7 +10,7 @@ export const PAGE_METADATA = {
   },
   "/video": {
     title: "Video Library | Wilbe",
-    description: "Watch videos from top founders, operators, and scientists."
+    description: "Learn from top founders, operators, and scientists."
   },
   "/build-your-deck": {
     title: "Build Your Deck | Wilbe",
