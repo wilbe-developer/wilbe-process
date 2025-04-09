@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +26,9 @@ import BsfPage from "@/components/BsfOld";
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
 
+// MetaWrapper for per-page <Helmet> tags
+import MetaWrapper from "@/components/MetaWrapper";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -36,35 +38,37 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            {/* Auth routes */}
-            <Route path={PATHS.LOGIN} element={<LoginPage />} />
-            <Route path={PATHS.REGISTER} element={<RegisterPage />} />
-            <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
-            <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
-            <Route path={PATHS.BSF_PAGE} element={<BsfPage />} />
-            
-            {/* Protected routes */}
-            <Route element={<Layout />}>
-              <Route element={<ProtectedRoute />}>
-                <Route path={PATHS.HOME} element={<HomePage />} />
-                <Route path={PATHS.KNOWLEDGE_CENTER} element={<KnowledgeCenterPage />} />
-                <Route path={PATHS.MEMBER_DIRECTORY} element={<MemberDirectoryPage />} />
-                <Route path={`${PATHS.VIDEO}/:videoId`} element={<VideoPlayerPage />} />
-                <Route path={PATHS.ADMIN} element={<AdminPage />} />
-                <Route path={PATHS.PROFILE} element={<ProfilePage />} />
-                
-                {/* Placeholder routes */}
-                <Route path={PATHS.BUILD_YOUR_DECK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Build Your Deck</h1><p>This feature is coming soon.</p></div>} />
-                <Route path={PATHS.LAB_SEARCH} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Lab Search</h1><p>This feature is coming soon.</p></div>} />
-                <Route path={PATHS.EVENTS} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Events</h1><p>This feature is coming soon.</p></div>} />
-                <Route path={PATHS.ASK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Ask & Invite</h1><p>This feature is coming soon.</p></div>} />
+          <MetaWrapper>
+            <Routes>
+              {/* Auth routes */}
+              <Route path={PATHS.LOGIN} element={<LoginPage />} />
+              <Route path={PATHS.REGISTER} element={<RegisterPage />} />
+              <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
+              <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
+              <Route path={PATHS.BSF_PAGE} element={<BsfPage />} />
+
+              {/* Protected routes */}
+              <Route element={<Layout />}>
+                <Route element={<ProtectedRoute />}>
+                  <Route path={PATHS.HOME} element={<HomePage />} />
+                  <Route path={PATHS.KNOWLEDGE_CENTER} element={<KnowledgeCenterPage />} />
+                  <Route path={PATHS.MEMBER_DIRECTORY} element={<MemberDirectoryPage />} />
+                  <Route path={`${PATHS.VIDEO}/:videoId`} element={<VideoPlayerPage />} />
+                  <Route path={PATHS.ADMIN} element={<AdminPage />} />
+                  <Route path={PATHS.PROFILE} element={<ProfilePage />} />
+
+                  {/* Placeholder routes */}
+                  <Route path={PATHS.BUILD_YOUR_DECK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Build Your Deck</h1><p>This feature is coming soon.</p></div>} />
+                  <Route path={PATHS.LAB_SEARCH} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Lab Search</h1><p>This feature is coming soon.</p></div>} />
+                  <Route path={PATHS.EVENTS} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Events</h1><p>This feature is coming soon.</p></div>} />
+                  <Route path={PATHS.ASK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Ask & Invite</h1><p>This feature is coming soon.</p></div>} />
+                </Route>
               </Route>
-            </Route>
-            
-            {/* Catch-all route */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </MetaWrapper>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
