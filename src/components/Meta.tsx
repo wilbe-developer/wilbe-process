@@ -1,8 +1,9 @@
 import { Helmet } from "react-helmet";
-import { PAGE_METADATA } from "@/lib/pageMetadata";
+import { pageMetadata } from "@/lib/pageMetadata";
 
-export const Meta = ({ path }: { path: string }) => {
-  const meta = PAGE_METADATA[path];
+export default function Meta({ page }: { page: keyof typeof pageMetadata }) {
+  const meta = pageMetadata[page];
+
   if (!meta) return null;
 
   return (
@@ -11,4 +12,4 @@ export const Meta = ({ path }: { path: string }) => {
       <meta name="description" content={meta.description} />
     </Helmet>
   );
-};
+}
