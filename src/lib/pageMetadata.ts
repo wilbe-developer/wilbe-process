@@ -1,7 +1,7 @@
 
 // Define default image and website URL
 const DEFAULT_IMAGE = "https://process.wilbe.com/og-image.png";
-const WEBSITE_URL = "https://wilbe.com";
+const WEBSITE_URL = "https://process.wilbe.com";
 
 export const PAGE_METADATA = {
   "/knowledge-center": {
