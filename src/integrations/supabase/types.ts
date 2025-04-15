@@ -82,6 +82,7 @@ export type Database = {
           approved: boolean | null
           avatar: string | null
           bio: string | null
+          cover_photo: string | null
           created_at: string | null
           email: string | null
           expertise: string | null
@@ -95,6 +96,10 @@ export type Database = {
           role: string | null
           status: string | null
           twitter_handle: string | null
+          wix_creation_date: string | null
+          wix_id: string | null
+          wix_last_login: string | null
+          wix_last_updated: string | null
         }
         Insert: {
           about?: string | null
@@ -102,6 +107,7 @@ export type Database = {
           approved?: boolean | null
           avatar?: string | null
           bio?: string | null
+          cover_photo?: string | null
           created_at?: string | null
           email?: string | null
           expertise?: string | null
@@ -115,6 +121,10 @@ export type Database = {
           role?: string | null
           status?: string | null
           twitter_handle?: string | null
+          wix_creation_date?: string | null
+          wix_id?: string | null
+          wix_last_login?: string | null
+          wix_last_updated?: string | null
         }
         Update: {
           about?: string | null
@@ -122,6 +132,7 @@ export type Database = {
           approved?: boolean | null
           avatar?: string | null
           bio?: string | null
+          cover_photo?: string | null
           created_at?: string | null
           email?: string | null
           expertise?: string | null
@@ -135,6 +146,10 @@ export type Database = {
           role?: string | null
           status?: string | null
           twitter_handle?: string | null
+          wix_creation_date?: string | null
+          wix_id?: string | null
+          wix_last_login?: string | null
+          wix_last_updated?: string | null
         }
         Relationships: []
       }

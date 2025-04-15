@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -41,14 +42,11 @@
   color: #888;
 }
 
-:global(.wordmark) {
+/* Fix for logo coloring - making sure these selectors work globally */
+svg .wordmark {
   fill: var(--text-color, currentColor);
 }
 
-:global(.sails) {
+svg .sails {
   fill: var(--sails-color, currentColor);
 }
-
-
-
-
