@@ -42,11 +42,22 @@
   color: #888;
 }
 
-/* Fix for logo coloring - making sure these selectors work globally */
-svg .wordmark {
+/* Remove these selectors as we're now using inline fill attributes */
+/* svg .wordmark {
   fill: var(--text-color, currentColor);
 }
 
 svg .sails {
   fill: var(--sails-color, currentColor);
+} */
+
+/* Add a utility class for the logo that can be used in dark mode contexts */
+.logo-on-dark {
+  --text-color: white;
+  --sails-color: #FF2C6D;
+}
+
+.logo-default {
+  --text-color: #FF2C6D;
+  --sails-color: #FF2C6D;
 }

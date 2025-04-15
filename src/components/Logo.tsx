@@ -8,8 +8,8 @@ const Logo = ({ className = "" }: { className?: string }) => {
       <WilbeLogo
         className="h-6"
         style={{
-          '--sails-color': '#FF2C6D',
-          '--text-color': '#FF2C6D',
+          '--sails-color': 'var(--brand-pink, #FF2C6D)',
+          '--text-color': 'var(--brand-pink, #FF2C6D)',
         } as React.CSSProperties}
       />
     </Link>
