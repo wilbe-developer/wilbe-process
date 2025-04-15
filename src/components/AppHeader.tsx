@@ -58,7 +58,7 @@ const AppHeader = () => {
 
   return (
     <header className="h-16 md:pl-[214px] px-4 md:px-6 flex items-center justify-between border-b min-w-[320px] overflow-x-hidden">
-      <h1 className="text-xl font-semibold truncate">{pageTitle}</h1>
+      <h1 className="text-xl font-semibold truncate pl-10 md:pl-0 md:ml-0">{pageTitle}</h1>
       
       <div className="flex items-center gap-2 md:gap-4">
         {showBeta && (

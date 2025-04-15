@@ -16,7 +16,7 @@ const Layout = () => {
       {isAuthenticated && <MobileSidebar />}
       <div className={`${isAuthenticated && !isMobile ? "pl-[214px]" : ""}`}>
         <AppHeader />
-        <main className="p-4 md:p-6">
+        <main className="p-4 md:p-6 overflow-x-hidden">
           <Outlet />
         </main>
       </div>
