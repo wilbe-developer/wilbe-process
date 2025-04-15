@@ -42,10 +42,10 @@
 }
 
 :global(.sails) {
-  fill: var(--sails-color);
+  fill: var(--sails-color, currentColor);
 }
 
 :global(.wordmark) {
-  fill: var(--text-color);
+  fill: var(--text-color, currentColor);
 }
 
