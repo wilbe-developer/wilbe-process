@@ -93,7 +93,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    overflow-x: hidden; /* Add this to prevent horizontal scrolling on the body */
+    overflow-x: hidden; /* Prevent horizontal scrolling on the body */
   }
 
   /* Ensure horizontal overflow is hidden at all levels */
@@ -111,5 +111,6 @@
   .no-scrollbar {
     -ms-overflow-x: hidden; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+    overflow-x: auto !important; /* Allow horizontal scrolling with no scrollbar */
   }
 }

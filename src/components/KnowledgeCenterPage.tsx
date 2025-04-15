@@ -106,22 +106,26 @@ const KnowledgeCenterPage = () => {
       </div>
       
       <div className="mb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Tabs list in a horizontally scrollable container */}
-          <div className="relative w-full overflow-x-auto no-scrollbar mb-6 pb-1">
-            <TabsList className="inline-flex w-max">
-              <TabsTrigger value="all">All Videos</TabsTrigger>
-              {modules.map((module) => (
-                <TabsTrigger key={module.id} value={module.id}>
-                  {module.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-          
-          {/* Content below tabs should not scroll with tabs */}
-          <div className="w-full overflow-x-hidden">
-            <TabsContent value="all" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Tabs navigation in a scrollable container */}
+        <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
+          <TabsList className="inline-flex w-max">
+            <TabsTrigger value="all" onClick={() => setActiveTab("all")}>All Videos</TabsTrigger>
+            {modules.map((module) => (
+              <TabsTrigger 
+                key={module.id} 
+                value={module.id} 
+                onClick={() => setActiveTab(module.id)}
+              >
+                {module.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+        
+        {/* Static tab content container - doesn't scroll horizontally */}
+        <div className="w-full overflow-hidden">
+          {activeTab === "all" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loading ? (
                 Array(6)
                   .fill(0)
@@ -146,14 +150,12 @@ const KnowledgeCenterPage = () => {
                   <p className="text-gray-500">No videos available. Please check database or login status.</p>
                 </div>
               )}
-            </TabsContent>
-            
-            {modules.map((module) => (
-              <TabsContent
-                key={module.id}
-                value={module.id}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
+            </div>
+          )}
+          
+          {modules.map((module) => (
+            activeTab === module.id && (
+              <div key={module.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="md:col-span-3 mb-2">
                   <h2 className="text-xl font-semibold mb-2">{module.title}</h2>
                   <p className="text-gray-600">{module.description}</p>
@@ -178,10 +180,10 @@ const KnowledgeCenterPage = () => {
                     <p className="text-gray-500">No videos available in this module. Check module_videos associations.</p>
                   </div>
                 )}
-              </TabsContent>
-            ))}
-          </div>
-        </Tabs>
+              </div>
+            )
+          ))}
+        </div>
       </div>
       
       <div className="flex justify-center mb-8">
