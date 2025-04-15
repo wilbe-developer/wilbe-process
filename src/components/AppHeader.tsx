@@ -57,12 +57,12 @@ const AppHeader = () => {
   }
 
   return (
-    <header className="h-16 px-4 md:px-6 flex items-center justify-between border-b min-w-[320px] overflow-x-hidden">
+    <header className="h-16 px-4 md:px-6 flex items-center justify-between border-b min-w-[320px]">
       <h1 className="text-xl font-semibold truncate pl-10 md:pl-0">
         {pageTitle}
       </h1>
       
-      <div className="flex items-center gap-2 md:gap-4">
+      <div className="flex items-center gap-2 md:gap-4 pr-2">
         {showBeta && (
           <span className="hidden md:block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
             Beta

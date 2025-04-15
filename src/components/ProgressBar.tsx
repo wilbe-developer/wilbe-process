@@ -10,14 +10,14 @@ const ProgressBar = () => {
   
   return (
     <div className="mb-8">
-      <div className="flex justify-between items-center mb-2">
-        <div className="h-2 w-full rounded-full bg-gray-200 mr-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+        <div className="h-2 w-full rounded-full bg-gray-200 sm:mr-4 flex-grow">
           <div 
             className="h-2 rounded-full bg-brand-pink" 
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
-        <div className="text-sm font-medium whitespace-nowrap">
+        <div className="text-sm font-medium min-w-fit">
           You have completed {completedCount} out of {totalCount} items.
         </div>
       </div>

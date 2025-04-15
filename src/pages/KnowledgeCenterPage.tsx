@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { PATHS } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import ModuleSelect from "@/components/ModuleSelect";
 
 const KnowledgeCenterPage = () => {
   const { videos, modules, loading, error } = useVideos();
@@ -89,13 +89,13 @@ const KnowledgeCenterPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4">
-      <ProgressBar />
-      
-      <h1 className="text-3xl font-bold mb-6">Knowledge Center</h1>
-      
+    <div className="max-w-6xl mx-auto px-4 pb-8">
       <div className="mb-8">
-        <p className="text-gray-700">
+        <ProgressBar />
+        
+        <h1 className="text-3xl font-bold mb-6">Knowledge Center</h1>
+        
+        <p className="text-gray-700 mb-4">
           Browse all the video content on the platform here, or head over to the path-specific structured pages from the Home page.
         </p>
         {!isAuthenticated && (
@@ -105,55 +105,67 @@ const KnowledgeCenterPage = () => {
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
-          <TabsList className="inline-flex w-max">
-            <TabsTrigger value="all">All Videos</TabsTrigger>
-            {modules.map((module) => (
-              <TabsTrigger 
-                key={module.id} 
-                value={module.id}
-              >
-                {module.title}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-        
-        <div className="w-full overflow-hidden">
-          <TabsContent value="all">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {loading ? (
-                Array(6)
-                  .fill(0)
-                  .map((_, index) => (
-                    <div key={index} className="space-y-3">
-                      <Skeleton className="w-full aspect-video rounded-md" />
-                      <Skeleton className="h-4 w-full rounded-md" />
-                      <Skeleton className="h-4 w-2/3 rounded-md" />
-                    </div>
-                  ))
-              ) : videos.length > 0 ? (
-                videos.map((video) => (
-                  <VideoCard 
-                    key={video.id} 
-                    video={video} 
-                    showModule={true} 
-                    moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
-                  />
+      {/* Mobile dropdown selector */}
+      <div className="md:hidden mb-6">
+        <ModuleSelect 
+          modules={modules}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
+
+      {/* Desktop tabs */}
+      <div className="hidden md:block">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
+            <TabsList className="inline-flex w-max">
+              <TabsTrigger value="all">All Videos</TabsTrigger>
+              {modules.map((module) => (
+                <TabsTrigger 
+                  key={module.id} 
+                  value={module.id}
+                >
+                  {module.title}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+        </Tabs>
+      </div>
+      
+      <div className="w-full">
+        {activeTab === "all" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              Array(6)
+                .fill(0)
+                .map((_, index) => (
+                  <div key={index} className="space-y-3">
+                    <Skeleton className="w-full aspect-video rounded-md" />
+                    <Skeleton className="h-4 w-full rounded-md" />
+                    <Skeleton className="h-4 w-2/3 rounded-md" />
+                  </div>
                 ))
-              ) : (
-                <div className="col-span-3 text-center py-8">
-                  <p className="text-gray-500">No videos available. Please check database or login status.</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          {modules.map((module) => (
-            <TabsContent key={module.id} value={module.id}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="md:col-span-3 mb-2">
+            ) : videos.length > 0 ? (
+              videos.map((video) => (
+                <VideoCard 
+                  key={video.id} 
+                  video={video} 
+                  showModule={true} 
+                  moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
+                />
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-8">
+                <p className="text-gray-500">No videos available. Please check database or login status.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          modules.map((module) => (
+            module.id === activeTab && (
+              <div key={module.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="col-span-full mb-4">
                   <h2 className="text-xl font-semibold mb-2">{module.title}</h2>
                   <p className="text-gray-600">{module.description}</p>
                 </div>
@@ -178,12 +190,12 @@ const KnowledgeCenterPage = () => {
                   </div>
                 )}
               </div>
-            </TabsContent>
-          ))}
-        </div>
-      </Tabs>
+            )
+          ))
+        )}
+      </div>
       
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center mt-8">
         <Button variant="outline" asChild>
           <Link to={PATHS.HOME}>Back to Home</Link>
         </Button>
