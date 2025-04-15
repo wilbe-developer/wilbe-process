@@ -109,7 +109,7 @@
   }
 
   .no-scrollbar {
-    -ms-overflow-x: hidden; /* IE and Edge */
+    -ms-overflow-style: hidden; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
     overflow-x: auto !important; /* Allow horizontal scrolling with no scrollbar */
   }

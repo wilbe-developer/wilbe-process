@@ -105,16 +105,14 @@ const KnowledgeCenterPage = () => {
         )}
       </div>
       
-      <div className="mb-8">
-        {/* Tabs navigation in a scrollable container */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
           <TabsList className="inline-flex w-max">
-            <TabsTrigger value="all" onClick={() => setActiveTab("all")}>All Videos</TabsTrigger>
+            <TabsTrigger value="all">All Videos</TabsTrigger>
             {modules.map((module) => (
               <TabsTrigger 
                 key={module.id} 
-                value={module.id} 
-                onClick={() => setActiveTab(module.id)}
+                value={module.id}
               >
                 {module.title}
               </TabsTrigger>
@@ -122,9 +120,8 @@ const KnowledgeCenterPage = () => {
           </TabsList>
         </div>
         
-        {/* Static tab content container - doesn't scroll horizontally */}
         <div className="w-full overflow-hidden">
-          {activeTab === "all" && (
+          <TabsContent value="all">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loading ? (
                 Array(6)
@@ -151,11 +148,11 @@ const KnowledgeCenterPage = () => {
                 </div>
               )}
             </div>
-          )}
+          </TabsContent>
           
           {modules.map((module) => (
-            activeTab === module.id && (
-              <div key={module.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TabsContent key={module.id} value={module.id}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="md:col-span-3 mb-2">
                   <h2 className="text-xl font-semibold mb-2">{module.title}</h2>
                   <p className="text-gray-600">{module.description}</p>
@@ -181,10 +178,10 @@ const KnowledgeCenterPage = () => {
                   </div>
                 )}
               </div>
-            )
+            </TabsContent>
           ))}
         </div>
-      </div>
+      </Tabs>
       
       <div className="flex justify-center mb-8">
         <Button variant="outline" asChild>
