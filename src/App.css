@@ -41,12 +41,13 @@
   color: #888;
 }
 
-:global(svg .wordmark) {
+:global(svg) .wordmark {
   fill: var(--text-color, currentColor);
 }
 
-:global(svg .sails) {
+:global(svg) .sails {
   fill: var(--sails-color, currentColor);
 }
+
 
 
