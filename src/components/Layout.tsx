@@ -11,12 +11,12 @@ const Layout = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {isAuthenticated && !isMobile && <Sidebar />}
       {isAuthenticated && <MobileSidebar />}
       <div className={`${isAuthenticated && !isMobile ? "pl-[214px]" : ""}`}>
         <AppHeader />
-        <main className="p-6">
+        <main className="p-4 md:p-6">
           <Outlet />
         </main>
       </div>

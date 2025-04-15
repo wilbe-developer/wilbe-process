@@ -57,17 +57,17 @@ const AppHeader = () => {
   }
 
   return (
-    <header className="h-16 pl-[214px] pr-6 flex items-center justify-between border-b">
-      <h1 className="text-xl font-semibold">{pageTitle}</h1>
+    <header className="h-16 md:pl-[214px] px-4 md:px-6 flex items-center justify-between border-b min-w-[320px] overflow-x-hidden">
+      <h1 className="text-xl font-semibold truncate">{pageTitle}</h1>
       
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-4">
         {showBeta && (
-          <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+          <span className="hidden md:block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
             Beta
           </span>
         )}
         
-        <a href="#" className="text-gray-500 hover:text-gray-800 text-sm">
+        <a href="#" className="hidden md:block text-gray-500 hover:text-gray-800 text-sm whitespace-nowrap">
           questions/feedback
         </a>
         

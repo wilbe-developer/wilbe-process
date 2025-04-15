@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,14 +27,12 @@ const KnowledgeCenterPage = () => {
     modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
   });
 
-  // Update active tab when the URL param changes
   useEffect(() => {
     if (tabParam) {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
 
-  // Show toast if there's an error
   useEffect(() => {
     if (error) {
       toast({
@@ -46,7 +43,6 @@ const KnowledgeCenterPage = () => {
     }
   }, [error, toast]);
 
-  // Authentication warning toast
   useEffect(() => {
     if (!isAuthenticated && !loading) {
       toast({
@@ -57,13 +53,11 @@ const KnowledgeCenterPage = () => {
     }
   }, [isAuthenticated, loading, toast]);
 
-  // Get module title by ID
   const getModuleTitleById = (moduleId: string) => {
     const module = modules.find(m => m.id === moduleId);
     return module ? module.title : moduleId;
   };
 
-  // Show login prompt if not authenticated
   if (!isAuthenticated && !loading) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
@@ -81,7 +75,6 @@ const KnowledgeCenterPage = () => {
     );
   }
 
-  // Show empty state if no videos are found after loading
   if (!loading && videos.length === 0 && modules.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
@@ -95,7 +88,7 @@ const KnowledgeCenterPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4">
       <ProgressBar />
       
       <h1 className="text-3xl font-bold mb-6">Knowledge Center</h1>
@@ -111,56 +104,20 @@ const KnowledgeCenterPage = () => {
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">All Videos</TabsTrigger>
-          {modules.map((module) => (
-            <TabsTrigger key={module.id} value={module.id}>
-              {module.title}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        
-        <TabsContent value="all" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {loading ? (
-            Array(6)
-              .fill(0)
-              .map((_, index) => (
-                <div key={index} className="space-y-3">
-                  <Skeleton className="w-full aspect-video rounded-md" />
-                  <Skeleton className="h-4 w-full rounded-md" />
-                  <Skeleton className="h-4 w-2/3 rounded-md" />
-                </div>
-              ))
-          ) : videos.length > 0 ? (
-            videos.map((video) => (
-              <VideoCard 
-                key={video.id} 
-                video={video} 
-                showModule={true} 
-                moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
-              />
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-8">
-              <p className="text-gray-500">No videos available. Please check database or login status.</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        {modules.map((module) => (
-          <TabsContent
-            key={module.id}
-            value={module.id}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-          >
-            <div className="md:col-span-3 mb-2">
-              <h2 className="text-xl font-semibold mb-2">{module.title}</h2>
-              <p className="text-gray-600">{module.description}</p>
-            </div>
-            
+      <div className="overflow-x-auto -mx-4 px-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8 min-w-[600px] md:min-w-0">
+          <TabsList className="mb-6">
+            <TabsTrigger value="all">All Videos</TabsTrigger>
+            {modules.map((module) => (
+              <TabsTrigger key={module.id} value={module.id}>
+                {module.title}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          <TabsContent value="all" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading ? (
-              Array(3)
+              Array(6)
                 .fill(0)
                 .map((_, index) => (
                   <div key={index} className="space-y-3">
@@ -169,20 +126,58 @@ const KnowledgeCenterPage = () => {
                     <Skeleton className="h-4 w-2/3 rounded-md" />
                   </div>
                 ))
-            ) : module.videos && module.videos.length > 0 ? (
-              module.videos.map((video) => (
-                <VideoCard key={video.id} video={video} moduleTitle={module.title} />
+            ) : videos.length > 0 ? (
+              videos.map((video) => (
+                <VideoCard 
+                  key={video.id} 
+                  video={video} 
+                  showModule={true} 
+                  moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
+                />
               ))
             ) : (
               <div className="col-span-3 text-center py-8">
-                <p className="text-gray-500">No videos available in this module. Check module_videos associations.</p>
+                <p className="text-gray-500">No videos available. Please check database or login status.</p>
               </div>
             )}
           </TabsContent>
-        ))}
-      </Tabs>
+          
+          {modules.map((module) => (
+            <TabsContent
+              key={module.id}
+              value={module.id}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              <div className="md:col-span-3 mb-2">
+                <h2 className="text-xl font-semibold mb-2">{module.title}</h2>
+                <p className="text-gray-600">{module.description}</p>
+              </div>
+              
+              {loading ? (
+                Array(3)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div key={index} className="space-y-3">
+                      <Skeleton className="w-full aspect-video rounded-md" />
+                      <Skeleton className="h-4 w-full rounded-md" />
+                      <Skeleton className="h-4 w-2/3 rounded-md" />
+                    </div>
+                  ))
+              ) : module.videos && module.videos.length > 0 ? (
+                module.videos.map((video) => (
+                  <VideoCard key={video.id} video={video} moduleTitle={module.title} />
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-8">
+                  <p className="text-gray-500">No videos available in this module. Check module_videos associations.</p>
+                </div>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
       
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-8">
         <Button variant="outline" asChild>
           <Link to={PATHS.HOME}>Back to Home</Link>
         </Button>
