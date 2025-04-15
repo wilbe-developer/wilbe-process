@@ -1,5 +1,5 @@
 
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -32,17 +32,9 @@ const MobileSidebar = () => {
       </SheetTrigger>
       <SheetContent side="left" className="p-0 w-[80%] max-w-[280px] bg-brand-darkBlue text-white">
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b border-brand-navy">
+          <div className="p-6 border-b border-brand-navy relative">
             <Logo className="text-white" />
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-4 top-4 text-white"
-              onClick={() => setOpen(false)}
-            >
-              <X />
-              <span className="sr-only">Close</span>
-            </Button>
+            {/* We're removing the default close button from SheetContent by applying a custom override */}
           </div>
 
           <nav className="flex-1 overflow-auto">
