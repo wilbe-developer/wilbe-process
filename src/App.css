@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+:global(.sails) {
+  fill: var(--sails-color);
+}
+
+:global(.wordmark) {
+  fill: var(--text-color);
+}
+
