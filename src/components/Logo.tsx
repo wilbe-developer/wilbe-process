@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
-import WilbeLogo from "@/components/WilbeLogo";
+import { ReactComponent as WilbeLogo } from "@/assets/WilbeLogo.svg";
 
 const Logo = ({ className = "" }: { className?: string }) => {
   return (
     <Link to="/" className={`flex items-center gap-2 ${className}`}>
-      <WilbeLogo className="text-brand-pink font-bold text-2xl" />
+      <WilbeLogo
+        className="h-8"
+        style={{
+          '--sails-color': '#FF2C6D',
+          '--text-color': '#FF2C6D', // or any Tailwind color value you want
+        } as React.CSSProperties}
+      />
     </Link>
   );
 };
