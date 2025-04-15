@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import WilbeLogo from "@/assets/logo/WilbeLogo.svg?react";
+import WilbeLogo from "@/assets/WilbeLogo.svg?react";
 
 const Logo = ({ className = "" }: { className?: string }) => {
   return (
