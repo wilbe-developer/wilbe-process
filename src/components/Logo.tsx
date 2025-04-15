@@ -1,13 +1,10 @@
-
 import { Link } from "react-router-dom";
-import { APP_NAME } from "@/lib/constants";
+import WilbeLogo from "@/components/WilbeLogo";
 
 const Logo = ({ className = "" }: { className?: string }) => {
   return (
-    <Link to="/" className={`flex items-center gap-1 ${className}`}>
-      <span className="text-brand-pink font-bold text-2xl">
-        <span className="text-brand-pink">⋉</span> {APP_NAME}
-      </span>
+    <Link to="/" className={`flex items-center gap-2 ${className}`}>
+      <WilbeLogo className="text-brand-pink font-bold text-2xl" />
     </Link>
   );
 };
