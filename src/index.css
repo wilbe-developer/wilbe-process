@@ -96,9 +96,9 @@
     overflow-x: hidden; /* Add this to prevent horizontal scrolling on the body */
   }
 
-  /* Add these classes to control horizontal overflow */
-  html, body, #root {
-    max-width: 100vw;
+  /* Ensure horizontal overflow is hidden at all levels */
+  html, body, #root, div {
+    max-width: 100%;
     overflow-x: hidden;
   }
 }
