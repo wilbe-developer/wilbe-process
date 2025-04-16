@@ -6,7 +6,7 @@ import { UserProfile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PATHS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Users, Building2, MapPin, Briefcase } from "lucide-react";
 
 const MemberPreview = () => {
   const { members, loading } = useMembers();
@@ -44,25 +44,46 @@ const MemberPreview = () => {
   return (
     <div>
       {featuredMembers.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {featuredMembers.map(member => (
             <Link 
               key={member.id} 
               to={`${PATHS.MEMBER_DIRECTORY}`} 
-              className="flex flex-col items-center group"
+              className="group bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all"
             >
-              <Avatar className="w-20 h-20 border-2 border-white shadow-md group-hover:border-brand-pink transition-colors">
-                <AvatarImage src={member.avatar} alt={`${member.firstName} ${member.lastName}`} />
-                <AvatarFallback className="text-lg">
-                  {member.firstName[0]}{member.lastName[0]}
-                </AvatarFallback>
-              </Avatar>
-              <h3 className="font-medium mt-3 text-center group-hover:text-brand-pink transition-colors">
-                {member.firstName} {member.lastName}
-              </h3>
-              <p className="text-sm text-gray-500 text-center">
-                {member.expertise || member.institution || "Community Member"}
-              </p>
+              <div className="flex flex-col items-center">
+                <Avatar className="w-20 h-20 border-2 border-white shadow-md group-hover:border-brand-pink transition-colors">
+                  <AvatarImage src={member.avatar} alt={`${member.firstName} ${member.lastName}`} />
+                  <AvatarFallback className="text-lg">
+                    {member.firstName[0]}{member.lastName[0]}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <h3 className="font-medium mt-3 text-center group-hover:text-brand-pink transition-colors">
+                  {member.firstName} {member.lastName}
+                </h3>
+                
+                <div className="mt-4 space-y-2 w-full text-sm text-gray-600">
+                  {member.expertise && (
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-gray-400" />
+                      <span className="truncate">{member.expertise}</span>
+                    </div>
+                  )}
+                  {member.institution && (
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-gray-400" />
+                      <span className="truncate">{member.institution}</span>
+                    </div>
+                  )}
+                  {member.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      <span className="truncate">{member.location}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </Link>
           ))}
         </div>
