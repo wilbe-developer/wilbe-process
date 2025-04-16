@@ -34,6 +34,7 @@ const VideoCarousel = () => {
           const bDate = new Date(b.created_at || 0);
           return bDate.getTime() - aDate.getTime();
         })
+        .reverse()
         .slice(0, 5);
       
       setFeaturedVideos(latestVideos);
