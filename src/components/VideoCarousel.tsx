@@ -2,13 +2,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useVideos } from "@/hooks/useVideos";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
 import { PATHS } from "@/lib/constants";
 import { Video } from "@/types";
 import { CalendarDays, Clock, Play } from "lucide-react";
@@ -21,10 +14,11 @@ const VideoCarousel = () => {
   const { videos, loading } = useVideos();
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
   
-  const [emblaRef] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
     loop: true,
+    align: 'center',
     skipSnaps: false,
-    containScroll: 'trimSnaps',
+    containScroll: 'keepSnaps',
     dragFree: true
   }, [
     Autoplay({ delay: 4000, stopOnMouseEnter: true })
@@ -47,6 +41,32 @@ const VideoCarousel = () => {
     }
   }, [videos, loading]);
 
+  useEffect(() => {
+    if (emblaApi) {
+      // When the slide changes, update slide appearance
+      const onSelect = () => {
+        const slides = document.querySelectorAll('.embla__slide');
+        const selectedIndex = emblaApi.selectedScrollSnap();
+        
+        slides.forEach((slide, i) => {
+          if (i === selectedIndex) {
+            slide.classList.add('is-selected');
+          } else {
+            slide.classList.remove('is-selected');
+          }
+        });
+      };
+
+      emblaApi.on('select', onSelect);
+      // Call once to set initial state
+      onSelect();
+      
+      return () => {
+        emblaApi.off('select', onSelect);
+      };
+    }
+  }, [emblaApi]);
+
   if (loading || featuredVideos.length === 0) {
     return (
       <div className="relative w-full h-[400px] bg-gray-900 rounded-xl overflow-hidden flex items-center justify-center">
@@ -56,12 +76,12 @@ const VideoCarousel = () => {
   }
 
   return (
-    <div className="relative overflow-hidden">
-      <div className="embla" ref={emblaRef}>
+    <div className="relative">
+      <div className="embla overflow-visible" ref={emblaRef}>
         <div className="embla__container">
           {featuredVideos.map((video, index) => (
             <div key={video.id} className="embla__slide">
-              <div className="relative group w-full md:h-[400px] h-[300px] rounded-xl overflow-hidden transform transition-transform duration-500 perspective-1000">
+              <div className="carousel-card">
                 <Link to={`${PATHS.VIDEO}/${video.id}`} className="block h-full">
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
@@ -107,28 +127,58 @@ const VideoCarousel = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        .embla {
-          overflow: hidden;
-        }
-        .embla__container {
-          display: flex;
-          transform-style: preserve-3d;
-          perspective: 1000px;
-        }
-        .embla__slide {
-          flex: 0 0 100%;
-          min-width: 0;
-          padding: 0 1rem;
-          transform: scale(0.9) translateZ(-100px);
-          transition: transform 0.4s ease;
-          opacity: 0.5;
-        }
-        .embla__slide.is-selected {
-          transform: scale(1) translateZ(0);
-          opacity: 1;
-        }
-      `}</style>
+      <style>
+        {`
+          .embla {
+            margin: 0 -2rem;
+            padding: 2rem;
+            overflow: visible;
+          }
+          
+          .embla__container {
+            display: flex;
+            perspective: 1000px;
+          }
+          
+          .embla__slide {
+            flex: 0 0 80%;
+            min-width: 0;
+            max-width: 800px;
+            margin: 0 1rem;
+            transform: rotateY(20deg) scale(0.9);
+            transition: transform 0.4s ease;
+            opacity: 0.5;
+            position: relative;
+          }
+          
+          .embla__slide.is-selected {
+            transform: rotateY(0) scale(1);
+            opacity: 1;
+            z-index: 10;
+          }
+          
+          .carousel-card {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+          }
+          
+          @media (max-width: 768px) {
+            .embla__slide {
+              flex: 0 0 90%;
+            }
+            
+            .carousel-card {
+              height: 300px;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };
