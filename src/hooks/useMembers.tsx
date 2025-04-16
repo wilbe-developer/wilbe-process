@@ -108,7 +108,7 @@ export const useMembers = () => {
       }
       
       // If completeness score is the same, sort by creation date (newest first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
   };
 
