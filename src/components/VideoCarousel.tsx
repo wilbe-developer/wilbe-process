@@ -1,18 +1,23 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useVideos } from "@/hooks/useVideos";
 import { PATHS } from "@/lib/constants";
 import { Video } from "@/types";
-import { CalendarDays, Clock, Play } from "lucide-react";
+import { CalendarDays, Clock, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const VideoCarousel = () => {
   const { videos, loading } = useVideos();
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
+  const isMobile = useIsMobile();
+  const autoplayOptions = { delay: 4000, stopOnInteraction: false };
+  const autoplayRef = useRef(Autoplay(autoplayOptions));
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     loop: true,
@@ -20,9 +25,7 @@ const VideoCarousel = () => {
     skipSnaps: false,
     containScroll: 'keepSnaps',
     dragFree: true
-  }, [
-    Autoplay({ delay: 4000, stopOnMouseEnter: true })
-  ]);
+  }, [autoplayRef.current]);
 
   useEffect(() => {
     if (!loading && videos.length > 0) {
@@ -40,6 +43,9 @@ const VideoCarousel = () => {
       setFeaturedVideos(latestVideos);
     }
   }, [videos, loading]);
+
+  const scrollPrev = () => emblaApi && emblaApi.scrollPrev();
+  const scrollNext = () => emblaApi && emblaApi.scrollNext();
 
   useEffect(() => {
     if (emblaApi) {
@@ -76,25 +82,44 @@ const VideoCarousel = () => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative carousel-wrapper">
+      {/* Navigation buttons */}
+      <button 
+        onClick={scrollPrev} 
+        className="carousel-button left-2"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+      
+      <button 
+        onClick={scrollNext} 
+        className="carousel-button right-2"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="h-6 w-6" />
+      </button>
+
       <div className="embla overflow-visible" ref={emblaRef}>
         <div className="embla__container">
-          {featuredVideos.map((video, index) => (
+          {featuredVideos.map((video) => (
             <div key={video.id} className="embla__slide">
               <div className="carousel-card">
                 <Link to={`${PATHS.VIDEO}/${video.id}`} className="block h-full">
                   {/* Gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
                   
-                  {/* Video thumbnail */}
-                  <img 
-                    src={video.thumbnailUrl || "/placeholder.svg"}
-                    alt={video.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder.svg";
-                    }}
-                  />
+                  {/* Video thumbnail with aspect ratio maintained */}
+                  <AspectRatio ratio={16 / 9} className="h-full">
+                    <img 
+                      src={video.thumbnailUrl || "/placeholder.svg"}
+                      alt={video.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "/placeholder.svg";
+                      }}
+                    />
+                  </AspectRatio>
                   
                   {/* Video info overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
@@ -129,26 +154,60 @@ const VideoCarousel = () => {
 
       <style>
         {`
+          .carousel-wrapper {
+            position: relative;
+            overflow: visible !important;
+            width: 100%;
+            margin: 2rem 0;
+          }
+          
+          .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+          }
+          
+          .carousel-button:hover {
+            background-color: white;
+            transform: translateY(-50%) scale(1.1);
+          }
+          
           .embla {
-            margin: 0 -2rem;
-            padding: 2rem;
-            overflow: visible;
+            overflow: visible !important;
+            width: 100%;
+            padding: 1rem 0;
+            position: relative;
           }
           
           .embla__container {
             display: flex;
             perspective: 1000px;
+            width: 100%;
           }
           
           .embla__slide {
-            flex: 0 0 80%;
+            flex: 0 0 70%;
             min-width: 0;
             max-width: 800px;
             margin: 0 1rem;
             transform: rotateY(20deg) scale(0.9);
-            transition: transform 0.4s ease;
+            transition: transform 0.5s ease, opacity 0.5s ease;
             opacity: 0.5;
             position: relative;
+            z-index: 0;
           }
           
           .embla__slide.is-selected {
@@ -160,7 +219,8 @@ const VideoCarousel = () => {
           .carousel-card {
             position: relative;
             width: 100%;
-            height: 400px;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
             border-radius: 0.75rem;
             overflow: hidden;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
@@ -170,11 +230,8 @@ const VideoCarousel = () => {
           
           @media (max-width: 768px) {
             .embla__slide {
-              flex: 0 0 90%;
-            }
-            
-            .carousel-card {
-              height: 300px;
+              flex: 0 0 85%;
+              margin: 0 0.5rem;
             }
           }
         `}

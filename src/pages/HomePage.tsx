@@ -10,7 +10,7 @@ const HomePage = () => {
   const { user } = useAuth();
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4">
       <section className="mb-12">
         <h1 className="text-3xl font-bold mb-4">Welcome to Wilbe{user ? `, ${user.firstName}` : ""}</h1>
         <p className="text-lg mb-6">
@@ -18,7 +18,7 @@ const HomePage = () => {
         </p>
       </section>
       
-      <section className="mb-12">
+      <section className="mb-12 allow-overflow-x">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Latest Videos</h2>
           <Link to={PATHS.KNOWLEDGE_CENTER} className="text-brand-pink hover:underline">

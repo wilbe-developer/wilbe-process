@@ -93,13 +93,30 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    overflow-x: hidden; /* Prevent horizontal scrolling on the body */
   }
-
-  /* Ensure horizontal overflow is hidden at all levels */
-  html, body, #root, div {
-    max-width: 100%;
-    overflow-x: hidden;
+  
+  /* Allow horizontal scroll for specific elements with class "allow-overflow-x" */
+  .allow-overflow-x {
+    overflow-x: visible !important;
+  }
+  
+  /* Hide scrollbar but allow scrolling */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    overflow-x: auto;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+  
+  /* Specific exception for carousel containers */
+  .embla, 
+  .embla__container, 
+  .carousel-wrapper {
+    overflow: visible !important;
+    max-width: none !important;
   }
 }
 
