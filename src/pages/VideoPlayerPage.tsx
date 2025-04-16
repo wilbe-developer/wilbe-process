@@ -1,5 +1,5 @@
 
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useVideos } from "@/hooks/useVideos";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,14 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoCard from "@/components/VideoCard";
 import { PATHS } from "@/lib/constants";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+const DECK_BUILDER_TEMPLATE_URL = "https://www.canva.com/design/DAGIgXCPhJk/DCxXlmbcIlqQiUIOW-GWlw/view?utm_content=DAGIgXCPhJk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview";
 
 const VideoPlayerPage = () => {
   const { videoId } = useParams();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const {
     getVideoById,
@@ -37,6 +40,10 @@ const VideoPlayerPage = () => {
     module ? getVideosByModule(module.id).filter(v => v.id !== videoId) : []
   );
   const [isCompleted, setIsCompleted] = useState(video?.completed || false);
+  
+  // Check if this is from the deck builder page
+  const isDeckBuilderVideo = location.search.includes('deckBuilder=true') || video?.isDeckBuilderVideo;
+  const deckBuilderSlide = new URLSearchParams(location.search).get('slide') || video?.deckBuilderSlide;
 
   // Update state when videoId changes
   useEffect(() => {
@@ -113,11 +120,12 @@ const VideoPlayerPage = () => {
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center mb-4">
         <Button variant="ghost" size="sm" asChild className="mr-2">
-          <Link to={PATHS.KNOWLEDGE_CENTER}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> Knowledge Center
+          <Link to={isDeckBuilderVideo ? PATHS.BUILD_YOUR_DECK : PATHS.KNOWLEDGE_CENTER}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> 
+            {isDeckBuilderVideo ? "Build Your Deck" : "Knowledge Center"}
           </Link>
         </Button>
-        {!isMobile && (
+        {!isMobile && !isDeckBuilderVideo && (
           <div className="text-gray-500 text-sm">
             {module?.title && (
               <>
@@ -139,6 +147,27 @@ const VideoPlayerPage = () => {
           </div>
         )}
       </div>
+
+      {isDeckBuilderVideo && (
+        <div className="mb-4 p-4 bg-brand-darkBlue text-white rounded-md">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-medium">Minimum Viable Deck</h3>
+              {deckBuilderSlide && (
+                <p className="text-sm text-gray-300">Use this video to help with slide {deckBuilderSlide}</p>
+              )}
+            </div>
+            <Button 
+              asChild
+              className="bg-brand-pink hover:bg-brand-pink/90"
+            >
+              <a href={DECK_BUILDER_TEMPLATE_URL} target="_blank" rel="noopener noreferrer">
+                Template <ExternalLink className="ml-1 h-4 w-4" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
@@ -224,7 +253,7 @@ const VideoPlayerPage = () => {
                   {relatedVideos.map((relatedVideo) => (
                     <div key={relatedVideo.id} className="flex items-center">
                       <Link
-                        to={`${PATHS.VIDEO}/${relatedVideo.id}`}
+                        to={`${PATHS.VIDEO}/${relatedVideo.id}${isDeckBuilderVideo ? '?deckBuilder=true' : ''}${deckBuilderSlide ? `&slide=${deckBuilderSlide}` : ''}`}
                         className="flex items-center hover:bg-gray-50 p-2 rounded-md w-full"
                       >
                         <div className="flex-shrink-0 relative">
@@ -291,7 +320,7 @@ const VideoPlayerPage = () => {
               {relatedVideos.map((relatedVideo) => (
                 <div key={relatedVideo.id} className="flex items-center">
                   <Link
-                    to={`${PATHS.VIDEO}/${relatedVideo.id}`}
+                    to={`${PATHS.VIDEO}/${relatedVideo.id}${isDeckBuilderVideo ? '?deckBuilder=true' : ''}${deckBuilderSlide ? `&slide=${deckBuilderSlide}` : ''}`}
                     className="flex items-center hover:bg-gray-50 p-2 rounded-md w-full"
                   >
                     <div className="flex-shrink-0 relative">

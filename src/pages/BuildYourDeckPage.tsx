@@ -26,15 +26,23 @@ const BuildYourDeckPage = () => {
     );
   }
 
-  // Filter videos by moduleId
-  const introVideo = videos.find(v => v.title.includes("Science to Product"));
-  const teamVideos = videos.filter(v => 
+  // Sort videos by created_at if available
+  const sortedVideos = [...videos].sort((a, b) => {
+    if (a.created_at && b.created_at) {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    return (a.order || 0) - (b.order || 0);
+  });
+
+  // Filter videos by moduleId or title
+  const introVideo = sortedVideos.find(v => v.title.includes("Science to Product"));
+  const teamVideos = sortedVideos.filter(v => 
     v.title.includes("Two Ways of Doing Ventures") || 
     v.title.includes("Company Culture and Team Building")
   );
-  const propositionVideos = videos.filter(v => v.moduleId === "proposition");
-  const marketVideos = videos.filter(v => v.moduleId === "your-market");
-  const fundraisingVideos = videos.filter(v => v.moduleId === "fundraising-101");
+  const propositionVideos = sortedVideos.filter(v => v.moduleId === "proposition");
+  const marketVideos = sortedVideos.filter(v => v.moduleId === "your-market");
+  const fundraisingVideos = sortedVideos.filter(v => v.moduleId === "fundraising-101");
 
   return (
     <div className="max-w-6xl mx-auto p-4">

@@ -1,3 +1,4 @@
+
 export interface UserProfile {
   id: string;
   firstName: string;
@@ -40,6 +41,9 @@ export interface Video {
   thumbnailUrl?: string;
   completed?: boolean;
   created_at?: string;
+  // Add indicator for deck-builder videos
+  isDeckBuilderVideo?: boolean;
+  deckBuilderSlide?: string;
 }
 
 export type UserRole = 'user' | 'admin';

@@ -51,7 +51,18 @@ const DeckBuilderSection = ({
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {videos.map((video) => (
-              <VideoCard key={video.id} video={video} />
+              <div key={video.id} className="relative">
+                <Link to={`${PATHS.VIDEO}/${video.id}?deckBuilder=true${slideNumbers ? `&slide=${slideNumbers}` : ''}`}>
+                  <VideoCard 
+                    key={video.id} 
+                    video={{
+                      ...video,
+                      isDeckBuilderVideo: true,
+                      deckBuilderSlide: slideNumbers
+                    }} 
+                  />
+                </Link>
+              </div>
             ))}
           </div>
         </div>

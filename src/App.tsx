@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,6 +24,7 @@ import NotFoundPage from "@/pages/NotFoundPage";
 import LandingPage from "@/components/LandingPageOld";
 import BsfPage from "@/components/BsfOld";
 import EventsPage from "@/pages/EventsPage";
+import BuildYourDeckPage from "@/pages/BuildYourDeckPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -58,9 +60,9 @@ const App = () => (
                   <Route path={PATHS.ADMIN} element={<AdminPage />} />
                   <Route path={PATHS.PROFILE} element={<ProfilePage />} />
                   <Route path={PATHS.EVENTS} element={<EventsPage />} />
+                  <Route path={PATHS.BUILD_YOUR_DECK} element={<BuildYourDeckPage />} />
 
                   {/* Placeholder routes */}
-                  <Route path={PATHS.BUILD_YOUR_DECK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Build Your Deck</h1><p>This feature is coming soon.</p></div>} />
                   <Route path={PATHS.LAB_SEARCH} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Lab Search</h1><p>This feature is coming soon.</p></div>} />
                   <Route path={PATHS.ASK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Ask & Invite</h1><p>This feature is coming soon.</p></div>} />
                 </Route>
