@@ -26,9 +26,6 @@ const BuildYourDeckPage = () => {
     );
   }
 
-  // Get regular modules
-  const regularModules = modules.filter(m => !m.isDeckBuilderModule);
-
   // Get deck builder modules
   const deckBuilderModules = modules.filter(m => m.isDeckBuilderModule)
     .sort((a, b) => {
@@ -45,31 +42,31 @@ const BuildYourDeckPage = () => {
 
   // Find introduction module (MVD Introduction)
   const introModule = deckBuilderModules.find(m => m.slug === "mvd-introduction");
-  const introVideos = introModule ? videos.filter(v => v.moduleId === introModule.id) : [];
+  const introVideos = introModule ? modules.find(m => m.id === introModule.id)?.videos || [] : [];
 
   console.log("Introduction Module:", introModule?.slug, "with", introVideos.length, "videos");
 
   // Team module (Slide 1)
   const teamModule = deckBuilderModules.find(m => m.slug === "the-team");
-  const teamVideos = teamModule ? videos.filter(v => v.moduleId === teamModule.id) : [];
+  const teamVideos = teamModule ? modules.find(m => m.id === teamModule.id)?.videos || [] : [];
   
   console.log("Team Module:", teamModule?.slug, "with", teamVideos.length, "videos");
 
   // Proposition module (Slides 2 & 3)
   const propositionModule = deckBuilderModules.find(m => m.slug === "mvd-proposition");
-  const propositionVideos = propositionModule ? videos.filter(v => v.moduleId === propositionModule.id) : [];
+  const propositionVideos = propositionModule ? modules.find(m => m.id === propositionModule.id)?.videos || [] : [];
   
   console.log("Proposition Module:", propositionModule?.slug, "with", propositionVideos.length, "videos");
 
   // Market module (Slides 4 & 5)
   const marketModule = deckBuilderModules.find(m => m.slug === "mvd-market");
-  const marketVideos = marketModule ? videos.filter(v => v.moduleId === marketModule.id) : [];
+  const marketVideos = marketModule ? modules.find(m => m.id === marketModule.id)?.videos || [] : [];
   
   console.log("Market Module:", marketModule?.slug, "with", marketVideos.length, "videos");
 
   // Fundraising module
   const fundraisingModule = deckBuilderModules.find(m => m.slug === "fundraising-101");
-  const fundraisingVideos = fundraisingModule ? videos.filter(v => v.moduleId === fundraisingModule.id) : [];
+  const fundraisingVideos = fundraisingModule ? modules.find(m => m.id === fundraisingModule.id)?.videos || [] : [];
   
   console.log("Fundraising Module:", fundraisingModule?.slug, "with", fundraisingVideos.length, "videos");
 

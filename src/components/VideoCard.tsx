@@ -9,9 +9,15 @@ interface VideoCardProps {
   video: Video;
   showModule?: boolean;
   moduleTitle?: string;
+  isDeckBuilderView?: boolean;
 }
 
-const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) => {
+const VideoCard = ({ 
+  video, 
+  showModule = false, 
+  moduleTitle,
+  isDeckBuilderView = false
+}: VideoCardProps) => {
   // Construct the URL with the appropriate query parameters
   const videoUrl = `${PATHS.VIDEO}/${video.id}${
     video.isDeckBuilderVideo ? `?deckBuilder=true${
@@ -29,6 +35,7 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
     deckBuilder: video.isDeckBuilderVideo ? "yes" : "no",
     deckBuilderSlide: video.deckBuilderSlide || "none",
     deckBuilderModuleId: video.deckBuilderModuleId || "none",
+    isDeckBuilderView: isDeckBuilderView,
     source: video.id.includes("dummy-") ? "dummy data" : "supabase"
   });
   
@@ -91,7 +98,7 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
               <CheckCircle className="h-5 w-5 text-green-500 bg-white rounded-full" />
             </div>
           )}
-          {video.isDeckBuilderVideo && video.deckBuilderSlide && (
+          {isDeckBuilderView && video.isDeckBuilderVideo && video.deckBuilderSlide && (
             <div className="absolute top-2 left-2 bg-brand-pink text-white text-xs px-1.5 py-0.5 rounded">
               Slide {video.deckBuilderSlide}
             </div>

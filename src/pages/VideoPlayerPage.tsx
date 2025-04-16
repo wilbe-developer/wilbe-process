@@ -38,41 +38,31 @@ const VideoPlayerPage = () => {
   );
   const [isCompleted, setIsCompleted] = useState(video?.completed || false);
   
-  // Check if this is from the deck builder page
   const isDeckBuilderVideo = location.search.includes('deckBuilder=true') || video?.isDeckBuilderVideo;
   const deckBuilderSlide = new URLSearchParams(location.search).get('slide') || video?.deckBuilderSlide;
   
-  // Get related videos based on context (deck builder or regular module)
   const [relatedVideos, setRelatedVideos] = useState<any[]>([]);
 
-  // Update state when videoId changes
   useEffect(() => {
     if (videoId) {
       const currentVideo = getVideoById(videoId);
       setVideo(currentVideo);
       
       if (currentVideo) {
-        // Get the right module
         const currentModule = getModule(currentVideo.moduleId);
         setModule(currentModule);
         
         setIsCompleted(currentVideo.completed || false);
         
-        // Choose related videos based on context
         if (isDeckBuilderVideo) {
-          // Get the actual deck builder module ID
           const deckBuilderModuleId = currentVideo.deckBuilderModuleId || currentVideo.moduleId;
-          
-          // Use the actual deck builder module to get related videos
           const deckBuilderModule = modules.find(m => m.id === deckBuilderModuleId);
           
-          if (deckBuilderModule) {
-            // If we have a specific deck builder module, get videos from that module
-            const moduleVideos = getVideosByModule(deckBuilderModule.id).filter(v => v.id !== videoId);
+          if (deckBuilderModule && deckBuilderModule.videos) {
+            const moduleVideos = deckBuilderModule.videos.filter(v => v.id !== videoId);
             setRelatedVideos(moduleVideos);
             console.log(`Found ${moduleVideos.length} related videos from deck builder module ${deckBuilderModule.title}`);
           } else if (deckBuilderSlide) {
-            // If we have a slide number but no module ID, try to find the right module by slide
             let deckBuilderModuleBySlide;
             
             if (deckBuilderSlide === "1") {
@@ -83,26 +73,23 @@ const VideoPlayerPage = () => {
               deckBuilderModuleBySlide = modules.find(m => m.isDeckBuilderModule && m.slug === "mvd-market");
             }
             
-            if (deckBuilderModuleBySlide) {
-              const moduleVideos = getVideosByModule(deckBuilderModuleBySlide.id).filter(v => v.id !== videoId);
+            if (deckBuilderModuleBySlide && deckBuilderModuleBySlide.videos) {
+              const moduleVideos = deckBuilderModuleBySlide.videos.filter(v => v.id !== videoId);
               setRelatedVideos(moduleVideos);
               console.log(`Found ${moduleVideos.length} related videos from deck builder module by slide: ${deckBuilderModuleBySlide.title}`);
             } else {
-              // Fallback to empty array
-              setRelatedVideos([]);
+              const allDeckBuilderModules = modules.filter(m => m.isDeckBuilderModule);
+              const deckBuilderVideos = allDeckBuilderModules.flatMap(m => m.videos || []).filter(v => v && v.id !== videoId);
+              setRelatedVideos(deckBuilderVideos.slice(0, 5));
             }
           } else {
-            // If no specific context, show a selection of deck builder videos
-            const deckBuilderVideos = videos.filter(v => v.isDeckBuilderVideo && v.id !== videoId);
-            setRelatedVideos(deckBuilderVideos.slice(0, 5));
+            setRelatedVideos([]);
           }
         } else if (currentModule) {
-          // For regular videos, show other videos from the same module
           setRelatedVideos(
-            getVideosByModule(currentModule.id).filter(v => v.id !== videoId)
+            (currentModule.videos || []).filter(v => v.id !== videoId)
           );
         } else {
-          // Fallback to empty array
           setRelatedVideos([]);
         }
       }
@@ -124,7 +111,6 @@ const VideoPlayerPage = () => {
     }
   };
 
-  // Extract YouTube ID from URL if it's a full URL
   const getYoutubeEmbedId = (youtubeIdOrUrl: string) => {
     if (!youtubeIdOrUrl) return '';
     
@@ -137,7 +123,7 @@ const VideoPlayerPage = () => {
       }
     }
     
-    return youtubeIdOrUrl; // Return as is if it's just an ID
+    return youtubeIdOrUrl;
   };
 
   if (loading) {
@@ -167,10 +153,8 @@ const VideoPlayerPage = () => {
 
   const youtubeEmbedId = getYoutubeEmbedId(video?.youtubeId || '');
   
-  // Get module title for display
   const getModuleTitle = () => {
     if (isDeckBuilderVideo) {
-      // Find the actual deck builder module to display its title
       if (video?.deckBuilderModuleId) {
         const deckBuilderModule = modules.find(m => m.id === video.deckBuilderModuleId);
         if (deckBuilderModule) {
@@ -178,7 +162,6 @@ const VideoPlayerPage = () => {
         }
       }
       
-      // Fallback to using the slide number
       if (deckBuilderSlide === "1") {
         return "The Team";
       } else if (deckBuilderSlide === "2 & 3") {
@@ -186,7 +169,6 @@ const VideoPlayerPage = () => {
       } else if (deckBuilderSlide === "4 & 5") {
         return "Market";
       } else {
-        // Check if we can get the module title from the video's moduleId
         const videoModule = module?.title;
         if (videoModule) {
           return videoModule;

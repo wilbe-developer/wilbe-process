@@ -115,6 +115,7 @@ const DeckBuilderSection = ({
                             deckBuilderModuleId: moduleId || video.moduleId
                           }} 
                           moduleTitle={title}
+                          isDeckBuilderView={true}
                         />
                       </div>
                     ))}

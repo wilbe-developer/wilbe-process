@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,13 +19,30 @@ const KnowledgeCenterPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   
+  // Filter out deck builder modules and their videos
+  const regularModules = modules.filter(m => !m.isDeckBuilderModule);
+  
+  // For the "all" tab, we need all videos that are either:
+  // 1. Not from a deck builder module
+  // 2. Also exist in a regular module
+  const visibleVideos = videos.filter(video => {
+    // Filter out videos that are only in deck builder modules
+    const videoModule = modules.find(m => m.id === video.moduleId);
+    if (!videoModule?.isDeckBuilderModule) {
+      return true; // Keep videos from regular modules
+    }
+    
+    // Check if this video also exists in a regular module
+    return false; // Exclude videos that are only in deck builder modules
+  });
+  
   console.log("KnowledgeCenterPage rendering", { 
     isAuthenticated,
-    videosCount: videos.length,
-    modulesCount: modules.length,
+    videosCount: visibleVideos.length,
+    modulesCount: regularModules.length,
     loading,
     error,
-    modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
+    modules: regularModules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
   });
 
   useEffect(() => {
@@ -75,7 +93,7 @@ const KnowledgeCenterPage = () => {
     );
   }
 
-  if (!loading && videos.length === 0 && modules.length === 0) {
+  if (!loading && visibleVideos.length === 0 && regularModules.length === 0) {
     return (
       <div className="max-w-6xl mx-auto py-8 text-center">
         <h1 className="text-2xl font-bold mb-4">No videos found</h1>
@@ -106,7 +124,7 @@ const KnowledgeCenterPage = () => {
       
       <div className="mb-6">
         <ModuleSelect 
-          modules={modules}
+          modules={regularModules}
           value={activeTab}
           onChange={setActiveTab}
         />
@@ -125,13 +143,14 @@ const KnowledgeCenterPage = () => {
                     <Skeleton className="h-4 w-2/3 rounded-md" />
                   </div>
                 ))
-            ) : videos.length > 0 ? (
-              videos.map((video) => (
+            ) : visibleVideos.length > 0 ? (
+              visibleVideos.map((video) => (
                 <VideoCard 
                   key={video.id} 
                   video={video} 
                   showModule={true} 
                   moduleTitle={video.moduleId ? getModuleTitleById(video.moduleId) : undefined}
+                  isDeckBuilderView={false}
                 />
               ))
             ) : (
@@ -141,7 +160,7 @@ const KnowledgeCenterPage = () => {
             )}
           </div>
         ) : (
-          modules.map((module) => (
+          regularModules.map((module) => (
             module.id === activeTab && (
               <div key={module.id} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="col-span-full mb-4">
@@ -161,7 +180,12 @@ const KnowledgeCenterPage = () => {
                     ))
                 ) : module.videos && module.videos.length > 0 ? (
                   module.videos.map((video) => (
-                    <VideoCard key={video.id} video={video} moduleTitle={module.title} />
+                    <VideoCard 
+                      key={video.id} 
+                      video={video} 
+                      moduleTitle={module.title}
+                      isDeckBuilderView={false} 
+                    />
                   ))
                 ) : (
                   <div className="col-span-3 text-center py-8">

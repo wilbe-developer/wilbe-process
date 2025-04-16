@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Video, Module } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -158,39 +157,35 @@ export const useVideos = () => {
           const moduleVideos = formattedVideos
             .filter(video => moduleVideoIds.some(mv => mv.id === video.id))
             .map(video => {
+              // Create a copy of the video for this module to prevent cross-contamination
+              const videoCopy = { ...video };
+              
               // Find the module_video entry to get the order
               const moduleVideo = moduleVideoIds.find(mv => mv.id === video.id);
-              return {
-                ...video,
-                moduleId: module.id,
-                order: moduleVideo?.order || 0,
-                // Add deck builder specific properties if this is a deck builder module
-                isDeckBuilderVideo: module.is_deck_builder_module || false,
-                deckBuilderModuleId: module.is_deck_builder_module ? module.id : undefined,
+              
+              // Set module-specific properties
+              videoCopy.moduleId = module.id;
+              videoCopy.order = moduleVideo?.order || 0;
+              
+              // Add deck builder specific properties if this is a deck builder module
+              if (module.is_deck_builder_module) {
+                videoCopy.isDeckBuilderVideo = true;
+                videoCopy.deckBuilderModuleId = module.id;
                 // Set slide number based on module title or slug for deck builder modules
-                deckBuilderSlide: module.is_deck_builder_module ? 
-                  module.title === 'The Team' || module.slug === 'the-team' ? "1" : 
-                  module.title === 'Proposition' || module.slug === 'mvd-proposition' ? "2 & 3" :
-                  module.title === 'Market' || module.slug === 'mvd-market' ? "4 & 5" : ""
-                  : undefined
-              };
+                if (module.title === 'The Team' || module.slug === 'the-team') {
+                  videoCopy.deckBuilderSlide = "1";
+                } else if (module.title === 'Proposition' || module.slug === 'mvd-proposition') {
+                  videoCopy.deckBuilderSlide = "2 & 3";
+                } else if (module.title === 'Market' || module.slug === 'mvd-market') {
+                  videoCopy.deckBuilderSlide = "4 & 5";
+                } else {
+                  videoCopy.deckBuilderSlide = "";
+                }
+              }
+              
+              return videoCopy;
             })
             .sort((a, b) => a.order - b.order);
-          
-          // Update moduleId in the main videos array
-          moduleVideos.forEach(video => {
-            const index = formattedVideos.findIndex(v => v.id === video.id);
-            if (index !== -1) {
-              formattedVideos[index].moduleId = module.id;
-              formattedVideos[index].order = video.order;
-              // Add deck builder specific properties if applicable
-              if (module.is_deck_builder_module) {
-                formattedVideos[index].isDeckBuilderVideo = true;
-                formattedVideos[index].deckBuilderModuleId = module.id;
-                formattedVideos[index].deckBuilderSlide = video.deckBuilderSlide;
-              }
-            }
-          });
           
           return {
             id: module.id,
@@ -208,11 +203,12 @@ export const useVideos = () => {
           };
         });
         
-        console.log("Final processed modules:", formattedModules);
-        console.log("Final processed videos:", formattedVideos);
+        // Create a flat list of videos from all modules for the main videos array
+        // This ensures videos appear in all their respective modules
+        const allVideos = formattedModules.flatMap(module => module.videos || []);
+        console.log("Final processed videos:", allVideos);
         
-        // If no data was found in Supabase, fall back to dummy data
-        if (formattedVideos.length === 0 && formattedModules.length === 0) {
+        if (allVideos.length === 0 && formattedModules.length === 0) {
           console.warn("No data found in Supabase, falling back to dummy data");
           
           const dummyVideos: Video[] = VIDEOS.map(video => ({
@@ -234,7 +230,7 @@ export const useVideos = () => {
           setModules(dummyModules);
           setIsUsingDummyData(true);
         } else {
-          setVideos(formattedVideos);
+          setVideos(allVideos);
           setModules(formattedModules);
           setIsUsingDummyData(false);
         }
