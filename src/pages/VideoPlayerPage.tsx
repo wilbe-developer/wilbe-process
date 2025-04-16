@@ -30,7 +30,8 @@ const VideoPlayerPage = () => {
     getVideosByModule,
     markVideoAsCompleted,
     loading,
-    modules
+    modules,
+    videos
   } = useVideos();
   const [video, setVideo] = useState(videoId ? getVideoById(videoId) : null);
   const [module, setModule] = useState(
@@ -60,21 +61,71 @@ const VideoPlayerPage = () => {
         
         // Choose related videos based on context
         if (isDeckBuilderVideo) {
-          // For deck builder, filter videos with the same deck builder slide
-          const searchParams = new URLSearchParams(location.search);
-          const slide = searchParams.get('slide') || currentVideo.deckBuilderSlide;
+          // For deck builder, get related videos based on the slide number
+          const slide = new URLSearchParams(location.search).get('slide') || currentVideo.deckBuilderSlide;
           
-          // Get videos that are either:
-          // 1. From the same module if regular videos
-          // 2. Have the same deck builder slide number
-          const deckBuilderRelated = slide ? 
-            getVideos().filter(v => 
-              (v.deckBuilderSlide === slide || v.isDeckBuilderVideo) && 
-              v.id !== videoId
-            ) : 
-            getVideos().filter(v => v.isDeckBuilderVideo && v.id !== videoId);
+          if (slide) {
+            // If we have a specific slide number, find videos for that slide
+            let deckBuilderRelatedVideos = [];
             
-          setRelatedVideos(deckBuilderRelated);
+            // For slide 1 (Team), show all team-related videos
+            if (slide === "1") {
+              deckBuilderRelatedVideos = videos.filter(v => 
+                (v.title.toLowerCase().includes("two ways of doing ventures") || 
+                 v.title.toLowerCase().includes("company culture and team building")) &&
+                v.id !== videoId
+              );
+            }
+            // For slides 2 & 3 (Proposition), show all proposition module videos
+            else if (slide === "2 & 3") {
+              const propositionModule = modules.find(m => 
+                m.title.toLowerCase() === "proposition" || 
+                m.slug.toLowerCase() === "proposition"
+              );
+              
+              if (propositionModule) {
+                deckBuilderRelatedVideos = videos.filter(v => 
+                  v.moduleId === propositionModule.id && 
+                  v.id !== videoId
+                );
+              }
+            }
+            // For slides 4 & 5 (Market), show all market module videos
+            else if (slide === "4 & 5") {
+              const marketModule = modules.find(m => 
+                m.title.toLowerCase() === "your market" || 
+                m.slug.toLowerCase() === "your-market"
+              );
+              
+              if (marketModule) {
+                deckBuilderRelatedVideos = videos.filter(v => 
+                  v.moduleId === marketModule.id && 
+                  v.id !== videoId
+                );
+              }
+            }
+            // For Fundraising, show all fundraising module videos
+            else if (slide === "") {
+              const fundraisingModule = modules.find(m => 
+                m.title.toLowerCase() === "fundraising 101" || 
+                m.slug.toLowerCase() === "fundraising-101"
+              );
+              
+              if (fundraisingModule) {
+                deckBuilderRelatedVideos = videos.filter(v => 
+                  v.moduleId === fundraisingModule.id && 
+                  v.id !== videoId
+                );
+              }
+            }
+            
+            setRelatedVideos(deckBuilderRelatedVideos);
+          } else {
+            // If no slide, just show other deck builder videos
+            setRelatedVideos(
+              videos.filter(v => v.isDeckBuilderVideo && v.id !== videoId)
+            );
+          }
         } else if (currentModule) {
           // For regular videos, show other videos from the same module
           setRelatedVideos(
@@ -86,12 +137,7 @@ const VideoPlayerPage = () => {
         }
       }
     }
-  }, [videoId, getVideoById, getModule, getVideosByModule, location.search, isDeckBuilderVideo]);
-
-  // Helper function to get all videos
-  const getVideos = () => {
-    return getVideosByModule("") || [];
-  };
+  }, [videoId, getVideoById, getModule, getVideosByModule, location.search, isDeckBuilderVideo, videos, modules]);
 
   const handleCompletionToggle = () => {
     if (videoId && !isCompleted) {
@@ -150,6 +196,17 @@ const VideoPlayerPage = () => {
   }
 
   const youtubeEmbedId = getYoutubeEmbedId(video.youtubeId || '');
+  
+  // Get module title for display
+  const getModuleTitle = () => {
+    if (isDeckBuilderVideo) {
+      return 'Deck Builder';
+    } else if (module) {
+      return module.title;
+    } else {
+      return 'Member Stories';
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -244,7 +301,7 @@ const VideoPlayerPage = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>
-                      {isDeckBuilderVideo ? 'Deck Builder' : 'Member Stories'}
+                      {getModuleTitle()}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -322,7 +379,7 @@ const VideoPlayerPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {isDeckBuilderVideo ? 'Deck Builder' : 'Member Stories'}
+                  {getModuleTitle()}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -348,7 +405,11 @@ const VideoPlayerPage = () => {
         {!isMobile && (
           <div className="space-y-4">
             <h2 className="text-lg font-medium">
-              {isDeckBuilderVideo ? 'Deck Builder Videos' : 'Member Stories'}
+              {isDeckBuilderVideo 
+                ? deckBuilderSlide 
+                  ? `Slide ${deckBuilderSlide} Videos` 
+                  : 'Deck Builder Videos'
+                : getModuleTitle()}
             </h2>
             <p className="text-gray-600 mb-2">
               {isDeckBuilderVideo 

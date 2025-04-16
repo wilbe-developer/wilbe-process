@@ -27,6 +27,8 @@ export interface Module {
   slug: string;
   description: string;
   videos: Video[];
+  isDeckBuilderModule?: boolean;
+  deckBuilderSlide?: string;
 }
 
 export interface Video {

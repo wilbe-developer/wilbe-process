@@ -31,6 +31,19 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
     source: video.id.includes("dummy-") ? "dummy data" : "supabase"
   });
   
+  // Determine the module text to display
+  const getModuleText = () => {
+    if (moduleTitle) {
+      return moduleTitle;
+    } else if (video.isDeckBuilderVideo) {
+      return "Deck Builder";
+    } else if (video.moduleId) {
+      return "Member Stories"; // This will be replaced if moduleTitle is provided
+    } else {
+      return "Member Stories";
+    }
+  };
+  
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
       <Link to={videoUrl}>
@@ -63,8 +76,8 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
         <CardContent className="p-4">
           <div className="text-xs text-gray-500 mb-1">
             {showModule && video.moduleId ? 
-              `Module: ${moduleTitle || video.moduleId}` : 
-              video.isDeckBuilderVideo ? "Deck Builder" : "Member Stories"}
+              `Module: ${getModuleText()}` : 
+              getModuleText()}
           </div>
           <h3 className="font-medium text-base mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">
             {video.title}

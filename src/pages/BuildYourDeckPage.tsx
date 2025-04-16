@@ -4,7 +4,7 @@ import { useVideos } from "@/hooks/useVideos";
 import DeckBuilderSection from "@/components/deck-builder/DeckBuilderSection";
 
 const BuildYourDeckPage = () => {
-  const { videos, loading } = useVideos();
+  const { videos, loading, modules } = useVideos();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,29 +40,29 @@ const BuildYourDeckPage = () => {
     v.title.toLowerCase().includes("minimum viable deck")
   );
 
-  // Team videos (Two Ways of Doing Ventures and Company Culture)
+  // Videos for Slide 1 (Team)
   const teamVideos = sortedVideos.filter(v => 
     v.title.toLowerCase().includes("two ways of doing ventures") || 
     v.title.toLowerCase().includes("company culture and team building")
   );
 
-  // Get videos by moduleId
-  const propositionVideos = sortedVideos.filter(v => 
-    v.moduleId === "proposition" || 
-    v.title.toLowerCase().includes("proposition") ||
-    v.title.toLowerCase().includes("value proposition")
-  );
+  // Get videos by moduleId from modules
+  const getVideosByModuleTitle = (moduleTitle: string) => {
+    const module = modules.find(m => m.title.toLowerCase() === moduleTitle.toLowerCase());
+    if (module) {
+      return sortedVideos.filter(v => v.moduleId === module.id);
+    }
+    return [];
+  };
   
-  const marketVideos = sortedVideos.filter(v => 
-    v.moduleId === "your-market" || 
-    v.title.toLowerCase().includes("market")
-  );
+  // Get proposition videos
+  const propositionVideos = getVideosByModuleTitle("Proposition");
   
-  const fundraisingVideos = sortedVideos.filter(v => 
-    v.moduleId === "fundraising-101" || 
-    v.title.toLowerCase().includes("fundraising") ||
-    v.title.toLowerCase().includes("investor")
-  );
+  // Get market videos
+  const marketVideos = getVideosByModuleTitle("Your Market");
+  
+  // Get fundraising videos
+  const fundraisingVideos = getVideosByModuleTitle("Fundraising 101");
 
   return (
     <div className="max-w-6xl mx-auto p-4">

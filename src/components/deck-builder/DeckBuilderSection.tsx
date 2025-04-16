@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Video } from "@/types";
 import { PATHS } from "@/lib/constants";
 import VideoCard from "@/components/VideoCard";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DeckBuilderSectionProps {
@@ -85,7 +85,7 @@ const DeckBuilderSection = ({
           )}
           
           <div className="relative">
-            <ScrollArea className="w-full" orientation="horizontal">
+            <ScrollArea className="w-full">
               <div 
                 ref={scrollRef}
                 className="flex space-x-4 pb-4 md:pb-0 overflow-x-auto md:grid md:grid-flow-col md:auto-cols-max"
@@ -106,6 +106,7 @@ const DeckBuilderSection = ({
                   </div>
                 ))}
               </div>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </div>
         </div>
