@@ -1,4 +1,3 @@
-
 export const APP_NAME = "Wilbe";
 
 export const PATHS = {
@@ -17,7 +16,7 @@ export const PATHS = {
   PENDING: "/pending",
   LANDING_PAGE: "/landing-page",
   BSF_PAGE: "/bsf"
-};
+} as const;
 
 export const NAV_ITEMS = [
   { name: "Home", path: PATHS.HOME },
