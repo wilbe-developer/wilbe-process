@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useVideos } from "@/hooks/useVideos";
@@ -16,7 +15,7 @@ const VideoCarousel = () => {
   const { videos, loading } = useVideos();
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
   const isMobile = useIsMobile();
-  const autoplayOptions = { delay: 4000, stopOnInteraction: false };
+  const autoplayOptions = { delay: 5000, stopOnInteraction: false };
   const autoplayRef = useRef(Autoplay(autoplayOptions));
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
@@ -29,7 +28,6 @@ const VideoCarousel = () => {
 
   useEffect(() => {
     if (!loading && videos.length > 0) {
-      // Get the latest 5 videos (or fewer if not available)
       const latestVideos = [...videos]
         .sort((a, b) => {
           const aDummy = a.id.includes("dummy-");
@@ -49,7 +47,6 @@ const VideoCarousel = () => {
 
   useEffect(() => {
     if (emblaApi) {
-      // When the slide changes, update slide appearance
       const onSelect = () => {
         const slides = document.querySelectorAll('.embla__slide');
         const selectedIndex = emblaApi.selectedScrollSnap();
@@ -64,7 +61,6 @@ const VideoCarousel = () => {
       };
 
       emblaApi.on('select', onSelect);
-      // Call once to set initial state
       onSelect();
       
       return () => {
@@ -83,22 +79,25 @@ const VideoCarousel = () => {
 
   return (
     <div className="relative carousel-wrapper">
-      {/* Navigation buttons */}
-      <button 
-        onClick={scrollPrev} 
-        className="carousel-button left-2"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </button>
-      
-      <button 
-        onClick={scrollNext} 
-        className="carousel-button right-2"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </button>
+      {!isMobile && (
+        <>
+          <button 
+            onClick={scrollPrev} 
+            className="carousel-button left-2"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+          
+          <button 
+            onClick={scrollNext} 
+            className="carousel-button right-2"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        </>
+      )}
 
       <div className="embla overflow-visible" ref={emblaRef}>
         <div className="embla__container">
@@ -106,10 +105,12 @@ const VideoCarousel = () => {
             <div key={video.id} className="embla__slide">
               <div className="carousel-card">
                 <Link to={`${PATHS.VIDEO}/${video.id}`} className="block h-full">
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
+                  <div className={`absolute inset-0 ${
+                    isMobile 
+                      ? 'bg-gradient-to-t from-black/60 via-black/20 to-transparent'
+                      : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'
+                  } z-10`} />
                   
-                  {/* Video thumbnail with aspect ratio maintained */}
                   <AspectRatio ratio={16 / 9} className="h-full">
                     <img 
                       src={video.thumbnailUrl || "/placeholder.svg"}
@@ -121,29 +122,40 @@ const VideoCarousel = () => {
                     />
                   </AspectRatio>
                   
-                  {/* Video info overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
                     <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-1" />
                         {video.duration || "30:00"}
                       </div>
-                      <div className="w-1 h-1 rounded-full bg-white/60" />
-                      <div className="flex items-center">
-                        <CalendarDays className="w-4 h-4 mr-1" />
-                        {formatDistanceToNow(new Date(), { addSuffix: true })}
-                      </div>
+                      {!isMobile && (
+                        <>
+                          <div className="w-1 h-1 rounded-full bg-white/60" />
+                          <div className="flex items-center">
+                            <CalendarDays className="w-4 h-4 mr-1" />
+                            {formatDistanceToNow(new Date(), { addSuffix: true })}
+                          </div>
+                        </>
+                      )}
                     </div>
                     
-                    <h2 className="text-2xl font-bold text-white mb-2">{video.title}</h2>
-                    <p className="text-white/80 mb-4 line-clamp-2 text-sm md:text-base">
-                      {video.description}
-                    </p>
+                    <h2 className={`font-bold text-white ${
+                      isMobile ? 'text-lg mb-2' : 'text-2xl mb-2'
+                    }`}>
+                      {video.title}
+                    </h2>
                     
-                    <Button className="gap-2" size="sm">
-                      <Play className="w-4 h-4" />
-                      Watch Now
-                    </Button>
+                    {!isMobile && (
+                      <>
+                        <p className="text-white/80 mb-4 line-clamp-2 text-sm md:text-base">
+                          {video.description}
+                        </p>
+                        <Button className="gap-2" size="sm">
+                          <Play className="w-4 h-4" />
+                          Watch Now
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </Link>
               </div>
@@ -220,7 +232,7 @@ const VideoCarousel = () => {
             position: relative;
             width: 100%;
             height: 0;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            padding-bottom: 56.25%;
             border-radius: 0.75rem;
             overflow: hidden;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
