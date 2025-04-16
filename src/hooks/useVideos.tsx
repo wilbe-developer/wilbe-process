@@ -167,11 +167,11 @@ export const useVideos = () => {
                 // Add deck builder specific properties if this is a deck builder module
                 isDeckBuilderVideo: module.is_deck_builder_module || false,
                 deckBuilderModuleId: module.is_deck_builder_module ? module.id : undefined,
-                // Set slide number based on module title for deck builder modules
+                // Set slide number based on module title or slug for deck builder modules
                 deckBuilderSlide: module.is_deck_builder_module ? 
-                  module.title === 'The Team' ? "1" : 
-                  module.title === 'Proposition' ? "2 & 3" :
-                  module.title === 'Market' ? "4 & 5" : ""
+                  module.title === 'The Team' || module.slug === 'the-team' ? "1" : 
+                  module.title === 'Proposition' || module.slug === 'mvd-proposition' ? "2 & 3" :
+                  module.title === 'Market' || module.slug === 'mvd-market' ? "4 & 5" : ""
                   : undefined
               };
             })
@@ -199,10 +199,11 @@ export const useVideos = () => {
             description: module.description || "",
             videos: moduleVideos,
             isDeckBuilderModule: module.is_deck_builder_module || false,
+            orderIndex: module.order_index,
             deckBuilderSlide: module.is_deck_builder_module ? 
-              module.title === 'The Team' ? "1" : 
-              module.title === 'Proposition' ? "2 & 3" :
-              module.title === 'Market' ? "4 & 5" : ""
+              module.title === 'The Team' || module.slug === 'the-team' ? "1" : 
+              module.title === 'Proposition' || module.slug === 'mvd-proposition' ? "2 & 3" :
+              module.title === 'Market' || module.slug === 'mvd-market' ? "4 & 5" : ""
               : undefined
           };
         });

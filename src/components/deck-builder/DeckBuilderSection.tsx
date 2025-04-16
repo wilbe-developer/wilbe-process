@@ -97,21 +97,20 @@ const DeckBuilderSection = ({
                 <ScrollArea className="w-full">
                   <div 
                     ref={scrollRef}
-                    className="flex space-x-4 pb-4 md:pb-0 overflow-x-auto md:grid md:grid-flow-col md:auto-cols-max"
+                    className="flex space-x-4 pb-4 md:pb-0 overflow-x-auto"
                   >
                     {preparedVideos.map((video) => (
-                      <div key={video.id} className="w-[280px] flex-none">
-                        <Link to={`${PATHS.VIDEO}/${video.id}?deckBuilder=true${slideNumbers ? `&slide=${slideNumbers}` : ''}`}>
-                          <VideoCard 
-                            key={video.id} 
-                            video={{
-                              ...video,
-                              isDeckBuilderVideo: true,
-                              deckBuilderSlide: slideNumbers,
-                              deckBuilderModuleId: title.toLowerCase().replace(/\s+/g, '-')
-                            }} 
-                          />
-                        </Link>
+                      <div key={video.id} className="w-[280px] flex-none h-full">
+                        <VideoCard 
+                          key={video.id} 
+                          video={{
+                            ...video,
+                            isDeckBuilderVideo: true,
+                            deckBuilderSlide: slideNumbers,
+                            deckBuilderModuleId: title.toLowerCase().replace(/\s+/g, '-')
+                          }} 
+                          moduleTitle={title}
+                        />
                       </div>
                     ))}
                   </div>

@@ -31,7 +31,10 @@ const BuildYourDeckPage = () => {
 
   // Get deck builder modules
   const deckBuilderModules = modules.filter(m => m.isDeckBuilderModule)
-    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+    .sort((a, b) => {
+      // Use the orderIndex property for sorting if available
+      return (a.orderIndex || 0) - (b.orderIndex || 0);
+    });
 
   // Sort videos by created_at if available
   const sortedVideos = [...videos].sort((a, b) => {
@@ -42,7 +45,7 @@ const BuildYourDeckPage = () => {
   });
 
   // Find introduction module (MVD Introduction)
-  const introModule = deckBuilderModules.find(m => m.title === "MVD Introduction");
+  const introModule = deckBuilderModules.find(m => m.slug === "mvd-introduction");
   const introVideos = introModule ? sortedVideos.filter(v => v.moduleId === introModule.id) : [];
 
   // If no intro videos in deck builder module, find a fallback video
@@ -52,7 +55,7 @@ const BuildYourDeckPage = () => {
   ) : null;
 
   // Team module (Slide 1)
-  const teamModule = deckBuilderModules.find(m => m.title === "The Team");
+  const teamModule = deckBuilderModules.find(m => m.slug === "the-team");
   let teamVideos = teamModule ? sortedVideos.filter(v => v.moduleId === teamModule.id) : [];
   
   // If no videos in the team deck builder module, find fallback videos
@@ -64,7 +67,7 @@ const BuildYourDeckPage = () => {
   }
 
   // Proposition module (Slides 2 & 3)
-  const propositionModule = deckBuilderModules.find(m => m.title === "Proposition");
+  const propositionModule = deckBuilderModules.find(m => m.slug === "mvd-proposition");
   let propositionVideos = propositionModule ? sortedVideos.filter(v => v.moduleId === propositionModule.id) : [];
   
   // If no proposition videos in deck builder module, find videos in regular proposition module
@@ -76,7 +79,7 @@ const BuildYourDeckPage = () => {
   }
 
   // Market module (Slides 4 & 5)
-  const marketModule = deckBuilderModules.find(m => m.title === "Market");
+  const marketModule = deckBuilderModules.find(m => m.slug === "mvd-market");
   let marketVideos = marketModule ? sortedVideos.filter(v => v.moduleId === marketModule.id) : [];
   
   // If no market videos in deck builder module, find videos in regular market module
@@ -91,7 +94,7 @@ const BuildYourDeckPage = () => {
   }
 
   // Fundraising module
-  const fundraisingModule = deckBuilderModules.find(m => m.title === "Fundraising 101");
+  const fundraisingModule = deckBuilderModules.find(m => m.slug === "fundraising-101");
   let fundraisingVideos = fundraisingModule ? sortedVideos.filter(v => v.moduleId === fundraisingModule.id) : [];
   
   // If no fundraising videos in deck builder module, find videos in regular fundraising module

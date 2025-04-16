@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useVideos } from "@/hooks/useVideos";
@@ -28,14 +29,22 @@ const VideoCarousel = () => {
 
   useEffect(() => {
     if (!loading && videos.length > 0) {
+      // Make sure to sort by created_at date in DESCENDING order (newest first)
       const latestVideos = [...videos]
+        .filter(v => v.created_at) // Only include videos with a creation date
         .sort((a, b) => {
-          const aDate = new Date(a.created_at || 0);
-          const bDate = new Date(b.created_at || 0);
-          return bDate.getTime() - aDate.getTime();
+          // Compare dates in descending order (newest first)
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
         })
-        .reverse()
-        .slice(0, 5);
+        .slice(0, 5); // Get the 5 most recent videos
+      
+      console.log("Latest videos for carousel:", latestVideos.map(v => ({
+        title: v.title,
+        created_at: v.created_at,
+        moduleId: v.moduleId
+      })));
       
       setFeaturedVideos(latestVideos);
     }
@@ -137,7 +146,9 @@ const VideoCarousel = () => {
                           <div className="w-1 h-1 rounded-full bg-white/60" />
                           <div className="flex items-center">
                             <CalendarDays className="w-4 h-4 mr-1" />
-                            {formatDistanceToNow(new Date(video.created_at || 0), { addSuffix: true })}
+                            {video.created_at 
+                              ? formatDistanceToNow(new Date(video.created_at), { addSuffix: true })
+                              : "Recently added"}
                           </div>
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-2">

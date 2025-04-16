@@ -29,6 +29,7 @@ export interface Module {
   videos: Video[];
   isDeckBuilderModule?: boolean;
   deckBuilderSlide?: string;
+  orderIndex?: number;
 }
 
 export interface Video {

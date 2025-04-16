@@ -13,18 +13,21 @@ export type Database = {
         Row: {
           id: string
           module_id: string
+          module_name: string | null
           order_index: number | null
           video_id: string
         }
         Insert: {
           id?: string
           module_id: string
+          module_name?: string | null
           order_index?: number | null
           video_id: string
         }
         Update: {
           id?: string
           module_id?: string
+          module_name?: string | null
           order_index?: number | null
           video_id?: string
         }

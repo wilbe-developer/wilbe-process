@@ -41,14 +41,34 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
       // Find the module by ID to get the proper title
       const module = document.querySelector(`[data-module-id="${video.moduleId}"]`);
       const moduleName = module?.getAttribute('data-module-title');
-      return moduleName || "Member Stories"; // Fallback if module not found
+      
+      // If we have a module element, return its title
+      if (moduleName) {
+        return moduleName;
+      }
+      
+      // Try to extract module name from the video object or fall back to a default
+      if (video.moduleId.includes('proposition') || video.moduleId.includes('prop')) {
+        return 'Proposition';
+      } else if (video.moduleId.includes('market')) {
+        return 'Your Market';
+      } else if (video.moduleId.includes('team')) {
+        return 'The Team';
+      } else if (video.moduleId.includes('fundraising')) {
+        return 'Fundraising 101';
+      } else if (video.moduleId.includes('intro') || video.moduleId.includes('mvd-intro')) {
+        return 'MVD Introduction';
+      }
+      
+      // Final fallback
+      return "Member Stories";
     } else {
       return "Member Stories";
     }
   };
   
   return (
-    <Card className="overflow-hidden group hover:shadow-md transition-shadow h-full">
+    <Card className="overflow-hidden group hover:shadow-md transition-shadow h-full flex flex-col">
       <Link to={videoUrl} className="flex flex-col h-full">
         <div className="relative">
           <img 
