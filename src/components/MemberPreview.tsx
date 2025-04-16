@@ -21,6 +21,7 @@ const MemberPreview = () => {
           // Sort by creation date, newest first
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         })
+        .reverse()
         .slice(0, 4); // Get top 4 for preview
       
       setFeaturedMembers(membersWithAvatars);
