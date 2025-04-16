@@ -115,6 +115,7 @@ export const useVideos = () => {
           presenter: video.presenter || "",
           thumbnailUrl: video.thumbnail_url || "/placeholder.svg",
           completed: false, // Will be updated with user progress
+          created_at: video.created_at
         }));
 
         console.log("Formatted videos:", formattedVideos);
@@ -145,7 +146,7 @@ export const useVideos = () => {
           }
         });
         
-        // Format modules to match our Module type
+        // Format modules to match our Module type, separating regular and deck builder modules
         const formattedModules: Module[] = (modulesData || []).map(module => {
           // Get videos for this module
           const moduleVideoIds = (moduleVideosData || [])
@@ -162,7 +163,16 @@ export const useVideos = () => {
               return {
                 ...video,
                 moduleId: module.id,
-                order: moduleVideo?.order || 0
+                order: moduleVideo?.order || 0,
+                // Add deck builder specific properties if this is a deck builder module
+                isDeckBuilderVideo: module.is_deck_builder_module || false,
+                deckBuilderModuleId: module.is_deck_builder_module ? module.id : undefined,
+                // Set slide number based on module title for deck builder modules
+                deckBuilderSlide: module.is_deck_builder_module ? 
+                  module.title === 'The Team' ? "1" : 
+                  module.title === 'Proposition' ? "2 & 3" :
+                  module.title === 'Market' ? "4 & 5" : ""
+                  : undefined
               };
             })
             .sort((a, b) => a.order - b.order);
@@ -173,6 +183,12 @@ export const useVideos = () => {
             if (index !== -1) {
               formattedVideos[index].moduleId = module.id;
               formattedVideos[index].order = video.order;
+              // Add deck builder specific properties if applicable
+              if (module.is_deck_builder_module) {
+                formattedVideos[index].isDeckBuilderVideo = true;
+                formattedVideos[index].deckBuilderModuleId = module.id;
+                formattedVideos[index].deckBuilderSlide = video.deckBuilderSlide;
+              }
             }
           });
           
@@ -181,7 +197,13 @@ export const useVideos = () => {
             title: module.title,
             slug: module.slug,
             description: module.description || "",
-            videos: moduleVideos
+            videos: moduleVideos,
+            isDeckBuilderModule: module.is_deck_builder_module || false,
+            deckBuilderSlide: module.is_deck_builder_module ? 
+              module.title === 'The Team' ? "1" : 
+              module.title === 'Proposition' ? "2 & 3" :
+              module.title === 'Market' ? "4 & 5" : ""
+              : undefined
           };
         });
         

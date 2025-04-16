@@ -50,6 +50,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          is_deck_builder_module: boolean | null
           order_index: number | null
           slug: string
           title: string
@@ -59,6 +60,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_deck_builder_module?: boolean | null
           order_index?: number | null
           slug: string
           title: string
@@ -68,6 +70,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          is_deck_builder_module?: boolean | null
           order_index?: number | null
           slug?: string
           title?: string

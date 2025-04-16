@@ -38,15 +38,18 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
     } else if (video.isDeckBuilderVideo) {
       return "Deck Builder";
     } else if (video.moduleId) {
-      return "Member Stories"; // This will be replaced if moduleTitle is provided
+      // Find the module by ID to get the proper title
+      const module = document.querySelector(`[data-module-id="${video.moduleId}"]`);
+      const moduleName = module?.getAttribute('data-module-title');
+      return moduleName || "Member Stories"; // Fallback if module not found
     } else {
       return "Member Stories";
     }
   };
   
   return (
-    <Card className="overflow-hidden group hover:shadow-md transition-shadow">
-      <Link to={videoUrl}>
+    <Card className="overflow-hidden group hover:shadow-md transition-shadow h-full">
+      <Link to={videoUrl} className="flex flex-col h-full">
         <div className="relative">
           <img 
             src={video.thumbnailUrl || "/placeholder.svg"} 
@@ -73,7 +76,7 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
             </div>
           )}
         </div>
-        <CardContent className="p-4">
+        <CardContent className="p-4 flex-grow flex flex-col">
           <div className="text-xs text-gray-500 mb-1">
             {showModule && video.moduleId ? 
               `Module: ${getModuleText()}` : 
@@ -82,7 +85,7 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
           <h3 className="font-medium text-base mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">
             {video.title}
           </h3>
-          <p className="text-sm text-gray-700 line-clamp-2 mb-2">
+          <p className="text-sm text-gray-700 line-clamp-2 mb-2 flex-grow">
             {video.description || "No description available"}
           </p>
           <div className="text-sm text-brand-pink">View Class</div>

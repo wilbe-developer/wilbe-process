@@ -26,6 +26,13 @@ const BuildYourDeckPage = () => {
     );
   }
 
+  // Get regular modules
+  const regularModules = modules.filter(m => !m.isDeckBuilderModule);
+
+  // Get deck builder modules
+  const deckBuilderModules = modules.filter(m => m.isDeckBuilderModule)
+    .sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
+
   // Sort videos by created_at if available
   const sortedVideos = [...videos].sort((a, b) => {
     if (a.created_at && b.created_at) {
@@ -34,35 +41,69 @@ const BuildYourDeckPage = () => {
     return (a.order || 0) - (b.order || 0);
   });
 
-  // Introduction video (Science to Product - The MVD)
-  const introVideo = sortedVideos.find(v => 
+  // Find introduction module (MVD Introduction)
+  const introModule = deckBuilderModules.find(m => m.title === "MVD Introduction");
+  const introVideos = introModule ? sortedVideos.filter(v => v.moduleId === introModule.id) : [];
+
+  // If no intro videos in deck builder module, find a fallback video
+  const fallbackIntroVideo = !introVideos.length ? sortedVideos.find(v => 
     v.title.toLowerCase().includes("science to product") || 
     v.title.toLowerCase().includes("minimum viable deck")
-  );
+  ) : null;
 
-  // Videos for Slide 1 (Team)
-  const teamVideos = sortedVideos.filter(v => 
-    v.title.toLowerCase().includes("two ways of doing ventures") || 
-    v.title.toLowerCase().includes("company culture and team building")
-  );
+  // Team module (Slide 1)
+  const teamModule = deckBuilderModules.find(m => m.title === "The Team");
+  let teamVideos = teamModule ? sortedVideos.filter(v => v.moduleId === teamModule.id) : [];
+  
+  // If no videos in the team deck builder module, find fallback videos
+  if (!teamVideos.length) {
+    teamVideos = sortedVideos.filter(v => 
+      v.title.toLowerCase().includes("two ways of doing ventures") || 
+      v.title.toLowerCase().includes("company culture and team building")
+    );
+  }
 
-  // Get videos by moduleId from modules
-  const getVideosByModuleTitle = (moduleTitle: string) => {
-    const module = modules.find(m => m.title.toLowerCase() === moduleTitle.toLowerCase());
-    if (module) {
-      return sortedVideos.filter(v => v.moduleId === module.id);
+  // Proposition module (Slides 2 & 3)
+  const propositionModule = deckBuilderModules.find(m => m.title === "Proposition");
+  let propositionVideos = propositionModule ? sortedVideos.filter(v => v.moduleId === propositionModule.id) : [];
+  
+  // If no proposition videos in deck builder module, find videos in regular proposition module
+  if (!propositionVideos.length) {
+    const regularPropositionModule = regularModules.find(m => m.title.toLowerCase() === "proposition");
+    if (regularPropositionModule) {
+      propositionVideos = sortedVideos.filter(v => v.moduleId === regularPropositionModule.id);
     }
-    return [];
-  };
+  }
+
+  // Market module (Slides 4 & 5)
+  const marketModule = deckBuilderModules.find(m => m.title === "Market");
+  let marketVideos = marketModule ? sortedVideos.filter(v => v.moduleId === marketModule.id) : [];
   
-  // Get proposition videos
-  const propositionVideos = getVideosByModuleTitle("Proposition");
+  // If no market videos in deck builder module, find videos in regular market module
+  if (!marketVideos.length) {
+    const regularMarketModule = regularModules.find(m => 
+      m.title.toLowerCase() === "your market" || 
+      m.slug.toLowerCase() === "your-market"
+    );
+    if (regularMarketModule) {
+      marketVideos = sortedVideos.filter(v => v.moduleId === regularMarketModule.id);
+    }
+  }
+
+  // Fundraising module
+  const fundraisingModule = deckBuilderModules.find(m => m.title === "Fundraising 101");
+  let fundraisingVideos = fundraisingModule ? sortedVideos.filter(v => v.moduleId === fundraisingModule.id) : [];
   
-  // Get market videos
-  const marketVideos = getVideosByModuleTitle("Your Market");
-  
-  // Get fundraising videos
-  const fundraisingVideos = getVideosByModuleTitle("Fundraising 101");
+  // If no fundraising videos in deck builder module, find videos in regular fundraising module
+  if (!fundraisingVideos.length) {
+    const regularFundraisingModule = regularModules.find(m => 
+      m.title.toLowerCase() === "fundraising 101" || 
+      m.slug.toLowerCase() === "fundraising-101"
+    );
+    if (regularFundraisingModule) {
+      fundraisingVideos = sortedVideos.filter(v => v.moduleId === regularFundraisingModule.id);
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-4">
@@ -80,7 +121,7 @@ const BuildYourDeckPage = () => {
         title="Introduction"
         subtitle="The MVD"
         description="Get an overview of what we mean with a minimum viable deck."
-        videos={introVideo ? [introVideo] : []}
+        videos={introVideos.length ? introVideos : (fallbackIntroVideo ? [fallbackIntroVideo] : [])}
       />
 
       <DeckBuilderSection

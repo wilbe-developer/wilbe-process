@@ -37,6 +37,13 @@ const DeckBuilderSection = ({
     }
   };
 
+  // Add deck builder properties to videos if not present
+  const preparedVideos = videos.map(video => ({
+    ...video,
+    isDeckBuilderVideo: true,
+    deckBuilderSlide: slideNumbers || "",
+  }));
+
   return (
     <div className="bg-brand-darkBlue rounded-lg p-6 md:p-8 mb-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -63,52 +70,60 @@ const DeckBuilderSection = ({
         </div>
         
         <div className="lg:col-span-2 relative">
-          {videos.length > 2 && (
+          {preparedVideos.length > 0 ? (
             <>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white bg-black/30 hover:bg-black/50 rounded-full hidden md:flex"
-                onClick={() => handleScroll('left')}
-              >
-                <ChevronLeft />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white bg-black/30 hover:bg-black/50 rounded-full hidden md:flex"
-                onClick={() => handleScroll('right')}
-              >
-                <ChevronRight />
-              </Button>
-            </>
-          )}
-          
-          <div className="relative">
-            <ScrollArea className="w-full">
-              <div 
-                ref={scrollRef}
-                className="flex space-x-4 pb-4 md:pb-0 overflow-x-auto md:grid md:grid-flow-col md:auto-cols-max"
-              >
-                {videos.map((video) => (
-                  <div key={video.id} className="w-[280px] flex-none">
-                    <Link to={`${PATHS.VIDEO}/${video.id}?deckBuilder=true${slideNumbers ? `&slide=${slideNumbers}` : ''}`}>
-                      <VideoCard 
-                        key={video.id} 
-                        video={{
-                          ...video,
-                          isDeckBuilderVideo: true,
-                          deckBuilderSlide: slideNumbers,
-                          deckBuilderModuleId: title.toLowerCase().replace(/\s+/g, '-')
-                        }} 
-                      />
-                    </Link>
+              {preparedVideos.length > 2 && (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 text-white bg-black/30 hover:bg-black/50 rounded-full hidden md:flex"
+                    onClick={() => handleScroll('left')}
+                  >
+                    <ChevronLeft />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 text-white bg-black/30 hover:bg-black/50 rounded-full hidden md:flex"
+                    onClick={() => handleScroll('right')}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </>
+              )}
+              
+              <div className="relative">
+                <ScrollArea className="w-full">
+                  <div 
+                    ref={scrollRef}
+                    className="flex space-x-4 pb-4 md:pb-0 overflow-x-auto md:grid md:grid-flow-col md:auto-cols-max"
+                  >
+                    {preparedVideos.map((video) => (
+                      <div key={video.id} className="w-[280px] flex-none">
+                        <Link to={`${PATHS.VIDEO}/${video.id}?deckBuilder=true${slideNumbers ? `&slide=${slideNumbers}` : ''}`}>
+                          <VideoCard 
+                            key={video.id} 
+                            video={{
+                              ...video,
+                              isDeckBuilderVideo: true,
+                              deckBuilderSlide: slideNumbers,
+                              deckBuilderModuleId: title.toLowerCase().replace(/\s+/g, '-')
+                            }} 
+                          />
+                        </Link>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-[200px] bg-gray-800 rounded-lg">
+              <p className="text-gray-400">No videos available for this section yet.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

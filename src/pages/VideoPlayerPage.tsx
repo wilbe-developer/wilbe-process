@@ -70,52 +70,98 @@ const VideoPlayerPage = () => {
             
             // For slide 1 (Team), show all team-related videos
             if (slide === "1") {
-              deckBuilderRelatedVideos = videos.filter(v => 
-                (v.title.toLowerCase().includes("two ways of doing ventures") || 
-                 v.title.toLowerCase().includes("company culture and team building")) &&
-                v.id !== videoId
+              // First check if we have a deck builder module for The Team
+              const teamModule = modules.find(m => 
+                m.isDeckBuilderModule && m.title === "The Team"
               );
+              
+              if (teamModule && teamModule.videos.length > 0) {
+                deckBuilderRelatedVideos = teamModule.videos.filter(v => v.id !== videoId);
+              } else {
+                // Fallback to searching for team-related videos by title
+                deckBuilderRelatedVideos = videos.filter(v => 
+                  (v.title.toLowerCase().includes("two ways of doing ventures") || 
+                   v.title.toLowerCase().includes("company culture and team building")) &&
+                  v.id !== videoId
+                );
+              }
             }
             // For slides 2 & 3 (Proposition), show all proposition module videos
             else if (slide === "2 & 3") {
+              // First check if we have a deck builder module for Proposition
               const propositionModule = modules.find(m => 
-                m.title.toLowerCase() === "proposition" || 
-                m.slug.toLowerCase() === "proposition"
+                m.isDeckBuilderModule && m.title === "Proposition"
               );
               
-              if (propositionModule) {
-                deckBuilderRelatedVideos = videos.filter(v => 
-                  v.moduleId === propositionModule.id && 
-                  v.id !== videoId
+              if (propositionModule && propositionModule.videos.length > 0) {
+                deckBuilderRelatedVideos = propositionModule.videos.filter(v => v.id !== videoId);
+              } else {
+                // Fallback to regular proposition module
+                const regularPropositionModule = modules.find(m => 
+                  !m.isDeckBuilderModule && (
+                    m.title.toLowerCase() === "proposition" || 
+                    m.slug.toLowerCase() === "proposition"
+                  )
                 );
+                
+                if (regularPropositionModule) {
+                  deckBuilderRelatedVideos = videos.filter(v => 
+                    v.moduleId === regularPropositionModule.id && 
+                    v.id !== videoId
+                  );
+                }
               }
             }
             // For slides 4 & 5 (Market), show all market module videos
             else if (slide === "4 & 5") {
+              // First check if we have a deck builder module for Market
               const marketModule = modules.find(m => 
-                m.title.toLowerCase() === "your market" || 
-                m.slug.toLowerCase() === "your-market"
+                m.isDeckBuilderModule && m.title === "Market"
               );
               
-              if (marketModule) {
-                deckBuilderRelatedVideos = videos.filter(v => 
-                  v.moduleId === marketModule.id && 
-                  v.id !== videoId
+              if (marketModule && marketModule.videos.length > 0) {
+                deckBuilderRelatedVideos = marketModule.videos.filter(v => v.id !== videoId);
+              } else {
+                // Fallback to regular market module
+                const regularMarketModule = modules.find(m => 
+                  !m.isDeckBuilderModule && (
+                    m.title.toLowerCase() === "your market" || 
+                    m.slug.toLowerCase() === "your-market"
+                  )
                 );
+                
+                if (regularMarketModule) {
+                  deckBuilderRelatedVideos = videos.filter(v => 
+                    v.moduleId === regularMarketModule.id && 
+                    v.id !== videoId
+                  );
+                }
               }
             }
             // For Fundraising, show all fundraising module videos
             else if (slide === "") {
+              // First check if we have a deck builder module for Fundraising
               const fundraisingModule = modules.find(m => 
-                m.title.toLowerCase() === "fundraising 101" || 
-                m.slug.toLowerCase() === "fundraising-101"
+                m.isDeckBuilderModule && m.title === "Fundraising 101"
               );
               
-              if (fundraisingModule) {
-                deckBuilderRelatedVideos = videos.filter(v => 
-                  v.moduleId === fundraisingModule.id && 
-                  v.id !== videoId
+              if (fundraisingModule && fundraisingModule.videos.length > 0) {
+                deckBuilderRelatedVideos = fundraisingModule.videos.filter(v => v.id !== videoId);
+              } else {
+                // Fallback to regular fundraising module
+                const regularFundraisingModule = modules.find(m => 
+                  !m.isDeckBuilderModule && (
+                    m.title.toLowerCase() === "fundraising 101" || 
+                    m.slug.toLowerCase() === "fundraising-101"
+                  )
                 );
+                
+                if (regularFundraisingModule) {
+                  deckBuilderRelatedVideos = videos.filter(v => 
+                    v.moduleId === regularFundraisingModule.id && 
+                    v.id !== videoId
+                  );
+                }
               }
             }
             
@@ -200,7 +246,15 @@ const VideoPlayerPage = () => {
   // Get module title for display
   const getModuleTitle = () => {
     if (isDeckBuilderVideo) {
-      return 'Deck Builder';
+      if (deckBuilderSlide === "1") {
+        return "The Team";
+      } else if (deckBuilderSlide === "2 & 3") {
+        return "Proposition";
+      } else if (deckBuilderSlide === "4 & 5") {
+        return "Market";
+      } else {
+        return "Deck Builder";
+      }
     } else if (module) {
       return module.title;
     } else {
@@ -220,7 +274,7 @@ const VideoPlayerPage = () => {
             {module?.title && (
               <>
                 or go to:{" "}
-                {modules.map((m, index) => (
+                {modules.filter(m => !m.isDeckBuilderModule).map((m, index) => (
                   <span key={m.id}>
                     {index > 0 && " "}
                     <Link
@@ -229,7 +283,7 @@ const VideoPlayerPage = () => {
                     >
                       {m.title}
                     </Link>
-                    {index < modules.length - 1 && " "}
+                    {index < modules.filter(m => !m.isDeckBuilderModule).length - 1 && " "}
                   </span>
                 ))}
               </>
