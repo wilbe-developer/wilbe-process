@@ -30,11 +30,9 @@ const VideoCarousel = () => {
     if (!loading && videos.length > 0) {
       const latestVideos = [...videos]
         .sort((a, b) => {
-          const aDummy = a.id.includes("dummy-");
-          const bDummy = b.id.includes("dummy-");
-          if (aDummy && !bDummy) return 1;
-          if (!aDummy && bDummy) return -1;
-          return b.id.localeCompare(a.id);
+          const aDate = new Date(a.created_at || 0);
+          const bDate = new Date(b.created_at || 0);
+          return bDate.getTime() - aDate.getTime();
         })
         .slice(0, 5);
       
@@ -107,7 +105,7 @@ const VideoCarousel = () => {
                 <Link to={`${PATHS.VIDEO}/${video.id}`} className="block h-full">
                   <div className={`absolute inset-0 ${
                     isMobile 
-                      ? 'bg-gradient-to-t from-black/60 via-black/20 to-transparent'
+                      ? 'bg-gradient-to-t from-black/30 to-transparent'
                       : 'bg-gradient-to-t from-black/80 via-black/40 to-transparent'
                   } z-10`} />
                   
@@ -123,30 +121,27 @@ const VideoCarousel = () => {
                   </AspectRatio>
                   
                   <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                    <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
-                      <div className="flex items-center">
+                    {isMobile ? (
+                      <div className="inline-flex items-center bg-black/60 px-2 py-1 rounded text-white/90 text-sm">
                         <Clock className="w-4 h-4 mr-1" />
                         {video.duration || "30:00"}
                       </div>
-                      {!isMobile && (
-                        <>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
+                          <div className="flex items-center">
+                            <Clock className="w-4 h-4 mr-1" />
+                            {video.duration || "30:00"}
+                          </div>
                           <div className="w-1 h-1 rounded-full bg-white/60" />
                           <div className="flex items-center">
                             <CalendarDays className="w-4 h-4 mr-1" />
-                            {formatDistanceToNow(new Date(), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(video.created_at || 0), { addSuffix: true })}
                           </div>
-                        </>
-                      )}
-                    </div>
-                    
-                    <h2 className={`font-bold text-white ${
-                      isMobile ? 'text-lg mb-2' : 'text-2xl mb-2'
-                    }`}>
-                      {video.title}
-                    </h2>
-                    
-                    {!isMobile && (
-                      <>
+                        </div>
+                        <h2 className="text-2xl font-bold text-white mb-2">
+                          {video.title}
+                        </h2>
                         <p className="text-white/80 mb-4 line-clamp-2 text-sm md:text-base">
                           {video.description}
                         </p>

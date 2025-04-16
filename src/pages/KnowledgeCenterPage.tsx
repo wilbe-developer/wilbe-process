@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVideos } from "@/hooks/useVideos";
 import VideoCard from "@/components/VideoCard";
 import ProgressBar from "@/components/ProgressBar";
@@ -105,8 +104,7 @@ const KnowledgeCenterPage = () => {
         )}
       </div>
       
-      {/* Mobile dropdown selector */}
-      <div className="md:hidden mb-6">
+      <div className="mb-6">
         <ModuleSelect 
           modules={modules}
           value={activeTab}
@@ -114,25 +112,6 @@ const KnowledgeCenterPage = () => {
         />
       </div>
 
-      {/* Desktop tabs */}
-      <div className="hidden md:block">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
-            <TabsList className="inline-flex w-max">
-              <TabsTrigger value="all">All Videos</TabsTrigger>
-              {modules.map((module) => (
-                <TabsTrigger 
-                  key={module.id} 
-                  value={module.id}
-                >
-                  {module.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </Tabs>
-      </div>
-      
       <div className="w-full">
         {activeTab === "all" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
