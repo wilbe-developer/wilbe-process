@@ -34,15 +34,35 @@ const BuildYourDeckPage = () => {
     return (a.order || 0) - (b.order || 0);
   });
 
-  // Filter videos by moduleId or title
-  const introVideo = sortedVideos.find(v => v.title.includes("Science to Product"));
-  const teamVideos = sortedVideos.filter(v => 
-    v.title.includes("Two Ways of Doing Ventures") || 
-    v.title.includes("Company Culture and Team Building")
+  // Introduction video (Science to Product - The MVD)
+  const introVideo = sortedVideos.find(v => 
+    v.title.toLowerCase().includes("science to product") || 
+    v.title.toLowerCase().includes("minimum viable deck")
   );
-  const propositionVideos = sortedVideos.filter(v => v.moduleId === "proposition");
-  const marketVideos = sortedVideos.filter(v => v.moduleId === "your-market");
-  const fundraisingVideos = sortedVideos.filter(v => v.moduleId === "fundraising-101");
+
+  // Team videos (Two Ways of Doing Ventures and Company Culture)
+  const teamVideos = sortedVideos.filter(v => 
+    v.title.toLowerCase().includes("two ways of doing ventures") || 
+    v.title.toLowerCase().includes("company culture and team building")
+  );
+
+  // Get videos by moduleId
+  const propositionVideos = sortedVideos.filter(v => 
+    v.moduleId === "proposition" || 
+    v.title.toLowerCase().includes("proposition") ||
+    v.title.toLowerCase().includes("value proposition")
+  );
+  
+  const marketVideos = sortedVideos.filter(v => 
+    v.moduleId === "your-market" || 
+    v.title.toLowerCase().includes("market")
+  );
+  
+  const fundraisingVideos = sortedVideos.filter(v => 
+    v.moduleId === "fundraising-101" || 
+    v.title.toLowerCase().includes("fundraising") ||
+    v.title.toLowerCase().includes("investor")
+  );
 
   return (
     <div className="max-w-6xl mx-auto p-4">

@@ -12,6 +12,13 @@ interface VideoCardProps {
 }
 
 const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) => {
+  // Construct the URL with the appropriate query parameters
+  const videoUrl = `${PATHS.VIDEO}/${video.id}${
+    video.isDeckBuilderVideo ? `?deckBuilder=true${
+      video.deckBuilderSlide ? `&slide=${video.deckBuilderSlide}` : ''
+    }` : ''
+  }`;
+  
   console.log("Rendering VideoCard with data:", { 
     title: video.title,
     id: video.id, 
@@ -19,12 +26,14 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
     moduleTitle: moduleTitle || "none",
     thumbnailUrl: video.thumbnailUrl || "none",
     youtubeId: video.youtubeId || "none",
+    deckBuilder: video.isDeckBuilderVideo ? "yes" : "no",
+    deckBuilderSlide: video.deckBuilderSlide || "none",
     source: video.id.includes("dummy-") ? "dummy data" : "supabase"
   });
   
   return (
     <Card className="overflow-hidden group hover:shadow-md transition-shadow">
-      <Link to={`${PATHS.VIDEO}/${video.id}`}>
+      <Link to={videoUrl}>
         <div className="relative">
           <img 
             src={video.thumbnailUrl || "/placeholder.svg"} 
@@ -45,12 +54,17 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
               <CheckCircle className="h-5 w-5 text-green-500 bg-white rounded-full" />
             </div>
           )}
+          {video.isDeckBuilderVideo && video.deckBuilderSlide && (
+            <div className="absolute top-2 left-2 bg-brand-pink text-white text-xs px-1.5 py-0.5 rounded">
+              Slide {video.deckBuilderSlide}
+            </div>
+          )}
         </div>
         <CardContent className="p-4">
           <div className="text-xs text-gray-500 mb-1">
             {showModule && video.moduleId ? 
               `Module: ${moduleTitle || video.moduleId}` : 
-              "Member Stories"}
+              video.isDeckBuilderVideo ? "Deck Builder" : "Member Stories"}
           </div>
           <h3 className="font-medium text-base mb-2 line-clamp-2 group-hover:text-brand-pink transition-colors">
             {video.title}

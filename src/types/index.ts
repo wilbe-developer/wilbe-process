@@ -41,9 +41,10 @@ export interface Video {
   thumbnailUrl?: string;
   completed?: boolean;
   created_at?: string;
-  // Add indicator for deck-builder videos
+  // Deck builder specific properties
   isDeckBuilderVideo?: boolean;
   deckBuilderSlide?: string;
+  deckBuilderModuleId?: string; // To store the deck builder specific module
 }
 
 export type UserRole = 'user' | 'admin';

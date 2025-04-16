@@ -1,5 +1,5 @@
 
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useVideos } from "@/hooks/useVideos";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import VideoCard from "@/components/VideoCard";
 import { PATHS } from "@/lib/constants";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -23,6 +22,7 @@ const DECK_BUILDER_TEMPLATE_URL = "https://www.canva.com/design/DAGIgXCPhJk/DCxX
 const VideoPlayerPage = () => {
   const { videoId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const {
     getVideoById,
@@ -36,14 +36,14 @@ const VideoPlayerPage = () => {
   const [module, setModule] = useState(
     video ? getModule(video.moduleId) : null
   );
-  const [relatedVideos, setRelatedVideos] = useState(
-    module ? getVideosByModule(module.id).filter(v => v.id !== videoId) : []
-  );
   const [isCompleted, setIsCompleted] = useState(video?.completed || false);
   
   // Check if this is from the deck builder page
   const isDeckBuilderVideo = location.search.includes('deckBuilder=true') || video?.isDeckBuilderVideo;
   const deckBuilderSlide = new URLSearchParams(location.search).get('slide') || video?.deckBuilderSlide;
+  
+  // Get related videos based on context (deck builder or regular module)
+  const [relatedVideos, setRelatedVideos] = useState<any[]>([]);
 
   // Update state when videoId changes
   useEffect(() => {
@@ -52,24 +52,59 @@ const VideoPlayerPage = () => {
       setVideo(currentVideo);
       
       if (currentVideo) {
+        // Get the right module
         const currentModule = getModule(currentVideo.moduleId);
         setModule(currentModule);
         
-        if (currentModule) {
+        setIsCompleted(currentVideo.completed || false);
+        
+        // Choose related videos based on context
+        if (isDeckBuilderVideo) {
+          // For deck builder, filter videos with the same deck builder slide
+          const searchParams = new URLSearchParams(location.search);
+          const slide = searchParams.get('slide') || currentVideo.deckBuilderSlide;
+          
+          // Get videos that are either:
+          // 1. From the same module if regular videos
+          // 2. Have the same deck builder slide number
+          const deckBuilderRelated = slide ? 
+            getVideos().filter(v => 
+              (v.deckBuilderSlide === slide || v.isDeckBuilderVideo) && 
+              v.id !== videoId
+            ) : 
+            getVideos().filter(v => v.isDeckBuilderVideo && v.id !== videoId);
+            
+          setRelatedVideos(deckBuilderRelated);
+        } else if (currentModule) {
+          // For regular videos, show other videos from the same module
           setRelatedVideos(
             getVideosByModule(currentModule.id).filter(v => v.id !== videoId)
           );
+        } else {
+          // Fallback to empty array
+          setRelatedVideos([]);
         }
-        
-        setIsCompleted(currentVideo.completed || false);
       }
     }
-  }, [videoId, getVideoById, getModule, getVideosByModule]);
+  }, [videoId, getVideoById, getModule, getVideosByModule, location.search, isDeckBuilderVideo]);
+
+  // Helper function to get all videos
+  const getVideos = () => {
+    return getVideosByModule("") || [];
+  };
 
   const handleCompletionToggle = () => {
     if (videoId && !isCompleted) {
       markVideoAsCompleted(videoId);
       setIsCompleted(true);
+    }
+  };
+
+  const handleBackClick = () => {
+    if (isDeckBuilderVideo) {
+      navigate(PATHS.BUILD_YOUR_DECK);
+    } else {
+      navigate(PATHS.KNOWLEDGE_CENTER);
     }
   };
 
@@ -114,16 +149,14 @@ const VideoPlayerPage = () => {
     );
   }
 
-  const youtubeEmbedId = getYoutubeEmbedId(video.youtubeId);
+  const youtubeEmbedId = getYoutubeEmbedId(video.youtubeId || '');
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center mb-4">
-        <Button variant="ghost" size="sm" asChild className="mr-2">
-          <Link to={isDeckBuilderVideo ? PATHS.BUILD_YOUR_DECK : PATHS.KNOWLEDGE_CENTER}>
-            <ArrowLeft className="h-4 w-4 mr-1" /> 
-            {isDeckBuilderVideo ? "Build Your Deck" : "Knowledge Center"}
-          </Link>
+        <Button variant="ghost" size="sm" onClick={handleBackClick} className="mr-2">
+          <ArrowLeft className="h-4 w-4 mr-1" /> 
+          {isDeckBuilderVideo ? "Build Your Deck" : "Knowledge Center"}
         </Button>
         {!isMobile && !isDeckBuilderVideo && (
           <div className="text-gray-500 text-sm">
@@ -150,7 +183,7 @@ const VideoPlayerPage = () => {
 
       {isDeckBuilderVideo && (
         <div className="mb-4 p-4 bg-brand-darkBlue text-white rounded-md">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h3 className="font-medium">Minimum Viable Deck</h3>
               {deckBuilderSlide && (
@@ -210,7 +243,9 @@ const VideoPlayerPage = () => {
               <TabsContent value="about" className="py-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Member Stories</CardTitle>
+                    <CardTitle>
+                      {isDeckBuilderVideo ? 'Deck Builder' : 'Member Stories'}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-700">{video.description}</p>
@@ -286,7 +321,9 @@ const VideoPlayerPage = () => {
           ) : (
             <Card>
               <CardHeader>
-                <CardTitle>Member Stories</CardTitle>
+                <CardTitle>
+                  {isDeckBuilderVideo ? 'Deck Builder' : 'Member Stories'}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700">{video.description}</p>
@@ -310,9 +347,13 @@ const VideoPlayerPage = () => {
 
         {!isMobile && (
           <div className="space-y-4">
-            <h2 className="text-lg font-medium">Member Stories</h2>
+            <h2 className="text-lg font-medium">
+              {isDeckBuilderVideo ? 'Deck Builder Videos' : 'Member Stories'}
+            </h2>
             <p className="text-gray-600 mb-2">
-              Hear from those scientists who've done it!
+              {isDeckBuilderVideo 
+                ? 'Videos to help you build your pitch deck'
+                : 'Hear from those scientists who\'ve done it!'}
             </p>
             
             <h3 className="text-sm font-medium">Videos in this list:</h3>
