@@ -15,6 +15,7 @@ interface DeckBuilderSectionProps {
   videos: Video[];
   slideNumbers?: string;
   templateUrl?: string;
+  moduleId?: string;
 }
 
 const DeckBuilderSection = ({
@@ -23,9 +24,12 @@ const DeckBuilderSection = ({
   description,
   videos,
   slideNumbers,
+  moduleId,
   templateUrl = "https://www.canva.com/design/DAGIgXCPhJk/DCxXlmbcIlqQiUIOW-GWlw/view?utm_content=DAGIgXCPhJk&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink&mode=preview"
 }: DeckBuilderSectionProps) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  console.log(`DeckBuilderSection ${title}: moduleId=${moduleId}, videos=${videos.length}`);
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -42,6 +46,7 @@ const DeckBuilderSection = ({
     ...video,
     isDeckBuilderVideo: true,
     deckBuilderSlide: slideNumbers || "",
+    deckBuilderModuleId: moduleId || video.moduleId, // Use the provided moduleId
   }));
 
   return (
@@ -107,7 +112,7 @@ const DeckBuilderSection = ({
                             ...video,
                             isDeckBuilderVideo: true,
                             deckBuilderSlide: slideNumbers,
-                            deckBuilderModuleId: title.toLowerCase().replace(/\s+/g, '-')
+                            deckBuilderModuleId: moduleId || video.moduleId
                           }} 
                           moduleTitle={title}
                         />

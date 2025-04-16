@@ -28,6 +28,7 @@ const VideoCard = ({ video, showModule = false, moduleTitle }: VideoCardProps) =
     youtubeId: video.youtubeId || "none",
     deckBuilder: video.isDeckBuilderVideo ? "yes" : "no",
     deckBuilderSlide: video.deckBuilderSlide || "none",
+    deckBuilderModuleId: video.deckBuilderModuleId || "none",
     source: video.id.includes("dummy-") ? "dummy data" : "supabase"
   });
   

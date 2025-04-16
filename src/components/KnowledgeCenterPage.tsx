@@ -19,13 +19,21 @@ const KnowledgeCenterPage = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   
+  // Filter out deck builder modules for Knowledge Center
+  const regularModules = modules.filter(m => !m.isDeckBuilderModule);
+  // Filter out videos that belong to deck builder modules
+  const regularVideos = videos.filter(v => {
+    const videoModule = modules.find(m => m.id === v.moduleId);
+    return !videoModule?.isDeckBuilderModule;
+  });
+  
   console.log("KnowledgeCenterPage rendering", { 
     isAuthenticated,
-    videosCount: videos.length,
-    modulesCount: modules.length,
+    videosCount: regularVideos.length,
+    modulesCount: regularModules.length,
     loading,
     error,
-    modules: modules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
+    modules: regularModules.map(m => ({ id: m.id, title: m.title, videoCount: m.videos?.length || 0 }))
   });
 
   useEffect(() => {
@@ -109,7 +117,7 @@ const KnowledgeCenterPage = () => {
         <div className="relative w-full overflow-x-auto mb-6 pb-1 no-scrollbar">
           <TabsList className="inline-flex w-max">
             <TabsTrigger value="all">All Videos</TabsTrigger>
-            {modules.map((module) => (
+            {regularModules.map((module) => (
               <TabsTrigger 
                 key={module.id} 
                 value={module.id}
@@ -133,8 +141,8 @@ const KnowledgeCenterPage = () => {
                       <Skeleton className="h-4 w-2/3 rounded-md" />
                     </div>
                   ))
-              ) : videos.length > 0 ? (
-                videos.map((video) => (
+              ) : regularVideos.length > 0 ? (
+                regularVideos.map((video) => (
                   <VideoCard 
                     key={video.id} 
                     video={video} 
@@ -150,7 +158,7 @@ const KnowledgeCenterPage = () => {
             </div>
           </TabsContent>
           
-          {modules.map((module) => (
+          {regularModules.map((module) => (
             <TabsContent key={module.id} value={module.id}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="md:col-span-3 mb-2">
