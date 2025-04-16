@@ -51,7 +51,10 @@ export const useMembers = () => {
             status: profile.status
           }));
           
-          setMembers(transformedMembers);
+          // Sort the members according to the specified criteria
+          const sortedMembers = sortMembersByProfileCompleteness(transformedMembers);
+          
+          setMembers(sortedMembers);
           console.log("Fetched real member profiles:", transformedMembers.length);
         }
       } else {
@@ -59,7 +62,8 @@ export const useMembers = () => {
         console.log("Not authenticated, using sample user data");
         await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
         const approvedMembers = SAMPLE_USERS.filter(user => user.approved);
-        setMembers(approvedMembers);
+        const sortedMembers = sortMembersByProfileCompleteness(approvedMembers);
+        setMembers(sortedMembers);
       }
     } catch (err) {
       console.error("Error fetching members:", err);
@@ -68,6 +72,45 @@ export const useMembers = () => {
       setLoading(false);
     }
   }, [isAuthenticated]);
+
+  // Function to calculate profile completeness score
+  const calculateProfileCompleteness = (member: UserProfile): number => {
+    let score = 0;
+    
+    // Check existence of each field that indicates profile completeness
+    if (member.firstName) score += 1;
+    if (member.lastName) score += 1;
+    if (member.email) score += 1;
+    if (member.linkedIn) score += 1;
+    if (member.institution) score += 1;
+    if (member.location) score += 1;
+    if (member.role) score += 1;
+    if (member.bio || member.about) score += 1;
+    if (member.twitterHandle) score += 1;
+    if (member.expertise) score += 1;
+    
+    return score;
+  };
+
+  // Function to sort members by the specified criteria
+  const sortMembersByProfileCompleteness = (memberList: UserProfile[]): UserProfile[] => {
+    return [...memberList].sort((a, b) => {
+      // First, prioritize members with avatars
+      if (a.avatar && !b.avatar) return -1;
+      if (!a.avatar && b.avatar) return 1;
+      
+      // Within groups (with avatar or without), sort by profile completeness
+      const aCompletenessScore = calculateProfileCompleteness(a);
+      const bCompletenessScore = calculateProfileCompleteness(b);
+      
+      if (aCompletenessScore !== bCompletenessScore) {
+        return bCompletenessScore - aCompletenessScore; // Higher score first
+      }
+      
+      // If completeness score is the same, sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  };
 
   useEffect(() => {
     fetchMembers();

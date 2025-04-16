@@ -32,7 +32,7 @@ const MemberDirectoryPage = () => {
         >
           <Input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by name, expertise, or institution..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1"
@@ -43,9 +43,9 @@ const MemberDirectoryPage = () => {
         </form>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {loading ? (
-          Array(6)
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array(6)
             .fill(0)
             .map((_, index) => (
               <div key={index} className="border rounded-lg p-6 space-y-4">
@@ -61,21 +61,27 @@ const MemberDirectoryPage = () => {
                   <Skeleton className="h-3 w-2/3" />
                 </div>
               </div>
-            ))
-        ) : filteredMembers.length > 0 ? (
-          filteredMembers.map((member) => (
-            <MemberCard key={member.id} member={member} />
-          ))
-        ) : (
-          <div className="col-span-2 text-center py-12">
-            <Search className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-xl font-medium mb-2">No members found</h2>
-            <p className="text-gray-500">
-              Try adjusting your search terms or filters
-            </p>
-          </div>
-        )}
-      </div>
+            ))}
+        </div>
+      ) : (
+        <>
+          {filteredMembers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredMembers.map((member) => (
+                <MemberCard key={member.id} member={member} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Search className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h2 className="text-xl font-medium mb-2">No members found</h2>
+              <p className="text-gray-500">
+                Try adjusting your search terms
+              </p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
