@@ -1,4 +1,3 @@
-
 export interface UserProfile {
   id: string;
   firstName: string;
@@ -33,13 +32,14 @@ export interface Video {
   id: string;
   moduleId: string;
   title: string;
-  description: string;
-  youtubeId: string;
-  duration: string;
-  order: number;
-  presenter: string;
-  thumbnailUrl: string;
+  description?: string;
+  youtubeId?: string;
+  duration?: string;
+  order?: number;
+  presenter?: string;
+  thumbnailUrl?: string;
   completed?: boolean;
+  created_at?: string;
 }
 
 export type UserRole = 'user' | 'admin';
