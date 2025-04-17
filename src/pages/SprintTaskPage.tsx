@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useSprintTasks } from "@/hooks/useSprintTasks";
-import { SprintTask, UserSprintProgress } from "@/types/sprint";
+import { SprintTask, UserSprintProgress, TaskOption } from "@/types/sprint";
 import FileUploader from "@/components/sprint/FileUploader";
 import UploadedFileView from "@/components/sprint/UploadedFileView";
 import QuestionForm from "@/components/sprint/QuestionForm";
@@ -36,18 +36,32 @@ const SprintTaskPage = () => {
       if (error) throw error;
       
       // Transform the options to match TaskOption[] type
-      if (data && data.options) {
+      let parsedOptions: TaskOption[] | null = null;
+        
+      if (data.options) {
         try {
           if (typeof data.options === 'string') {
-            data.options = JSON.parse(data.options);
+            parsedOptions = JSON.parse(data.options);
+          } else {
+            // If it's already an object/array from Supabase
+            parsedOptions = data.options as unknown as TaskOption[];
           }
         } catch (e) {
           console.error('Failed to parse options:', e);
-          data.options = null;
+          parsedOptions = null;
         }
       }
       
-      return data as SprintTask;
+      return {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        order_index: data.order_index,
+        upload_required: data.upload_required,
+        content: data.content,
+        question: data.question,
+        options: parsedOptions
+      } as SprintTask;
     },
     enabled: !!taskId
   });
@@ -68,18 +82,33 @@ const SprintTaskPage = () => {
       if (error) throw error;
       
       // Transform the answers to ensure it's a proper Record
+      let parsedAnswers: Record<string, any> | null = null;
+        
       if (data && data.answers) {
         try {
           if (typeof data.answers === 'string') {
-            data.answers = JSON.parse(data.answers);
+            parsedAnswers = JSON.parse(data.answers);
+          } else {
+            // If it's already an object from Supabase
+            parsedAnswers = data.answers as Record<string, any>;
           }
         } catch (e) {
           console.error('Failed to parse answers:', e);
-          data.answers = null;
+          parsedAnswers = null;
         }
       }
       
-      return data as UserSprintProgress;
+      if (!data) return null;
+      
+      return {
+        id: data.id,
+        user_id: data.user_id,
+        task_id: data.task_id,
+        completed: data.completed,
+        file_id: data.file_id,
+        answers: parsedAnswers,
+        completed_at: data.completed_at
+      } as UserSprintProgress;
     },
     enabled: !!user && !!taskId
   });

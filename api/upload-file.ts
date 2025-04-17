@@ -1,9 +1,10 @@
+
 // /api/upload-file.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { google } from 'googleapis';
-import formidable, { File } from 'formidable';
-import fs from 'fs';
 import { IncomingForm } from 'formidable';
+import fs from 'fs';
+import type { File, Fields, Files } from 'formidable';
 
 // Allow file parsing
 export const config = {
@@ -12,7 +13,7 @@ export const config = {
   },
 };
 
-const parseForm = (req: VercelRequest): Promise<{ fields: formidable.Fields; files: formidable.Files }> =>
+const parseForm = (req: VercelRequest): Promise<{ fields: Fields; files: Files }> =>
   new Promise((resolve, reject) => {
     const form = new IncomingForm({ multiples: false });
     form.parse(req, (err, fields, files) => {

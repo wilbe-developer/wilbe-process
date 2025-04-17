@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { SprintTask, UserSprintProgress, UserTaskProgress } from "@/types/sprint";
+import { SprintTask, UserSprintProgress, UserTaskProgress, TaskOption } from "@/types/sprint";
 import { useAuth } from "./useAuth";
 
 export const useSprintTasks = () => {
@@ -22,18 +22,32 @@ export const useSprintTasks = () => {
       // Process and transform the data to ensure type safety
       return (data || []).map(task => {
         // Convert options to proper format if needed
+        let parsedOptions: TaskOption[] | null = null;
+        
         if (task.options) {
           try {
             if (typeof task.options === 'string') {
-              task.options = JSON.parse(task.options);
+              parsedOptions = JSON.parse(task.options);
+            } else {
+              // If it's already an object/array from Supabase
+              parsedOptions = task.options as unknown as TaskOption[];
             }
           } catch (e) {
             console.error('Failed to parse options for task:', task.id, e);
-            task.options = null;
+            parsedOptions = null;
           }
         }
         
-        return task as SprintTask;
+        return {
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          order_index: task.order_index,
+          upload_required: task.upload_required,
+          content: task.content,
+          question: task.question,
+          options: parsedOptions
+        } as SprintTask;
       });
     },
     enabled: !!user,
@@ -55,18 +69,31 @@ export const useSprintTasks = () => {
       // Process and transform the data to ensure type safety
       return (data || []).map(progress => {
         // Convert answers to proper Record type if needed
+        let parsedAnswers: Record<string, any> | null = null;
+        
         if (progress.answers) {
           try {
             if (typeof progress.answers === 'string') {
-              progress.answers = JSON.parse(progress.answers);
+              parsedAnswers = JSON.parse(progress.answers);
+            } else {
+              // If it's already an object from Supabase
+              parsedAnswers = progress.answers as Record<string, any>;
             }
           } catch (e) {
             console.error('Failed to parse answers for progress:', progress.id, e);
-            progress.answers = null;
+            parsedAnswers = null;
           }
         }
         
-        return progress as UserSprintProgress;
+        return {
+          id: progress.id,
+          user_id: progress.user_id,
+          task_id: progress.task_id,
+          completed: progress.completed,
+          file_id: progress.file_id,
+          answers: parsedAnswers,
+          completed_at: progress.completed_at
+        } as UserSprintProgress;
       });
     },
     enabled: !!user,
