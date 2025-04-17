@@ -15,7 +15,12 @@ export const config = {
 
 const parseForm = (req: VercelRequest): Promise<{ fields: Fields; files: Files }> =>
   new Promise((resolve, reject) => {
-    const form = new IncomingForm({ multiples: false });
+    const form = new IncomingForm({ 
+      multiples: false,
+      keepExtensions: true,
+      uploadDir: '/tmp' // Specify writable directory for Vercel serverless environment
+    });
+    
     form.parse(req, (err, fields, files) => {
       if (err) reject(err);
       else resolve({ fields, files });
@@ -27,8 +32,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { files } = await parseForm(req);
-    const file = files.file as File;
-    if (!file) return res.status(400).json({ error: 'No file uploaded' });
+    
+    // Handle files.file being potentially an array or a single file
+    const file = Array.isArray(files.file) ? files.file[0] : (files.file as File);
+    
+    if (!file || !file.filepath) {
+      console.error('No file or filepath missing:', file);
+      return res.status(400).json({ error: 'No file uploaded or filepath missing' });
+    }
 
     // Use environment variables directly, avoid top-level await or other ESM-specific features
     const rawB64 = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || '';
