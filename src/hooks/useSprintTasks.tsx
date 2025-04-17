@@ -18,7 +18,23 @@ export const useSprintTasks = () => {
         .order("order_index");
       
       if (error) throw error;
-      return data || [];
+      
+      // Process and transform the data to ensure type safety
+      return (data || []).map(task => {
+        // Convert options to proper format if needed
+        if (task.options) {
+          try {
+            if (typeof task.options === 'string') {
+              task.options = JSON.parse(task.options);
+            }
+          } catch (e) {
+            console.error('Failed to parse options for task:', task.id, e);
+            task.options = null;
+          }
+        }
+        
+        return task as SprintTask;
+      });
     },
     enabled: !!user,
   });
@@ -35,7 +51,23 @@ export const useSprintTasks = () => {
         .eq("user_id", user.id);
       
       if (error) throw error;
-      return data || [];
+      
+      // Process and transform the data to ensure type safety
+      return (data || []).map(progress => {
+        // Convert answers to proper Record type if needed
+        if (progress.answers) {
+          try {
+            if (typeof progress.answers === 'string') {
+              progress.answers = JSON.parse(progress.answers);
+            }
+          } catch (e) {
+            console.error('Failed to parse answers for progress:', progress.id, e);
+            progress.answers = null;
+          }
+        }
+        
+        return progress as UserSprintProgress;
+      });
     },
     enabled: !!user,
   });

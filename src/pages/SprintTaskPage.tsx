@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useSprintTasks } from "@/hooks/useSprintTasks";
 import { SprintTask, UserSprintProgress } from "@/types/sprint";
 import FileUploader from "@/components/sprint/FileUploader";
@@ -34,7 +34,20 @@ const SprintTaskPage = () => {
         .single();
       
       if (error) throw error;
-      return data;
+      
+      // Transform the options to match TaskOption[] type
+      if (data && data.options) {
+        try {
+          if (typeof data.options === 'string') {
+            data.options = JSON.parse(data.options);
+          }
+        } catch (e) {
+          console.error('Failed to parse options:', e);
+          data.options = null;
+        }
+      }
+      
+      return data as SprintTask;
     },
     enabled: !!taskId
   });
@@ -53,7 +66,20 @@ const SprintTaskPage = () => {
         .maybeSingle();
       
       if (error) throw error;
-      return data;
+      
+      // Transform the answers to ensure it's a proper Record
+      if (data && data.answers) {
+        try {
+          if (typeof data.answers === 'string') {
+            data.answers = JSON.parse(data.answers);
+          }
+        } catch (e) {
+          console.error('Failed to parse answers:', e);
+          data.answers = null;
+        }
+      }
+      
+      return data as UserSprintProgress;
     },
     enabled: !!user && !!taskId
   });
