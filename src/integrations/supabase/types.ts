@@ -159,6 +159,117 @@ export type Database = {
         }
         Relationships: []
       }
+      sprint_tasks: {
+        Row: {
+          content: string | null
+          description: string | null
+          id: string
+          options: Json | null
+          order_index: number
+          question: string | null
+          title: string
+          upload_required: boolean
+        }
+        Insert: {
+          content?: string | null
+          description?: string | null
+          id?: string
+          options?: Json | null
+          order_index: number
+          question?: string | null
+          title: string
+          upload_required?: boolean
+        }
+        Update: {
+          content?: string | null
+          description?: string | null
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question?: string | null
+          title?: string
+          upload_required?: boolean
+        }
+        Relationships: []
+      }
+      user_files: {
+        Row: {
+          download_url: string
+          drive_file_id: string
+          file_name: string
+          id: string
+          uploaded_at: string
+          user_id: string
+          view_url: string
+        }
+        Insert: {
+          download_url: string
+          drive_file_id: string
+          file_name: string
+          id?: string
+          uploaded_at?: string
+          user_id: string
+          view_url: string
+        }
+        Update: {
+          download_url?: string
+          drive_file_id?: string
+          file_name?: string
+          id?: string
+          uploaded_at?: string
+          user_id?: string
+          view_url?: string
+        }
+        Relationships: []
+      }
+      user_sprint_progress: {
+        Row: {
+          answers: Json | null
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          file_id: string | null
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sprint_progress_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "user_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_sprint_progress_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "sprint_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_progress: {
         Row: {
           completed: boolean | null

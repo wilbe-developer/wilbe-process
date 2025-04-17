@@ -9,6 +9,7 @@ import { PATHS } from "@/lib/constants";
 
 // Layout
 import Layout from "@/components/Layout";
+import SprintLayout from "@/components/sprint/SprintLayout";
 
 // Pages
 import HomePage from "@/pages/HomePage";
@@ -25,6 +26,9 @@ import LandingPage from "@/components/LandingPageOld";
 import BsfPage from "@/components/BsfOld";
 import EventsPage from "@/pages/EventsPage";
 import BuildYourDeckPage from "@/pages/BuildYourDeckPage";
+import SprintPage from "@/pages/SprintPage";
+import SprintDashboardPage from "@/pages/SprintDashboardPage";
+import SprintTaskPage from "@/pages/SprintTaskPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -49,6 +53,15 @@ const App = () => (
               <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
               <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
               <Route path={PATHS.BSF_PAGE} element={<BsfPage />} />
+
+              {/* Sprint routes */}
+              <Route path={PATHS.SPRINT} element={<SprintPage />} />
+              <Route element={<SprintLayout />}>
+                <Route element={<ProtectedRoute />}>
+                  <Route path={PATHS.SPRINT_DASHBOARD} element={<SprintDashboardPage />} />
+                  <Route path={`${PATHS.SPRINT_TASK}/:taskId`} element={<SprintTaskPage />} />
+                </Route>
+              </Route>
 
               {/* Protected routes */}
               <Route element={<Layout />}>
