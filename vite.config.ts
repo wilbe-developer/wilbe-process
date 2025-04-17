@@ -6,7 +6,7 @@ import path from "path";
 
 // Dynamically import the componentTagger only in development mode
 // to avoid ESM/CommonJS conflicts
-const getPlugins = async (mode) => {
+const getPlugins = async (mode: string) => {
   const plugins = [
     react(),
     svgr(), // ✅ added here
