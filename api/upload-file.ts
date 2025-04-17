@@ -30,7 +30,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
     const rawB64 = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || '';
+    console.log("📦 rawB64 length:", rawB64.length);
+    
     const jsonString = Buffer.from(rawB64, 'base64').toString('utf-8');
+    console.log("📄 Decoded JSON preview:", jsonString.slice(0, 100));
+    
     const serviceAccount = JSON.parse(jsonString);
 
     const auth = new google.auth.JWT(
