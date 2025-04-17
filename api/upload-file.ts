@@ -30,6 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const file = files.file as File;
     if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
+    // Use environment variables directly, avoid top-level await or other ESM-specific features
     const rawB64 = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || '';
     console.log("📦 rawB64 length:", rawB64.length);
     
