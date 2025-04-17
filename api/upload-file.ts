@@ -1,4 +1,3 @@
-
 // /api/upload-file.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { google } from 'googleapis';
@@ -18,7 +17,7 @@ const parseForm = (req: VercelRequest): Promise<{ fields: Fields; files: Files }
     const form = new IncomingForm({ 
       multiples: false,
       keepExtensions: true,
-      uploadDir: '/tmp' // Specify writable directory for Vercel serverless environment
+      uploadDir: '/tmp' // Writable directory for Vercel serverless environment
     });
     
     form.parse(req, (err, fields, files) => {
@@ -33,7 +32,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { files } = await parseForm(req);
     
-    // Handle files.file being potentially an array or a single file
     const file = Array.isArray(files.file) ? files.file[0] : (files.file as File);
     
     if (!file || !file.filepath) {
@@ -41,7 +39,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'No file uploaded or filepath missing' });
     }
 
-    // Use environment variables directly, avoid top-level await or other ESM-specific features
     const rawB64 = process.env.GOOGLE_SERVICE_ACCOUNT_B64 || '';
     console.log("📦 rawB64 length:", rawB64.length);
     
@@ -69,17 +66,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         body: fs.createReadStream(file.filepath),
       },
       fields: 'id, name, webViewLink, webContentLink',
+      supportsAllDrives: true, // ✅ Required for Shared Drives
     });
 
     const fileId = uploadResponse.data.id;
 
-    // Share file with link access
     await drive.permissions.create({
       fileId: fileId!,
       requestBody: {
         role: 'reader',
         type: 'anyone',
       },
+      supportsAllDrives: true, // ✅ Also needed here
     });
 
     res.status(200).json({
