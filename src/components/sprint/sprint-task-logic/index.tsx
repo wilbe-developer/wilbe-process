@@ -77,7 +77,7 @@ export const SprintTaskLogicRouter = ({
             isCompleted={isCompleted}
             onComplete={onComplete}
             task={task}
-            hideMainQuestion={true} // Skip main q, show quick edit
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -98,6 +98,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -112,6 +113,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -126,6 +128,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -140,6 +143,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -160,6 +164,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -175,6 +180,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -189,6 +195,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -203,6 +210,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
@@ -217,6 +225,7 @@ export const SprintTaskLogicRouter = ({
             task={task}
             isCompleted={isCompleted}
             onComplete={onComplete}
+            hideMainQuestion={true}
           />
         </SprintProfileShowOrAsk>
       );
