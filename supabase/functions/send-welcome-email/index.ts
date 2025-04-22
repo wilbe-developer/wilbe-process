@@ -21,14 +21,32 @@ serve(async (req) => {
   try {
     const { to, name, sprintUrl } = await req.json() as WelcomeEmailData;
 
-    // In a real implementation, this would use a service like Resend or SendGrid
-    console.log(`Sending welcome email to ${to} (${name}) with sprint URL: ${sprintUrl}`);
+    // Log the received data
+    console.log(`Received request to send welcome email to ${to} (${name}) with sprint URL: ${sprintUrl}`);
+
+    // In a production implementation, this would use a service like Resend or SendGrid
+    // For now, we'll just log the details and return success
+    console.log(`TO: ${to}`);
+    console.log(`NAME: ${name}`);
+    console.log(`SPRINT_URL: ${sprintUrl}`);
+    console.log(`Sending welcome email to ${to} with personalized sprint URL: ${sprintUrl}`);
+
+    // Demo email content (not actually sent in this implementation)
+    const emailContent = `
+      <h1>Welcome to Your Founder Sprint, ${name}!</h1>
+      <p>We're excited to have you join our founder community. Your personalized sprint journey is ready.</p>
+      <p>To get started, <a href="${sprintUrl}">click here to access your sprint dashboard</a>.</p>
+      <p>This email was triggered by the signup process and would be sent to: ${to}</p>
+    `;
+
+    console.log("Email content would be:");
+    console.log(emailContent);
 
     // For now, we'll just return success
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Welcome email sent successfully",
+        message: "Welcome email would be sent (development mode)",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

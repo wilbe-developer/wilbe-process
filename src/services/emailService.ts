@@ -1,19 +1,19 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-interface SendEmailProps {
-  to: string;
-  subject: string;
-  body: string;
-}
-
 export const sendWelcomeEmail = async (email: string, name: string) => {
   try {
+    // Build the sprint URL with the current origin
+    const sprintUrl = `${window.location.origin}/sprint-dashboard`;
+    
+    console.log(`Sending welcome email to ${email} (${name}) with sprint URL: ${sprintUrl}`);
+    
+    // Call the Supabase Edge Function that sends welcome emails
     const { data, error } = await supabase.functions.invoke('send-welcome-email', {
-      body: {
-        to: email,
-        name: name,
-        sprintUrl: `${window.location.origin}/sprint-dashboard`
+      body: { 
+        to: email, 
+        name: name, 
+        sprintUrl: sprintUrl 
       }
     });
     
@@ -22,9 +22,10 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
       return false;
     }
     
+    console.log('Welcome email sent successfully:', data);
     return true;
   } catch (error) {
-    console.error('Error calling email function:', error);
+    console.error('Exception sending welcome email:', error);
     return false;
   }
-}
+};

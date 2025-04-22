@@ -108,24 +108,40 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
       ) : null;
     
     case 'conditional':
-      return step.conditional ? (
-        <>
-          {step.conditional.map((condition, index) => {
-            if (value === condition.value) {
-              return (
-                <div key={index}>
-                  {React.cloneElement(condition.component as React.ReactElement, {
-                    value: value || '',
-                    onChange: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => 
-                      onChange(step.id, e.target.value)
-                  })}
-                </div>
-              );
-            }
-            return null;
-          })}
-        </>
-      ) : null;
+      if (!step.conditional) return null;
+      
+      // Find the conditional that matches one of our selections
+      const matchedCondition = step.conditional.find(condition => {
+        const conditionField = condition.field;
+        const conditionValue = condition.value;
+        return value?.[conditionField] === conditionValue;
+      });
+      
+      // If we have a matching condition, render the appropriate component
+      if (matchedCondition) {
+        const { componentType, componentProps = {} } = matchedCondition;
+        
+        if (componentType === 'textarea') {
+          return (
+            <Textarea
+              value={value || ''}
+              onChange={(e) => onChange(step.id, e.target.value)}
+              placeholder={componentProps.placeholder || "Your answer"}
+            />
+          );
+        } else if (componentType === 'input') {
+          return (
+            <Input
+              value={value || ''}
+              onChange={(e) => onChange(step.id, e.target.value)}
+              placeholder={componentProps.placeholder || "Your answer"}
+              type={componentProps.type || "text"}
+            />
+          );
+        }
+      }
+      
+      return null;
     
     default:
       return null;

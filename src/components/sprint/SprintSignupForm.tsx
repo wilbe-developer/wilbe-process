@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useSprintSignup } from "@/hooks/useSprintSignup";
 import { SprintFormField } from "./SprintFormField";
 import { steps } from "./SprintSignupSteps";
+import { useAuth } from "@/hooks/useAuth";
 
 const SprintSignupForm = () => {
   const {
@@ -18,8 +19,11 @@ const SprintSignupForm = () => {
     handleFileUpload,
     goToNextStep,
     goToPreviousStep,
-    silentSignup
+    silentSignup,
+    shouldRenderCurrentStep
   } = useSprintSignup();
+  
+  const { isAuthenticated, user } = useAuth();
 
   // Check if the current step is answered
   const isCurrentStepAnswered = () => {
@@ -55,6 +59,12 @@ const SprintSignupForm = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">⚡ Founder Sprint Sign-Up</h1>
         <p className="text-muted-foreground">We surface great founders. We help everyone else.</p>
+        
+        {isAuthenticated && user && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-blue-800">
+            <p>Welcome back, {user.firstName}! Complete this form to personalize your founder sprint.</p>
+          </div>
+        )}
       </div>
       
       <div className="mb-4 flex justify-between items-center">
@@ -69,25 +79,27 @@ const SprintSignupForm = () => {
         </div>
       </div>
       
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex flex-col space-y-4">
-            <h2 className="text-2xl font-semibold">{currentStepData.question}</h2>
-            {currentStepData.description && (
-              <p className="text-muted-foreground">{currentStepData.description}</p>
-            )}
-            
-            <SprintFormField
-              step={currentStepData}
-              value={answers[currentStepData.id]}
-              onChange={handleChange}
-              onFileUpload={handleFileUpload}
-              toggleMultiSelect={toggleMultiSelect}
-              uploadedFile={uploadedFile}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {shouldRenderCurrentStep() && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-4">
+              <h2 className="text-2xl font-semibold">{currentStepData.question}</h2>
+              {currentStepData.description && (
+                <p className="text-muted-foreground">{currentStepData.description}</p>
+              )}
+              
+              <SprintFormField
+                step={currentStepData}
+                value={answers[currentStepData.id]}
+                onChange={handleChange}
+                onFileUpload={handleFileUpload}
+                toggleMultiSelect={toggleMultiSelect}
+                uploadedFile={uploadedFile}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="flex justify-between">
         <Button
@@ -104,7 +116,7 @@ const SprintSignupForm = () => {
             disabled={!isCurrentStepAnswered() || isSubmitting}
             className="ml-auto"
           >
-            {isSubmitting ? "Creating your sprint..." : "Personalize My Sprint"} 
+            {isSubmitting ? "Creating your sprint..." : isAuthenticated ? "Update My Sprint" : "Personalize My Sprint"} 
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         ) : (
