@@ -25,7 +25,7 @@ export const products: Product[] = [
     id: 2,
     name: "What Wilbe",
     image: "/lovable-uploads/12df36cf-639b-4312-9038-c34d69380df1.png", // What Wilbe Tee
-    description: '"What is now and what Wilbe" t-shirt in navy blue',
+    description: 'What is now & what Wilbe t-shirt in navy blue',
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
   },
@@ -41,7 +41,7 @@ export const products: Product[] = [
     id: 4,
     name: "Wilbe on Campus",
     image: "/lovable-uploads/fdf11930-f17c-4bb7-b2a1-91a164c453d3.png", // Wilbe Hoodie
-    description: "Wilbe hoodie in navy blue in a university campus font.",
+    description: "Wilbe hoodie in navy blue in a university campus font",
     materials: ["100% cotton"],
     sizes: ["S", "M", "L", "XL"]
   },
