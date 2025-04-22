@@ -18,7 +18,7 @@ const ScienceTaskLogic: React.FC<ScienceTaskLogicProps> = ({
     ...(hideMainQuestion ? [] : [
       {
         type: 'question' as const,
-        question: 'Did you come up with an invention or discovery that you're trying to commercialize?',
+        question: 'Did you come up with an invention or discovery that you\'re trying to commercialize?',
         options: [
           { label: 'Yes', value: 'Yes' },
           { label: 'No', value: 'No' }

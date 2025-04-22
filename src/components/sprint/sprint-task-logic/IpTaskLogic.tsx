@@ -26,7 +26,7 @@ const IpTaskLogic: React.FC<IpTaskLogicProps> = ({
   
   const mainQuestion = {
     type: 'question' as const,
-    question: 'Is your company reliant on something you've invented / created at a university?',
+    question: 'Is your company reliant on something you\'ve invented / created at a university?',
     options: [
       { label: 'Yes', value: 'Yes' },
       { label: 'No', value: 'No' }
