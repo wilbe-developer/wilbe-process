@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useSprintTasks } from '@/hooks/useSprintTasks.tsx';
 import { SprintTask, UserTaskProgress } from '@/types/sprint';
+import { SprintTaskLogicRouter } from "@/components/sprint/sprint-task-logic";
 import QuestionForm from '@/components/sprint/QuestionForm';
 import FileUploader from '@/components/sprint/FileUploader';
 import UploadedFileView from '@/components/sprint/UploadedFileView';
@@ -10,10 +11,10 @@ import UploadedFileView from '@/components/sprint/UploadedFileView';
 const SprintTaskPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const { tasksWithProgress, updateProgress, isLoading } = useSprintTasks();
-  
+
   // Find the current task
   const currentTask = tasksWithProgress.find(task => task.id === taskId) as UserTaskProgress;
-  
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -21,14 +22,14 @@ const SprintTaskPage = () => {
       </div>
     );
   }
-  
+
   if (!currentTask) {
     return <div className="text-center p-8">Task not found</div>;
   }
-  
+
   const isCompleted = currentTask.progress?.completed || false;
   const hasUploadedFile = !!currentTask.progress?.file_id;
-  
+
   const handleTaskCompletion = async (fileId?: string) => {
     await updateProgress.mutateAsync({
       taskId: currentTask.id,
@@ -36,7 +37,7 @@ const SprintTaskPage = () => {
       fileId
     });
   };
-  
+
   const handleAnswerSubmission = async (answers: Record<string, any>) => {
     await updateProgress.mutateAsync({
       taskId: currentTask.id,
@@ -44,40 +45,53 @@ const SprintTaskPage = () => {
       answers
     });
   };
-  
+
+  // Try loading a logic component for this task
+  const LogicComponent = (
+    <SprintTaskLogicRouter
+      task={currentTask}
+      isCompleted={isCompleted}
+      onComplete={handleTaskCompletion}
+    />
+  );
+
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-2">{currentTask.title}</h1>
       <p className="text-gray-600 mb-8">{currentTask.description}</p>
-      
+
       {currentTask.content && (
         <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
           <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: currentTask.content }} />
         </div>
       )}
-      
+
       <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
-        {currentTask.upload_required ? (
-          hasUploadedFile ? (
-            <UploadedFileView 
-              fileId={currentTask.progress?.file_id || ''} 
-              isCompleted={isCompleted}
-            />
-          ) : (
-            <FileUploader 
-              onFileUploaded={(fileId) => handleTaskCompletion(fileId)}
-              onUploadComplete={handleTaskCompletion}
-              isCompleted={isCompleted}
-            />
-          )
-        ) : (
-          currentTask.question && (
-            <QuestionForm 
-              task={currentTask} 
-              onSubmit={handleAnswerSubmission}
-              isCompleted={isCompleted}
-            />
-          )
+        {LogicComponent || (
+          <>
+            {currentTask.upload_required ? (
+              hasUploadedFile ? (
+                <UploadedFileView
+                  fileId={currentTask.progress?.file_id || ''}
+                  isCompleted={isCompleted}
+                />
+              ) : (
+                <FileUploader
+                  onFileUploaded={(fileId) => handleTaskCompletion(fileId)}
+                  onUploadComplete={handleTaskCompletion}
+                  isCompleted={isCompleted}
+                />
+              )
+            ) : (
+              currentTask.question && (
+                <QuestionForm
+                  task={currentTask}
+                  onSubmit={handleAnswerSubmission}
+                  isCompleted={isCompleted}
+                />
+              )
+            )}
+          </>
         )}
       </div>
     </div>
