@@ -1,10 +1,8 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SprintTask, UserSprintProgress, UserTaskProgress, TaskOption } from "@/types/sprint";
 import { useAuth } from "./useAuth";
 
-// Rename the hook to match the export
 export const useSprintTasks = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();

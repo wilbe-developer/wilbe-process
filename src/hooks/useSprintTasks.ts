@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SprintSignupAnswers } from "@/types/sprint-signup";
 
@@ -15,7 +14,7 @@ export const useSprintTasksManager = () => {
           ? "Review and improve your existing pitch deck" 
           : "Create a pitch deck following our template",
         category: "storytelling",
-        required_upload: true,
+        upload_required: true,
         order_index: 1,
         status: "pending"
       });
@@ -27,7 +26,7 @@ export const useSprintTasksManager = () => {
           title: "Develop Team Building Plan",
           description: "Create a hiring plan to address the skills gap in your venture",
           category: "team",
-          required_upload: true,
+          upload_required: true,
           order_index: 2,
           status: "pending"
         });
@@ -37,7 +36,7 @@ export const useSprintTasksManager = () => {
           title: "Team Profile",
           description: "Upload detailed profiles of each team member",
           category: "team",
-          required_upload: true,
+          upload_required: true,
           order_index: 2,
           status: "pending"
         });
@@ -50,7 +49,7 @@ export const useSprintTasksManager = () => {
           title: "Scientific Foundation",
           description: "Upload a one-pager that provides the intuition behind your scientific idea",
           category: "science",
-          required_upload: true,
+          upload_required: true,
           order_index: 3,
           status: "pending"
         });
@@ -63,7 +62,7 @@ export const useSprintTasksManager = () => {
           title: "IP Strategy",
           description: "Document your IP strategy and TTO engagement plan",
           category: "ip",
-          required_upload: true,
+          upload_required: true,
           order_index: 4,
           status: "pending"
         });
@@ -78,7 +77,7 @@ export const useSprintTasksManager = () => {
             ? "Review and refine your problem statement" 
             : "Create a one-pager explaining the core problem your solution addresses",
           category: "business",
-          required_upload: true,
+          upload_required: true,
           order_index: 5,
           status: "pending"
         },
@@ -89,7 +88,7 @@ export const useSprintTasksManager = () => {
             ? "Document your customer conversations and key insights"
             : "Develop a plan to engage with potential customers and validate your solution",
           category: "customer",
-          required_upload: true,
+          upload_required: true,
           order_index: 6,
           status: "pending"
         },
@@ -100,7 +99,7 @@ export const useSprintTasksManager = () => {
             ? "Upload evidence supporting your market analysis and competitive advantage"
             : "Create a comprehensive market analysis and competition overview",
           category: "market",
-          required_upload: true,
+          upload_required: true,
           order_index: 7,
           status: "pending"
         },
@@ -111,7 +110,7 @@ export const useSprintTasksManager = () => {
             ? "Upload your financial plan for review"
             : "Create a financial plan using our template",
           category: "funding",
-          required_upload: true,
+          upload_required: true,
           order_index: 8,
           status: "pending"
         },
@@ -120,7 +119,7 @@ export const useSprintTasksManager = () => {
           title: "Milestone Planning",
           description: "Create a technical and commercial milestone plan",
           category: "execution",
-          required_upload: true,
+          upload_required: true,
           order_index: 9,
           status: "pending"
         },
@@ -129,7 +128,7 @@ export const useSprintTasksManager = () => {
           title: "Vision Document",
           description: "Create a one-pager explaining your long-term vision and industry impact",
           category: "vision",
-          required_upload: true,
+          upload_required: true,
           order_index: 10,
           status: "pending"
         }
