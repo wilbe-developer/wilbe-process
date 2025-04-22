@@ -8,6 +8,7 @@ type Props = {
   isCompleted: boolean;
   onComplete: (fileId?: string) => void;
   task: any;
+  hideMainQuestion?: boolean;
 };
 
 const VIDEO_PLACEHOLDER = (
@@ -30,10 +31,17 @@ const DECK_TEMPLATE_PLACEHOLDER = (
   </div>
 );
 
-const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete }) => {
+const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuestion }) => {
   const [hasDeck, setHasDeck] = useState<string | null>(null);
   const [fitsTemplate, setFitsTemplate] = useState<string | null>(null);
   const [step, setStep] = useState<"q1" | "q2" | "final">("q1");
+
+  // If the main question comes from onboarding, skip question flow
+  React.useEffect(() => {
+    if (hideMainQuestion) {
+      setStep("final");
+    }
+  }, [hideMainQuestion]);
 
   // Handlers for question flow
   const handleFirstAnswer = (answer: string) => {
@@ -59,7 +67,7 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete }) => {
     <div>
       <Card className="mb-8">
         <CardContent className="p-6 flex flex-col space-y-6">
-          {step === "q1" && (
+          {!hideMainQuestion && step === "q1" && (
             <>
               <h2 className="text-xl font-semibold mb-2">Do you have a slide deck for your planned venture?</h2>
               <div className="flex gap-4">
@@ -69,7 +77,7 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete }) => {
             </>
           )}
 
-          {step === "q2" && (
+          {!hideMainQuestion && step === "q2" && (
             <>
               <h2 className="text-xl font-semibold mb-2">Does it fit the 15-slide template?</h2>
               <div className="flex gap-4">
