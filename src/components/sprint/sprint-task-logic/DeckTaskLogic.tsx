@@ -9,6 +9,7 @@ type Props = {
   onComplete: (fileId?: string) => void;
   task: any;
   hideMainQuestion?: boolean;
+  children?: React.ReactNode; // Added children prop
 };
 
 const VIDEO_PLACEHOLDER = (
@@ -31,7 +32,7 @@ const DECK_TEMPLATE_PLACEHOLDER = (
   </div>
 );
 
-const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuestion }) => {
+const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuestion, children }) => {
   const [hasDeck, setHasDeck] = useState<string | null>(null);
   const [fitsTemplate, setFitsTemplate] = useState<string | null>(null);
   const [step, setStep] = useState<"q1" | "q2" | "final">("q1");
@@ -65,6 +66,7 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuest
 
   return (
     <div>
+      {children} {/* Render children prop */}
       <Card className="mb-8">
         <CardContent className="p-6 flex flex-col space-y-6">
           {!hideMainQuestion && step === "q1" && (

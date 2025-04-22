@@ -64,8 +64,9 @@ export const SprintTaskLogicRouter = ({
           task={task}
           hideMainQuestion={true} // Skip main q, show quick edit
         >
-          <SprintProfileShowOrAsk profileKey="has_deck" label="Do you have a deck?" >
-            {/* Never reached because hideMainQuestion for this task */}
+          <SprintProfileShowOrAsk profileKey="has_deck" label="Do you have a deck?">
+            {/* This is now a valid child */}
+            <div>Loading deck question...</div>
           </SprintProfileShowOrAsk>
         </DeckTaskLogic>
       );
@@ -144,19 +145,23 @@ export const SprintTaskLogicRouter = ({
       );
     case "Milestone Planning":
       return (
-        <ExperimentTaskLogic
-          task={task}
-          isCompleted={isCompleted}
-          onComplete={onComplete}
-        />
+        <SprintProfileShowOrAsk profileKey="experiment_validated" label="Have you run an experiment to validate your idea?">
+          <ExperimentTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+          />
+        </SprintProfileShowOrAsk>
       );
     case "Vision Document":
       return (
-        <VisionTaskLogic
-          task={task}
-          isCompleted={isCompleted}
-          onComplete={onComplete}
-        />
+        <SprintProfileShowOrAsk profileKey="industry_changing_vision" label="Will your company change the industry?">
+          <VisionTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+          />
+        </SprintProfileShowOrAsk>
       );
     default:
       return null;

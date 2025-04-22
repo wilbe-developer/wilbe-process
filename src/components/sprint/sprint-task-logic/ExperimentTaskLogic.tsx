@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FileUploader from "@/components/sprint/FileUploader";
 
-const ExperimentTaskLogic = ({ isCompleted, onComplete }: any) => {
+const ExperimentTaskLogic = ({ isCompleted, onComplete, task }: any) => {
   const [answer, setAnswer] = useState<string | null>(null);
   return (
     <Card>

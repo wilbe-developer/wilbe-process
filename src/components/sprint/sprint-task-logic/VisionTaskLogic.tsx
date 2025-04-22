@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FileUploader from "@/components/sprint/FileUploader";
 
-const VisionTaskLogic = ({ isCompleted, onComplete }: any) => {
+const VisionTaskLogic = ({ isCompleted, onComplete, task }: any) => {
   const [answered, setAnswered] = useState<boolean>(false);
   return (
     <Card>

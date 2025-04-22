@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,7 @@ export const SprintProfileQuickEdit: React.FC<SprintProfileQuickEditProps> = ({
       <span>{showValue()}</span>
       <Button
         variant="secondary"
-        size="xs"
+        size="sm"
         className="ml-1 h-6 px-2 py-0.5 text-xs"
         onClick={() => setOpen(true)}
         title={`Change ${label || profileKey}`}
