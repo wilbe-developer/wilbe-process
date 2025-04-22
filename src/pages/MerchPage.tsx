@@ -95,10 +95,10 @@ const MerchPage = () => {
         <>
           <div className="text-center py-12 px-4">
             <h1 className="text-3xl md:text-4xl font-semibold mb-2 text-dark">
-              Welcome to the Wilbe family! Pick your complimentary merch item
+              Welcome to the Wilbe family! 
             </h1>
             <p className="text-gray-600 text-lg max-w-lg mx-auto">
-              Select one item from our collection, on us.
+              Pick your complimentary merch item.
             </p>
           </div>
           <ProductGrid onProductSelect={handleProductSelect} />
