@@ -16,6 +16,7 @@ interface ShippingFormProps {
   selectedProduct: string;
   selectedSize: string;
   disabled?: boolean;
+  onChangeSelection?: () => void; // NEW
 }
 
 export const ShippingForm: React.FC<ShippingFormProps> = ({
@@ -23,6 +24,7 @@ export const ShippingForm: React.FC<ShippingFormProps> = ({
   selectedProduct,
   selectedSize,
   disabled = false,
+  onChangeSelection,
 }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,6 +41,19 @@ export const ShippingForm: React.FC<ShippingFormProps> = ({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {onChangeSelection && (
+          <div className="mb-4 flex justify-center">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-auto"
+              onClick={onChangeSelection}
+              disabled={disabled}
+            >
+              Change selection
+            </Button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
