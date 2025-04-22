@@ -33,6 +33,10 @@ const SprintSignupForm = () => {
     if (currentStepData.type === 'file') return true;
     
     if (currentStepData.type === 'conditional') {
+      if (currentStepData.id === 'funding_details') {
+        return answers.funding_received === 'yes' ? !!answers.funding_details : true;
+      }
+      
       if (currentStepData.conditional) {
         const isConditionMet = currentStepData.conditional.some(condition => 
           answers[condition.field] === condition.value

@@ -248,34 +248,43 @@ export type Database = {
       }
       sprint_tasks: {
         Row: {
+          category: string | null
           content: string | null
           description: string | null
           id: string
           options: Json | null
           order_index: number
           question: string | null
+          required_upload: boolean | null
+          status: string | null
           title: string
           upload_required: boolean
           user_id: string | null
         }
         Insert: {
+          category?: string | null
           content?: string | null
           description?: string | null
           id?: string
           options?: Json | null
           order_index: number
           question?: string | null
+          required_upload?: boolean | null
+          status?: string | null
           title: string
           upload_required?: boolean
           user_id?: string | null
         }
         Update: {
+          category?: string | null
           content?: string | null
           description?: string | null
           id?: string
           options?: Json | null
           order_index?: number
           question?: string | null
+          required_upload?: boolean | null
+          status?: string | null
           title?: string
           upload_required?: boolean
           user_id?: string | null
