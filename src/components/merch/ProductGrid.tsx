@@ -16,7 +16,7 @@ export const products: Product[] = [
   {
     id: 1,
     name: "Wilbe Original (scientists first)",
-    image: "/lovable-uploads/59e3659c-9de4-457d-b70a-b1047d15237e.png", // 1st real tee image
+    image: "/lovable-uploads/ec58856d-e030-4ce2-806d-cc07bd376fe5.png", // Scientists First Tee
     description: "Our original t-shirt in navy blue with a white Wilbe logo on the back",
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
@@ -24,7 +24,7 @@ export const products: Product[] = [
   {
     id: 2,
     name: "What Wilbe",
-    image: "/lovable-uploads/d2adef55-edba-455a-9952-2a1d35e7f7c7.png",
+    image: "/lovable-uploads/12df36cf-639b-4312-9038-c34d69380df1.png", // What Wilbe Tee
     description: '"What is now and what Wilbe" t-shirt in navy blue',
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
@@ -32,7 +32,7 @@ export const products: Product[] = [
   {
     id: 3,
     name: "Team Science (I ❤️ Science)",
-    image: "/lovable-uploads/d2c1a955-3ce2-47b2-91d4-0cb095b83a8d.png",
+    image: "/lovable-uploads/f6b0b0f6-7fbb-4aa3-b9f4-833ce7960135.png", // I Love Science Tee
     description: '"I ❤️ Science" merch with a black Wilbe logo on the back',
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
@@ -40,7 +40,7 @@ export const products: Product[] = [
   {
     id: 4,
     name: "Wilbe on Campus (Wilbe in uni font hoodie)",
-    image: "/lovable-uploads/e63aae6f-8753-4509-aff4-323cac4af598.png", // new hoodie image
+    image: "/lovable-uploads/fdf11930-f17c-4bb7-b2a1-91a164c453d3.png", // Wilbe Hoodie
     description: "Wilbe hoodie in navy blue in a university campus font.",
     materials: ["100% cotton"],
     sizes: ["S", "M", "L", "XL"]
@@ -48,7 +48,7 @@ export const products: Product[] = [
   {
     id: 5,
     name: "Post-money Value Cap (Wilbe cap)",
-    image: "/lovable-uploads/783800c2-496d-4441-b067-52820a7f1ad8.png", // new cap image
+    image: "/lovable-uploads/8d392a7c-c41b-4f91-a559-700227cf100a.png", // Wilbe Cap
     description: "Wilbe cap in navy blue with our original pink logo embroidery",
     materials: ["100% cotton"],
     sizes: ["One Size"]
