@@ -1,75 +1,47 @@
 
-import React, { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import FileUploader from "@/components/sprint/FileUploader";
+import React from "react";
+import StepBasedTaskLogic from "@/components/sprint/StepBasedTaskLogic";
 
 interface ProblemTaskLogicProps {
   isCompleted: boolean;
   onComplete: (fileId?: string) => void;
   task?: any;
   hideMainQuestion?: boolean;
-  children?: React.ReactNode;
 }
 
-const ProblemTaskLogic: React.FC<ProblemTaskLogicProps> = ({ isCompleted, onComplete, task, hideMainQuestion, children }) => {
-  const [answer, setAnswer] = useState<string | null>(null);
-  
-  // Skip asking if hideMainQuestion is true (meaning we're showing value from profile)
-  const showUploadSection = hideMainQuestion || answer !== null;
+const ProblemTaskLogic: React.FC<ProblemTaskLogicProps> = ({ 
+  isCompleted, 
+  onComplete, 
+  hideMainQuestion = false 
+}) => {
+  const steps = [
+    {
+      type: 'content' as const,
+      content: 'Difference between your invention and the problem to solve'
+    },
+    ...(hideMainQuestion ? [] : [
+      {
+        type: 'question' as const,
+        question: 'Have you identified a problem to solve that is beyond your invention?',
+        options: [
+          { label: 'Yes', value: 'Yes' },
+          { label: 'No', value: 'No' }
+        ]
+      }
+    ]),
+    {
+      type: 'upload' as const,
+      uploads: ['One-pager explaining the problem and solution'],
+      action: hideMainQuestion ? undefined : 'Please explain your challenge below.'
+    }
+  ];
   
   return (
-    <div>
-      {children}
-      <Card>
-        <CardContent className="p-6 flex flex-col gap-6">
-          <div className="mb-3 text-gray-700 font-medium">
-            Difference between your invention and the problem to solve
-          </div>
-          
-          {!hideMainQuestion && (
-            <>
-              <h2 className="text-lg font-semibold mb-4">
-                Have you identified a problem to solve that is beyond your invention?
-              </h2>
-              <div className="flex gap-3 mb-4">
-                <Button
-                  variant={answer === "Yes" ? "default" : "outline"}
-                  onClick={() => setAnswer("Yes")}
-                >
-                  Yes
-                </Button>
-                <Button
-                  variant={answer === "No" ? "default" : "outline"}
-                  onClick={() => setAnswer("No")}
-                >
-                  No
-                </Button>
-              </div>
-            </>
-          )}
-          
-          {showUploadSection && (
-            <div>
-              {(hideMainQuestion || answer === "Yes") && (
-                <>
-                  <div className="mb-2">Required upload:</div>
-                  <ul className="list-disc list-inside mb-2">
-                    <li>One-pager explaining the problem and solution</li>
-                  </ul>
-                </>
-              )}
-              
-              {answer === "No" && (
-                <div className="mb-2">Please explain your challenge below.</div>
-              )}
-              
-              <FileUploader isCompleted={isCompleted} onFileUploaded={() => onComplete()} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+    <StepBasedTaskLogic
+      steps={steps}
+      isCompleted={isCompleted}
+      onComplete={onComplete}
+    />
   );
 };
 

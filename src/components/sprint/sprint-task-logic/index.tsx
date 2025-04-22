@@ -28,16 +28,30 @@ const SprintProfileShowOrAsk = ({
   children: React.ReactNode;
 }) => {
   const { sprintProfile } = useSprintProfileQuickEdit();
-  if (sprintProfile && profileKey in sprintProfile && sprintProfile[profileKey] !== null && sprintProfile[profileKey] !== undefined) {
+  
+  // Check if profile has this value set
+  const hasProfileValue = sprintProfile && 
+    profileKey in sprintProfile && 
+    sprintProfile[profileKey] !== null && 
+    sprintProfile[profileKey] !== undefined;
+  
+  if (hasProfileValue) {
+    const value = sprintProfile[profileKey];
+    
+    // Format value for display
+    let displayValue = value;
+    if (typeof value === "boolean") {
+      displayValue = value ? "Yes" : "No";
+    } else if (type === "select" && options) {
+      const option = options.find(opt => opt.value === value);
+      displayValue = option ? option.label : value;
+    }
+    
     return (
       <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
         <div className="flex items-center gap-2 mb-3">
           <span className="font-medium">{label || profileKey}:</span>
-          <span className="text-green-800">
-            {typeof sprintProfile[profileKey] === "boolean"
-              ? sprintProfile[profileKey] ? "Yes" : "No"
-              : sprintProfile[profileKey]}
-          </span>
+          <span className="text-green-800">{displayValue}</span>
           <SprintProfileQuickEdit
             profileKey={profileKey}
             label={label}
@@ -52,6 +66,7 @@ const SprintProfileShowOrAsk = ({
       </div>
     );
   }
+  
   return <>{children}</>;
 };
 
@@ -81,6 +96,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Develop Team Building Plan":
     case "Team Profile":
       return (
@@ -102,6 +118,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Scientific Foundation":
       return (
         <SprintProfileShowOrAsk 
@@ -117,6 +134,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "IP Strategy":
       return (
         <SprintProfileShowOrAsk 
@@ -132,6 +150,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Problem Definition":
       return (
         <SprintProfileShowOrAsk 
@@ -147,6 +166,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Customer Insights":
     case "Customer Discovery":
       return (
@@ -168,6 +188,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Market Validation":
     case "Market Analysis":
       return (
@@ -184,6 +205,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Financial Strategy":
       return (
         <SprintProfileShowOrAsk 
@@ -199,6 +221,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Milestone Planning":
       return (
         <SprintProfileShowOrAsk 
@@ -214,6 +237,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     case "Vision Document":
       return (
         <SprintProfileShowOrAsk 
@@ -229,6 +253,7 @@ export const SprintTaskLogicRouter = ({
           />
         </SprintProfileShowOrAsk>
       );
+      
     default:
       return null;
   }
