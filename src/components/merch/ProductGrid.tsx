@@ -15,43 +15,43 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 1,
-    name: "Scientists First Tee",
-    image: "/lovable-uploads/59e3659c-9de4-457d-b70a-b1047d15237e.png",
-    description: "Navy t-shirt with 'Scientists First' text",
-    materials: ["100% Organic Cotton", "Premium Quality"],
+    name: "Wilbe Original (scientists first)",
+    image: "/lovable-uploads/59e3659c-9de4-457d-b70a-b1047d15237e.png", // 1st real tee image
+    description: "Our original t-shirt in navy blue with a white Wilbe logo on the back",
+    materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
   },
   {
     id: 2,
-    name: "I ❤️ Science Tee",
-    image: "/lovable-uploads/d2c1a955-3ce2-47b2-91d4-0cb095b83a8d.png",
-    description: "White t-shirt with 'I ❤️ Science' print",
-    materials: ["100% Organic Cotton", "Premium Quality"],
+    name: "What Wilbe",
+    image: "/lovable-uploads/d2adef55-edba-455a-9952-2a1d35e7f7c7.png",
+    description: '"What is now and what Wilbe" t-shirt in navy blue',
+    materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
   },
   {
     id: 3,
-    name: "Wilbe Hoodie",
-    image: "/lovable-uploads/3e738ede-3221-440e-8abf-282324291fe2.png",
-    description: "Black hoodie with Wilbe logo",
-    materials: ["80% Cotton", "20% Polyester", "Heavy Weight"],
-    sizes: ["S", "M", "L", "XL"]
+    name: "Team Science (I ❤️ Science)",
+    image: "/lovable-uploads/d2c1a955-3ce2-47b2-91d4-0cb095b83a8d.png",
+    description: '"I ❤️ Science" merch with a black Wilbe logo on the back',
+    materials: ["100% cotton"],
+    sizes: ["XS", "S", "M", "L", "XL"]
   },
   {
     id: 4,
-    name: "Wilbe Cap",
-    image: "/lovable-uploads/c261565b-ab74-49b1-9be1-70ed67d32191.png",
-    description: "Black cap with embroidered Wilbe logo",
-    materials: ["100% Cotton", "Adjustable Strap"],
-    sizes: ["One Size"]
+    name: "Wilbe on Campus (Wilbe in uni font hoodie)",
+    image: "/lovable-uploads/e63aae6f-8753-4509-aff4-323cac4af598.png", // new hoodie image
+    description: "Wilbe hoodie in navy blue in a university campus font.",
+    materials: ["100% cotton"],
+    sizes: ["S", "M", "L", "XL"]
   },
   {
     id: 5,
-    name: "What Wilbe Tee",
-    image: "/lovable-uploads/d2adef55-edba-455a-9952-2a1d35e7f7c7.png",
-    description: "Navy t-shirt with 'What Wilbe' design",
-    materials: ["100% Organic Cotton", "Premium Quality"],
-    sizes: ["XS", "S", "M", "L", "XL"]
+    name: "Post-money Value Cap (Wilbe cap)",
+    image: "/lovable-uploads/783800c2-496d-4441-b067-52820a7f1ad8.png", // new cap image
+    description: "Wilbe cap in navy blue with our original pink logo embroidery",
+    materials: ["100% cotton"],
+    sizes: ["One Size"]
   }
 ];
 

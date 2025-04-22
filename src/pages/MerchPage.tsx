@@ -4,6 +4,7 @@ import { ProductGrid, Product } from "@/components/merch/ProductGrid";
 import { ProductSidebar } from "@/components/merch/ProductSidebar";
 import { ShippingForm } from "@/components/merch/ShippingForm";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const MerchPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -11,6 +12,7 @@ const MerchPage = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
 
   const handleProductSelect = (product: Product) => {
     setSelectedProduct(product);
@@ -23,14 +25,68 @@ const MerchPage = () => {
     setShowForm(true);
   };
 
-  const handleFormSubmit = (formData: FormData) => {
+  const handleFormSubmit = async (formData: FormData) => {
+    if (!selectedProduct) return;
+    setSubmitting(true);
+
+    // Save order to merch_orders
+    const order = {
+      product_name: selectedProduct.name,
+      product_size: selectedSize,
+      full_name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      country_code: formData.get("countryCode") as string,
+      phone: formData.get("phone") as string,
+      country: formData.get("country") as string,
+      address: formData.get("address") as string,
+      city: formData.get("city") as string,
+      postal: formData.get("postal") as string,
+    };
+    let saved = false;
+    let emailSent = false;
+
+    try {
+      const { error } = await supabase.from("merch_orders").insert([order]);
+      if (!error) saved = true;
+    } catch (e) {
+      saved = false;
+    }
+
+    // Send confirmation email (via edge function)
+    try {
+      await fetch(
+        "https://iatercfyoclqxmohyyke.supabase.co/functions/v1/send-merch-confirmation",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: order.email,
+            name: order.full_name,
+            product: order.product_name,
+            size: order.product_size,
+            address: `${order.address}, ${order.city}, ${order.postal}, ${order.country}`,
+          }),
+        }
+      );
+      emailSent = true;
+    } catch {
+      emailSent = false;
+    }
+
     toast({
-      title: "Order Submitted",
-      description: "Thank you for your order! We'll be in touch soon.",
+      title: saved && emailSent
+        ? "Order Submitted"
+        : "Submission Issue",
+      description: saved && emailSent
+        ? "Thank you for your order! We'll be in touch soon."
+        : (saved
+            ? "Order saved, but we couldn't send a confirmation email. Please check your email later."
+            : "There was an issue submitting your order. Please try again."),
     });
     setShowForm(false);
     setSelectedProduct(null);
     setSelectedSize('');
+    setSubmitting(false);
   };
 
   return (
@@ -39,7 +95,7 @@ const MerchPage = () => {
         <>
           <div className="text-center py-12 px-4">
             <h1 className="text-3xl md:text-4xl font-semibold mb-2 text-dark">
-              Choose Your Complimentary Wilbe Merch
+              Welcome to the Wilbe family! Pick your complimentary merch item
             </h1>
             <p className="text-gray-600 text-lg max-w-lg mx-auto">
               Select one item from our collection, on us.
@@ -59,6 +115,7 @@ const MerchPage = () => {
             onSubmit={handleFormSubmit}
             selectedProduct={selectedProduct?.name || ""}
             selectedSize={selectedSize}
+            disabled={submitting}
           />
         </div>
       )}
