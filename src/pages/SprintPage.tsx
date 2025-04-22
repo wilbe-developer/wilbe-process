@@ -3,24 +3,45 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
+import { supabase } from "@/integrations/supabase/client";
 
-// This is a simple redirect page that will check authentication
-// and redirect to the appropriate page
 const SprintPage = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
-      if (isAuthenticated) {
-        navigate(PATHS.SPRINT_DASHBOARD);
-      } else {
-        // Store the intended destination for redirection after login
-        sessionStorage.setItem("redirectAfterLogin", PATHS.SPRINT_DASHBOARD);
-        navigate(PATHS.LOGIN);
+    const checkSprintOnboarding = async () => {
+      if (!loading) {
+        if (!isAuthenticated) {
+          sessionStorage.setItem("redirectAfterLogin", PATHS.SPRINT_DASHBOARD);
+          navigate(PATHS.LOGIN);
+          return;
+        }
+
+        // Check if user has completed sprint onboarding
+        if (user) {
+          const { data, error } = await supabase
+            .rpc('has_completed_sprint_onboarding', {
+              p_user_id: user.id
+            });
+
+          if (error) {
+            console.error('Error checking sprint onboarding:', error);
+            return;
+          }
+
+          if (!data) {
+            navigate(PATHS.SPRINT_SIGNUP);
+            return;
+          }
+
+          navigate(PATHS.SPRINT_DASHBOARD);
+        }
       }
-    }
-  }, [isAuthenticated, loading, navigate]);
+    };
+
+    checkSprintOnboarding();
+  }, [isAuthenticated, loading, navigate, user]);
 
   if (loading) {
     return (

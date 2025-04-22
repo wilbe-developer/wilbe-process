@@ -159,6 +159,93 @@ export type Database = {
         }
         Relationships: []
       }
+      sprint_profiles: {
+        Row: {
+          commercializing_invention: boolean | null
+          company_incorporated: boolean | null
+          created_at: string
+          current_job: string | null
+          customer_engagement: string | null
+          cv_url: string | null
+          email: string | null
+          experiment_validated: boolean | null
+          funding_amount: string | null
+          funding_details: string | null
+          funding_sources: string[] | null
+          has_deck: boolean | null
+          has_financial_plan: boolean | null
+          id: string
+          industry_changing_vision: boolean | null
+          linkedin_url: string | null
+          market_gap_reason: string | null
+          market_known: boolean | null
+          name: string | null
+          problem_defined: boolean | null
+          received_funding: boolean | null
+          team_status: string | null
+          tto_engaged: boolean | null
+          university_ip: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commercializing_invention?: boolean | null
+          company_incorporated?: boolean | null
+          created_at?: string
+          current_job?: string | null
+          customer_engagement?: string | null
+          cv_url?: string | null
+          email?: string | null
+          experiment_validated?: boolean | null
+          funding_amount?: string | null
+          funding_details?: string | null
+          funding_sources?: string[] | null
+          has_deck?: boolean | null
+          has_financial_plan?: boolean | null
+          id?: string
+          industry_changing_vision?: boolean | null
+          linkedin_url?: string | null
+          market_gap_reason?: string | null
+          market_known?: boolean | null
+          name?: string | null
+          problem_defined?: boolean | null
+          received_funding?: boolean | null
+          team_status?: string | null
+          tto_engaged?: boolean | null
+          university_ip?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commercializing_invention?: boolean | null
+          company_incorporated?: boolean | null
+          created_at?: string
+          current_job?: string | null
+          customer_engagement?: string | null
+          cv_url?: string | null
+          email?: string | null
+          experiment_validated?: boolean | null
+          funding_amount?: string | null
+          funding_details?: string | null
+          funding_sources?: string[] | null
+          has_deck?: boolean | null
+          has_financial_plan?: boolean | null
+          id?: string
+          industry_changing_vision?: boolean | null
+          linkedin_url?: string | null
+          market_gap_reason?: string | null
+          market_known?: boolean | null
+          name?: string | null
+          problem_defined?: boolean | null
+          received_funding?: boolean | null
+          team_status?: string | null
+          tto_engaged?: boolean | null
+          university_ip?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sprint_tasks: {
         Row: {
           content: string | null
@@ -169,6 +256,7 @@ export type Database = {
           question: string | null
           title: string
           upload_required: boolean
+          user_id: string | null
         }
         Insert: {
           content?: string | null
@@ -179,6 +267,7 @@ export type Database = {
           question?: string | null
           title: string
           upload_required?: boolean
+          user_id?: string | null
         }
         Update: {
           content?: string | null
@@ -189,6 +278,7 @@ export type Database = {
           question?: string | null
           title?: string
           upload_required?: boolean
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -379,7 +469,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_sprint_profile: {
+        Args: {
+          p_user_id: string
+          p_name: string
+          p_email: string
+          p_linkedin_url: string
+          p_cv_url: string
+          p_current_job: string
+          p_company_incorporated: boolean
+          p_received_funding: boolean
+          p_funding_details: string
+          p_has_deck: boolean
+          p_team_status: string
+          p_commercializing_invention: boolean
+          p_university_ip: boolean
+          p_tto_engaged: boolean
+          p_problem_defined: boolean
+          p_customer_engagement: string
+          p_market_known: boolean
+          p_market_gap_reason: string
+          p_funding_amount: string
+          p_has_financial_plan: boolean
+          p_funding_sources: string[]
+          p_experiment_validated: boolean
+          p_industry_changing_vision: boolean
+        }
+        Returns: undefined
+      }
+      has_completed_sprint_onboarding: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

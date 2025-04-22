@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -108,18 +107,15 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
       ) : null;
     
     case 'conditional':
-      if (!step.conditional) return null;
-      
-      // This step needs to directly render a textarea for entering funding details 
-      // when the user has selected they've received funding
+      // For funding details, check if funding_received is 'yes'
       if (step.id === 'funding_details') {
-        return (
+        return value?.funding_received === 'yes' ? (
           <Textarea
             value={value || ''}
             onChange={(e) => onChange(step.id, e.target.value)}
             placeholder="Please list the amount received and from whom."
           />
-        );
+        ) : null;
       }
       
       // For other conditional fields, try to find a matching condition

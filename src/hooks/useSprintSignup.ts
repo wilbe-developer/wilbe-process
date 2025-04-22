@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -87,7 +86,6 @@ export const useSprintSignup = () => {
     }
   };
 
-  // Create functions to handle the final submission
   const uploadFileToStorage = async (file: File, userId: string): Promise<string | null> => {
     try {
       const fileExt = file.name.split('.').pop();
@@ -325,135 +323,52 @@ export const useSprintSignup = () => {
     }
   };
 
-  // Modified to directly sign in the user instead of sending a magic link
   const silentSignup = async () => {
     try {
       setIsSubmitting(true);
       
-      // If the user is already authenticated, skip the signup
+      // If user is already authenticated, just update their sprint profile
       if (isAuthenticated && user) {
         console.log("User already authenticated, updating sprint profile");
-        await updateExistingUser();
+        await updateUserSprintData(user.id);
+        
+        toast({
+          title: "Sprint updated!",
+          description: "Your personalized founder sprint has been updated.",
+        });
+        
+        navigate(PATHS.SPRINT_DASHBOARD);
         return;
       }
+
+      // Create a new user with email and password
+      console.log("Creating new user with signup");
+      const randomPassword = Math.random().toString(36).slice(-10);
       
-      console.log("Checking if user exists with email:", answers.email);
-      
-      // Check if user already exists by trying to sign in
-      const { data: { user: existingUser }, error: userCheckError } = await supabase.auth.signInWithOtp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: answers.email,
+        password: randomPassword,
         options: {
-          shouldCreateUser: false
+          data: {
+            firstName: answers.name?.split(' ')[0] || '',
+            lastName: answers.name?.split(' ').slice(1).join(' ') || '',
+            linkedIn: answers.linkedin,
+          }
         }
       });
       
-      if (userCheckError && !userCheckError.message.includes("Email not confirmed")) {
-        console.error("Error checking if user exists:", userCheckError);
-        throw userCheckError;
+      if (authError) {
+        throw authError;
       }
       
-      console.log("User check result:", existingUser ? "Exists" : "Does not exist");
-      
-      // If user exists, handle the login differently - sign in directly with OTP
-      if (existingUser || (userCheckError && userCheckError.message.includes("Email not confirmed"))) {
-        console.log("User exists, handling direct sign in");
-        
-        // Generate a random password for auto-login
-        const randomPassword = Math.random().toString(36).slice(-10);
-        
-        // Try to sign up the user to automatically log them in
-        const { data: signInData, error: signInError } = await supabase.auth.signUp({
-          email: answers.email,
-          password: randomPassword,
-          options: {
-            data: {
-              firstName: answers.name?.split(' ')[0] || '',
-              lastName: answers.name?.split(' ').slice(1).join(' ') || '',
-              linkedIn: answers.linkedin,
-            }
-          }
-        });
-        
-        if (signInError) {
-          // If the user already exists, we got an error but it's expected
-          console.log("Expected sign-up error since user exists:", signInError);
-          
-          // Continue with automatic sign-in with OTP (magic link)
-          const { data: magicLinkData, error: magicLinkError } = await supabase.auth.signInWithOtp({
-            email: answers.email,
-            options: {
-              emailRedirectTo: window.location.origin + PATHS.SPRINT_DASHBOARD,
-            }
-          });
-          
-          if (magicLinkError) {
-            throw magicLinkError;
-          }
-          
-          console.log("Sent magic link for existing user");
-          
-          toast({
-            title: "Magic link sent",
-            description: "Please check your email for a magic link to access your sprint dashboard.",
-          });
-          
-          // Update their sprint data even though they will need to click the link
-          await updateUserSprintData(null);
-          
-          return;
-        }
-        
-        // If we somehow got past the expected error (unlikely), continue with the new user
-        console.log("Unexpectedly created a new user during sign in:", signInData);
-        await processNewUser(signInData.user);
-      } else {
-        // Create a new user with email and password
-        console.log("Creating new user with signup");
-        const randomPassword = Math.random().toString(36).slice(-10);
-        
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: answers.email,
-          password: randomPassword,
-          options: {
-            data: {
-              firstName: answers.name?.split(' ')[0] || '',
-              lastName: answers.name?.split(' ').slice(1).join(' ') || '',
-              linkedIn: answers.linkedin,
-            }
-          }
-        });
-        
-        if (authError) {
-          throw authError;
-        }
-        
-        if (!authData.user) {
-          throw new Error("Failed to create user");
-        }
-        
-        console.log("Created new user:", authData.user.id);
-        await processNewUser(authData.user);
+      if (!authData.user) {
+        throw new Error("Failed to create user");
       }
       
-    } catch (error) {
-      console.error('Error during signup:', error);
-      toast({
-        title: "Signup failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Helper to process a newly created user
-  const processNewUser = async (user: any) => {
-    try {
       // Update user sprint data
-      await updateUserSprintData(user.id);
+      await updateUserSprintData(authData.user.id);
       
-      // Send welcome email with sprint info
+      // Send welcome email
       await sendWelcomeEmail(answers.email, answers.name || 'Founder');
       
       toast({
@@ -463,72 +378,38 @@ export const useSprintSignup = () => {
       
       // Navigate to the sprint dashboard
       navigate(PATHS.SPRINT_DASHBOARD);
+      
     } catch (error) {
-      console.error('Error processing new user:', error);
-      throw error;
-    }
-  };
-  
-  // Helper to update user sprint data
-  const updateUserSprintData = async (userId: string | null) => {
-    try {
-      // If no userId provided but user is logged in, use that ID
-      const effectiveUserId = userId || (user ? user.id : null);
-      
-      if (!effectiveUserId) {
-        console.error('No user ID available for sprint data update');
-        return;
-      }
-      
-      // Upload CV if provided
-      let cvUrl = null;
-      if (uploadedFile) {
-        cvUrl = await uploadFileToStorage(uploadedFile, effectiveUserId);
-      }
-      
-      // Create personalized sprint tasks for this user
-      await createSprintTasks(effectiveUserId);
-      
-      // Update or create sprint profile
-      const { error: profileError } = await supabase.rpc('create_sprint_profile', {
-        p_user_id: effectiveUserId,
-        p_name: answers.name || (user ? `${user.firstName} ${user.lastName}` : ''),
-        p_email: answers.email || (user ? user.email : ''),
-        p_linkedin_url: answers.linkedin || (user ? user.linkedIn : ''),
-        p_cv_url: cvUrl,
-        p_current_job: answers.job || '',
-        p_company_incorporated: answers.incorporated === 'yes',
-        p_received_funding: answers.funding_received === 'yes',
-        p_funding_details: answers.funding_details || '',
-        p_has_deck: answers.deck === 'yes',
-        p_team_status: answers.team || '',
-        p_commercializing_invention: answers.invention === 'yes',
-        p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
-        p_tto_engaged: answers.ip === 'tto_yes',
-        p_problem_defined: answers.problem === 'yes',
-        p_customer_engagement: answers.customers || '',
-        p_market_known: answers.market_known === 'yes',
-        p_market_gap_reason: answers.market_gap_reason || '',
-        p_funding_amount: answers.funding_amount_text || '',
-        p_has_financial_plan: answers.funding_plan === 'yes',
-        p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
-        p_experiment_validated: answers.experiment === 'yes',
-        p_industry_changing_vision: answers.vision === 'yes'
+      console.error('Error during signup:', error);
+      toast({
+        title: "Setup failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
       });
-      
-      if (profileError) {
-        console.error('Error creating/updating profile:', profileError);
-        throw profileError;
-      }
-      
-      console.log("Sprint profile updated successfully for user:", effectiveUserId);
-      
-    } catch (error) {
-      console.error('Error updating user sprint data:', error);
-      throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
+  const shouldRenderCurrentStep = () => {
+    const currentStepData = steps[currentStep];
+    if (!currentStepData) return true;
+    
+    // For the funding_details step, check if funding_received is 'yes'
+    if (currentStepData.id === 'funding_details') {
+      return answers.funding_received === 'yes';
+    }
+    
+    return true;
+  };
+
+  // If the current step is not to be rendered, skip to the next step
+  useEffect(() => {
+    if (!shouldRenderCurrentStep()) {
+      goToNextStep();
+    }
+  }, [currentStep, answers.funding_received, goToNextStep, shouldRenderCurrentStep]);
+
   const updateExistingUser = async () => {
     try {
       if (!user) return;
@@ -555,25 +436,60 @@ export const useSprintSignup = () => {
     }
   };
 
-  // Check if the current step is the funding_details step and if we should render it
-  const shouldRenderCurrentStep = () => {
-    const currentStepData = steps[currentStep];
-    if (!currentStepData) return true;
-    
-    // For the funding_details step, check if funding_received is 'yes'
-    if (currentStepData.id === 'funding_details') {
-      return answers.funding_received === 'yes';
-    }
-    
-    return true;
-  };
+  const updateUserSprintData = async (userId: string | null) => {
+    try {
+      const effectiveUserId = userId || (user ? user.id : null);
+      
+      if (!effectiveUserId) {
+        console.error('No user ID available for sprint data update');
+        return;
+      }
 
-  // If the current step is not to be rendered, skip to the next step
-  useEffect(() => {
-    if (!shouldRenderCurrentStep()) {
-      goToNextStep();
+      // Upload CV if provided
+      let cvUrl = null;
+      if (uploadedFile) {
+        cvUrl = await uploadFileToStorage(uploadedFile, effectiveUserId);
+      }
+
+      // Create personalized sprint tasks for this user
+      await createSprintTasks(effectiveUserId);
+
+      // Call the create_sprint_profile RPC
+      const { error: profileError } = await supabase.rpc('create_sprint_profile', {
+        p_user_id: effectiveUserId,
+        p_name: answers.name || '',
+        p_email: answers.email || '',
+        p_linkedin_url: answers.linkedin || '',
+        p_cv_url: cvUrl,
+        p_current_job: answers.job || '',
+        p_company_incorporated: answers.incorporated === 'yes',
+        p_received_funding: answers.funding_received === 'yes',
+        p_funding_details: answers.funding_details || '',
+        p_has_deck: answers.deck === 'yes',
+        p_team_status: answers.team || '',
+        p_commercializing_invention: answers.invention === 'yes',
+        p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
+        p_tto_engaged: answers.ip === 'tto_yes',
+        p_problem_defined: answers.problem === 'yes',
+        p_customer_engagement: answers.customers || '',
+        p_market_known: answers.market_known === 'yes',
+        p_market_gap_reason: answers.market_gap_reason || '',
+        p_funding_amount: answers.funding_amount_text || '',
+        p_has_financial_plan: answers.funding_plan === 'yes',
+        p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
+        p_experiment_validated: answers.experiment === 'yes',
+        p_industry_changing_vision: answers.vision === 'yes'
+      });
+
+      if (profileError) {
+        console.error('Error creating/updating profile:', profileError);
+        throw profileError;
+      }
+    } catch (error) {
+      console.error('Error updating user sprint data:', error);
+      throw error;
     }
-  }, [currentStep, answers.funding_received]);
+  };
 
   return {
     currentStep,
