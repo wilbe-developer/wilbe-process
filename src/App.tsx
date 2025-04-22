@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
+import MerchPage from "@/pages/MerchPage";
 
 // Layout
 import Layout from "@/components/Layout";
@@ -48,6 +49,9 @@ const App = () => (
         <AuthProvider>
           <MetaWrapper>
             <Routes>
+              {/* Public merch chooser route */}
+              <Route path="/merch" element={<MerchPage />} />
+
               {/* Auth routes */}
               <Route path={PATHS.LOGIN} element={<LoginPage />} />
               <Route path={PATHS.REGISTER} element={<RegisterPage />} />
