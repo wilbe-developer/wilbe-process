@@ -1,5 +1,5 @@
 
-import { useSprintTasks } from "@/hooks/useSprintTasks";
+import { useSprintTasks } from "@/hooks/useSprintTasks.tsx";
 import TaskCard from "@/components/sprint/TaskCard";
 
 const SprintDashboardPage = () => {
