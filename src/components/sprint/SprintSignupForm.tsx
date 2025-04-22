@@ -57,6 +57,9 @@ const SprintSignupForm = () => {
 
   const isLastStep = currentStep === steps.length - 1;
   const currentStepData = steps[currentStep];
+  
+  // Only show step indicator if we're within the normal step range
+  const isWithinNormalStepRange = currentStep < steps.length;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -71,17 +74,19 @@ const SprintSignupForm = () => {
         )}
       </div>
       
-      <div className="mb-4 flex justify-between items-center">
-        <div className="text-sm text-muted-foreground">
-          Step {currentStep + 1} of {steps.length}
+      {isWithinNormalStepRange && (
+        <div className="mb-4 flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            Step {currentStep + 1} of {steps.length}
+          </div>
+          <div className="w-1/2 bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-brand-pink h-2.5 rounded-full transition-all duration-500" 
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+            ></div>
+          </div>
         </div>
-        <div className="w-1/2 bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-brand-pink h-2.5 rounded-full transition-all duration-500" 
-            style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-          ></div>
-        </div>
-      </div>
+      )}
       
       {shouldRenderCurrentStep() && (
         <Card className="mb-6">

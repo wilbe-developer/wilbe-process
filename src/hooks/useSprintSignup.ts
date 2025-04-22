@@ -31,11 +31,28 @@ export const useSprintSignup = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If user is already authenticated, skip to the end
-    if (isAuthenticated) {
-      setCurrentStep(99); // Just a high number to skip all steps
+    // If user is already authenticated, prepare for update mode
+    if (isAuthenticated && user) {
+      // Just a high number to skip form rendering
+      setCurrentStep(99);
+      
+      // Fetch existing answers if needed
+      // This could be expanded to pre-fill the form with existing data
+      if (user.email) {
+        setAnswers(prevAnswers => ({
+          ...prevAnswers,
+          email: user.email
+        }));
+      }
+      
+      if (user.firstName && user.lastName) {
+        setAnswers(prevAnswers => ({
+          ...prevAnswers,
+          name: `${user.firstName} ${user.lastName}`
+        }));
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const handleChange = (field: string, value: any) => {
     setAnswers(prevAnswers => ({
