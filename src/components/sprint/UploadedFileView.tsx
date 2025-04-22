@@ -7,9 +7,10 @@ import { Download, ExternalLink, File } from "lucide-react";
 
 interface UploadedFileViewProps {
   fileId: string;
+  isCompleted?: boolean;
 }
 
-const UploadedFileView = ({ fileId }: UploadedFileViewProps) => {
+const UploadedFileView = ({ fileId, isCompleted }: UploadedFileViewProps) => {
   const { data: file, isLoading } = useQuery({
     queryKey: ["uploadedFile", fileId],
     queryFn: async (): Promise<UploadedFile | null> => {

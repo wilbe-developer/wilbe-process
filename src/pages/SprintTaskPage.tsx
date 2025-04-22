@@ -60,12 +60,12 @@ const SprintTaskPage = () => {
         {currentTask.upload_required ? (
           hasUploadedFile ? (
             <UploadedFileView 
-              fileId={currentTask.progress?.file_id} 
+              fileId={currentTask.progress?.file_id || ''} 
               isCompleted={isCompleted}
             />
           ) : (
             <FileUploader 
-              taskId={currentTask.id} 
+              onFileUploaded={(fileId) => handleTaskCompletion(fileId)}
               onUploadComplete={handleTaskCompletion}
               isCompleted={isCompleted}
             />

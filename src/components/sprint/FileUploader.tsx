@@ -7,9 +7,17 @@ import { Upload, File, X } from "lucide-react";
 
 interface FileUploaderProps {
   onFileUploaded: (fileId: string) => void;
+  taskId?: string;
+  onUploadComplete?: (fileId?: string) => Promise<void>;
+  isCompleted?: boolean;
 }
 
-const FileUploader = ({ onFileUploaded }: FileUploaderProps) => {
+const FileUploader = ({ 
+  onFileUploaded, 
+  taskId, 
+  onUploadComplete,
+  isCompleted 
+}: FileUploaderProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isUploading, progress } = useFileUpload();
@@ -37,7 +45,12 @@ const FileUploader = ({ onFileUploaded }: FileUploaderProps) => {
     if (selectedFile) {
       uploadFile(selectedFile, {
         onSuccess: (data) => {
-          onFileUploaded(data.id);
+          // Use onUploadComplete if provided, otherwise fall back to onFileUploaded
+          if (onUploadComplete) {
+            onUploadComplete(data.id);
+          } else {
+            onFileUploaded(data.id);
+          }
           setSelectedFile(null);
         }
       });
@@ -71,11 +84,13 @@ const FileUploader = ({ onFileUploaded }: FileUploaderProps) => {
             className="hidden"
             onChange={handleFileChange}
             ref={fileInputRef}
+            disabled={isCompleted}
           />
           <Button
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
+            disabled={isCompleted}
           >
             Browse Files
           </Button>
@@ -101,6 +116,7 @@ const FileUploader = ({ onFileUploaded }: FileUploaderProps) => {
                   onClick={clearFile}
                   className="bg-gray-200 hover:bg-gray-300 rounded-full p-1"
                   title="Remove file"
+                  disabled={isCompleted}
                 >
                   <X className="h-4 w-4 text-gray-600" />
                 </button>
@@ -114,7 +130,12 @@ const FileUploader = ({ onFileUploaded }: FileUploaderProps) => {
                 </p>
               </div>
               <div className="flex justify-center">
-                <Button onClick={handleUpload}>Upload File</Button>
+                <Button 
+                  onClick={handleUpload}
+                  disabled={isCompleted}
+                >
+                  Upload File
+                </Button>
               </div>
             </div>
           )}
