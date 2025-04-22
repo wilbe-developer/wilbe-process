@@ -1,137 +1,203 @@
-import React, { useState, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Input } from "@/components/ui";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui";
-import SprintProfileShowOrAsk from "../SprintProfileShowOrAsk";
+import React from "react";
+import DeckTaskLogic from "./DeckTaskLogic";
+import TeamTaskLogic from "./TeamTaskLogic";
+import ScienceTaskLogic from "./ScienceTaskLogic";
+import IpTaskLogic from "./IpTaskLogic";
+import ProblemTaskLogic from "./ProblemTaskLogic";
+import CustomerTaskLogic from "./CustomerTaskLogic";
+import MarketTaskLogic from "./MarketTaskLogic";
+import FundingTaskLogic from "./FundingTaskLogic";
+import ExperimentTaskLogic from "./ExperimentTaskLogic";
+import VisionTaskLogic from "./VisionTaskLogic";
+import { SprintProfileQuickEdit } from "../SprintProfileQuickEdit";
+import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
+import { SprintProfileShowOrAsk } from "../SprintProfileShowOrAsk";
 
-interface TaskLogicProps {
-  taskId: string;
-}
-
-const SprintTaskLogic: React.FC<TaskLogicProps> = ({ taskId }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [question, setQuestion] = useState<string>("");
-  const { user, token } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const isShowingProfile = searchParams.get("showProfile") === "true";
-  const isAskingQuestion = searchParams.get("askQuestion") === "true";
-
-  const showProfile = useCallback(() => {
-    searchParams.set("showProfile", "true");
-    setSearchParams(searchParams);
-  }, [searchParams, setSearchParams]);
-
-  const askQuestion = useCallback(() => {
-    searchParams.set("askQuestion", "true");
-    setSearchParams(searchParams);
-  }, [searchParams, setSearchParams]);
-
-  const closeProfile = useCallback(() => {
-    searchParams.delete("showProfile");
-    searchParams.delete("askQuestion");
-    setSearchParams(searchParams);
-  }, [searchParams, setSearchParams]);
-
-  const handleQuestionChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setQuestion(e.target.value);
-  };
-
-  const submitQuestion = async () => {
-    if (!question.trim()) {
-      toast({
-        title: "Error",
-        description: "Question cannot be empty.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/api/sprint-tasks/${taskId}/questions`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ question }),
-        }
+export const SprintTaskLogicRouter = ({
+  task,
+  isCompleted,
+  onComplete
+}: {
+  task: any;
+  isCompleted: boolean;
+  onComplete: (fileId?: string) => void;
+}) => {
+  // Main router for each logic task
+  switch (task.title) {
+    case "Create Your Pitch Deck":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="has_deck" 
+          label="Do you have a deck?"
+          type="boolean"
+        >
+          <DeckTaskLogic
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            task={task}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      toast({
-        title: "Success",
-        description: "Question submitted successfully!",
-      });
-      setQuestion("");
-      closeProfile();
-    } catch (error) {
-      console.error("Error submitting question:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit question. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!user) {
-    return <div>Loading...</div>;
+      
+    case "Develop Team Building Plan":
+    case "Team Profile":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="team_status" 
+          label="Team status"
+          type="select"
+          options={[
+            { value: "solo", label: "I'm solo" },
+            { value: "employees", label: "I have a team but they're employees" },
+            { value: "cofounders", label: "I have co-founders" }
+          ]}
+        >
+          <TeamTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Scientific Foundation":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="commercializing_invention" 
+          label="Did you come up with an invention?"
+          type="boolean"
+        >
+          <ScienceTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "IP Strategy":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="university_ip" 
+          label="Is your company reliant on a university invention?"
+          type="boolean"
+        >
+          <IpTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Problem Definition":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="problem_defined" 
+          label="Identified a problem to solve?"
+          type="boolean"
+        >
+          <ProblemTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Customer Insights":
+    case "Customer Discovery":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="customer_engagement" 
+          label="Spoken to customers?"
+          type="select"
+          options={[
+            { value: "yes", label: "Yes" },
+            { value: "no", label: "No" },
+            { value: "early", label: "It's too early" }
+          ]}
+        >
+          <CustomerTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Market Validation":
+    case "Market Analysis":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="market_known" 
+          label="Do you know your target market?"
+          type="boolean"
+        >
+          <MarketTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Financial Strategy":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="has_financial_plan" 
+          label="Do you have a financial plan?"
+          type="boolean"
+        >
+          <FundingTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Milestone Planning":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="experiment_validated" 
+          label="Have you run an experiment to validate your idea?"
+          type="boolean"
+        >
+          <ExperimentTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    case "Vision Document":
+      return (
+        <SprintProfileShowOrAsk 
+          profileKey="industry_changing_vision" 
+          label="Will your company change the industry?"
+          type="boolean"
+        >
+          <VisionTaskLogic
+            task={task}
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            hideMainQuestion={true}
+          />
+        </SprintProfileShowOrAsk>
+      );
+      
+    default:
+      return null;
   }
-
-  return (
-    <div>
-      {!isShowingProfile && !isAskingQuestion && (
-        <SprintProfileShowOrAsk onShow={showProfile} onAsk={askQuestion} />
-      )}
-
-      {isShowingProfile && (
-        <div className="text-center">
-          <img
-            src={user.avatar}
-            alt="User Avatar"
-            className="rounded-full w-32 h-32 mx-auto mb-4"
-          />
-          <p>
-            {user.firstName} {user.lastName}
-          </p>
-          <p>{user.email}</p>
-          <Button onClick={closeProfile}>Close Profile</Button>
-        </div>
-      )}
-
-      {isAskingQuestion && (
-        <div className="flex flex-col gap-4">
-          <Input
-            type="text"
-            placeholder="Enter your question"
-            value={question}
-            onChange={handleQuestionChange}
-          />
-          <Button onClick={submitQuestion} disabled={isLoading}>
-            {isLoading ? "Submitting..." : "Submit Question"}
-          </Button>
-          <Button variant="secondary" onClick={closeProfile}>
-            Cancel
-          </Button>
-        </div>
-      )}
-    </div>
-  );
 };
-
-export default SprintTaskLogic;
