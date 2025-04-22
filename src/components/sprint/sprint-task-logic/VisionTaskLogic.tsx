@@ -27,7 +27,7 @@ const VisionTaskLogic: React.FC<VisionTaskLogicProps> = ({
     ]),
     {
       type: 'content' as const,
-      content: 'Create a vivid description of your company's ultimate vision and the transformative impact it will have on the industry.'
+      content: 'Create a vivid description of your company\'s ultimate vision and the transformative impact it will have on the industry.'
     },
     {
       type: 'upload' as const,

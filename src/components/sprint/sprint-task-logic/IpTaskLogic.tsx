@@ -20,7 +20,7 @@ const IpTaskLogic: React.FC<IpTaskLogicProps> = ({
   const baseSteps = [
     {
       type: 'content' as const,
-      content: 'IP is not the most important asset — it's the people and their knowledge.'
+      content: 'IP is not the most important asset — it\'s the people and their knowledge.'
     }
   ];
   
