@@ -15,9 +15,9 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 1,
-    name: "Wilbe Original (scientists first)",
+    name: "Wilbe Original",
     image: "/lovable-uploads/ec58856d-e030-4ce2-806d-cc07bd376fe5.png", // Scientists First Tee
-    description: "Our original t-shirt in navy blue with a white Wilbe logo on the back",
+    description: "Our original Scientists First t-shirt in navy blue with a white Wilbe logo on the back",
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
   },
@@ -31,15 +31,15 @@ export const products: Product[] = [
   },
   {
     id: 3,
-    name: "Team Science (I ❤️ Science)",
+    name: "Team Science",
     image: "/lovable-uploads/f6b0b0f6-7fbb-4aa3-b9f4-833ce7960135.png", // I Love Science Tee
-    description: '"I ❤️ Science" merch with a black Wilbe logo on the back',
+    description: 'I ❤️ Science t-shirt in white with a black Wilbe logo on the back',
     materials: ["100% cotton"],
     sizes: ["XS", "S", "M", "L", "XL"]
   },
   {
     id: 4,
-    name: "Wilbe on Campus (Wilbe in uni font hoodie)",
+    name: "Wilbe on Campus",
     image: "/lovable-uploads/fdf11930-f17c-4bb7-b2a1-91a164c453d3.png", // Wilbe Hoodie
     description: "Wilbe hoodie in navy blue in a university campus font.",
     materials: ["100% cotton"],
@@ -47,7 +47,7 @@ export const products: Product[] = [
   },
   {
     id: 5,
-    name: "Post-money Value Cap (Wilbe cap)",
+    name: "Post-money Value Cap",
     image: "/lovable-uploads/8d392a7c-c41b-4f91-a559-700227cf100a.png", // Wilbe Cap
     description: "Wilbe cap in navy blue with our original pink logo embroidery",
     materials: ["100% cotton"],
