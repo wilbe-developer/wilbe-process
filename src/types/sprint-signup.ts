@@ -8,7 +8,8 @@ export type Step = {
   conditional?: {
     field: string;
     value: string;
-    component: React.ReactNode;
+    componentType: string;
+    componentProps?: Record<string, string>;
   }[];
 };
 

@@ -1,5 +1,5 @@
+
 import { Step } from "@/types/sprint-signup";
-import { Textarea } from "@/components/ui/textarea";
 
 export const steps: Step[] = [
   {
@@ -55,7 +55,10 @@ export const steps: Step[] = [
       {
         field: 'funding_received',
         value: 'yes',
-        component: <Textarea placeholder="Please list the amount received and from whom." />
+        componentType: 'textarea',
+        componentProps: {
+          placeholder: "Please list the amount received and from whom."
+        }
       }
     ]
   },
