@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 import { Button } from "@/components/ui/button";
@@ -53,16 +52,15 @@ export const SprintProfileQuickEdit: React.FC<SprintProfileQuickEditProps> = ({
 
   return (
     <div className="inline-flex items-center gap-2">
-      <span className="font-medium">{label || profileKey}:</span>
       <span>{showValue()}</span>
       <Button
-        variant="outline"
-        size="sm"
-        className="ml-2 h-7 px-2 py-1"
+        variant="secondary"
+        size="xs"
+        className="ml-1 h-6 px-2 py-0.5 text-xs"
         onClick={() => setOpen(true)}
-        title={`Edit ${label || profileKey}`}
+        title={`Change ${label || profileKey}`}
       >
-        <Pencil size={16} />
+        Change
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
