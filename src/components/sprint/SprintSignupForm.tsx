@@ -2,21 +2,35 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  Input, 
-  Textarea, 
-  Button, 
-  Checkbox, 
-  RadioGroup, 
-  RadioGroupItem,
-  Label,
+  Input
+} from "@/components/ui/input";
+import { 
+  Button
+} from "@/components/ui/button";
+import { 
+  Textarea
+} from "@/components/ui/textarea";
+import {
+  Checkbox
+} from "@/components/ui/checkbox";
+import {
+  RadioGroup,
+  RadioGroupItem
+} from "@/components/ui/radio-group";
+import {
+  Label
+} from "@/components/ui/label";
+import {
   Card,
   CardContent
-} from "@/components/ui";
+} from "@/components/ui/card";
 import { UserProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowRight, ArrowLeft, Upload, Linkedin, Check } from "lucide-react";
 import { PATHS } from "@/lib/constants";
+import { sendWelcomeEmail } from "@/services/emailService";
+import { SprintProfile } from "@/types/sprint";
 
 // Define question steps
 type Step = {
@@ -280,14 +294,12 @@ const SprintSignupForm = () => {
       const fileName = `${userId}-cv.${fileExt}`;
       const filePath = `cvs/${fileName}`;
       
+      // The upload method doesn't support onUploadProgress directly in the options
+      // so we'll remove it from the type error
       const { error: uploadError } = await supabase.storage
         .from('sprint-uploads')
         .upload(filePath, file, {
-          upsert: true,
-          onUploadProgress: (progress) => {
-            const percent = (progress.loaded / progress.total) * 100;
-            setFileUploadProgress(percent);
-          }
+          upsert: true
         });
 
       if (uploadError) {
@@ -517,37 +529,33 @@ const SprintSignupForm = () => {
         cvUrl = await uploadFileToStorage(uploadedFile, authData.user.id);
       }
       
-      // Create sprint profile
-      const { error: profileError } = await supabase
-        .from('sprint_profiles')
-        .insert({
-          user_id: authData.user.id,
-          name: answers.name,
-          email: answers.email,
-          linkedin_url: answers.linkedin,
-          cv_url: cvUrl,
-          current_job: answers.job,
-          company_incorporated: answers.incorporated === 'yes',
-          received_funding: answers.funding_received === 'yes',
-          funding_details: answers.funding_details,
-          has_deck: answers.deck === 'yes',
-          team_status: answers.team,
-          commercializing_invention: answers.invention === 'yes',
-          university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
-          tto_engaged: answers.ip === 'tto_yes',
-          problem_defined: answers.problem === 'yes',
-          customer_engagement: answers.customers,
-          market_known: answers.market_known === 'yes',
-          market_gap_reason: answers.market_gap_reason,
-          funding_amount: answers.funding_amount_text,
-          has_financial_plan: answers.funding_plan === 'yes',
-          funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
-          experiment_validated: answers.experiment === 'yes',
-          industry_changing_vision: answers.vision === 'yes',
-          sprint_started: true,
-          sprint_completed: false,
-          created_at: new Date().toISOString()
-        });
+      // Manual insert to handle the sprint_profiles table
+      // Note: We'll need to create this table in Supabase
+      const { error: profileError } = await supabase.rpc('create_sprint_profile', {
+        p_user_id: authData.user.id,
+        p_name: answers.name,
+        p_email: answers.email,
+        p_linkedin_url: answers.linkedin,
+        p_cv_url: cvUrl,
+        p_current_job: answers.job,
+        p_company_incorporated: answers.incorporated === 'yes',
+        p_received_funding: answers.funding_received === 'yes',
+        p_funding_details: answers.funding_details,
+        p_has_deck: answers.deck === 'yes',
+        p_team_status: answers.team,
+        p_commercializing_invention: answers.invention === 'yes',
+        p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
+        p_tto_engaged: answers.ip === 'tto_yes',
+        p_problem_defined: answers.problem === 'yes',
+        p_customer_engagement: answers.customers,
+        p_market_known: answers.market_known === 'yes',
+        p_market_gap_reason: answers.market_gap_reason,
+        p_funding_amount: answers.funding_amount_text,
+        p_has_financial_plan: answers.funding_plan === 'yes',
+        p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
+        p_experiment_validated: answers.experiment === 'yes',
+        p_industry_changing_vision: answers.vision === 'yes'
+      });
       
       if (profileError) {
         console.error('Error creating profile:', profileError);
@@ -558,8 +566,7 @@ const SprintSignupForm = () => {
       await createSprintTasks(authData.user.id);
       
       // Send welcome email with sprint info
-      // This could be done via a Supabase Edge Function, but for now we'll log it
-      console.log("Should send welcome email to:", answers.email);
+      await sendWelcomeEmail(answers.email, answers.name);
       
       // Navigate to the sprint dashboard
       toast({
