@@ -1,4 +1,3 @@
-
 import React from "react";
 import DeckTaskLogic from "./DeckTaskLogic";
 import TeamTaskLogic from "./TeamTaskLogic";
@@ -12,63 +11,7 @@ import ExperimentTaskLogic from "./ExperimentTaskLogic";
 import VisionTaskLogic from "./VisionTaskLogic";
 import { SprintProfileQuickEdit } from "../SprintProfileQuickEdit";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
-
-// Helper to wrap a field with quick-edit if value is present
-const SprintProfileShowOrAsk = ({
-  profileKey,
-  label,
-  options,
-  type = "boolean",
-  children,
-}: {
-  profileKey: string;
-  label: string;
-  options?: { value: string; label: string }[];
-  type?: "string" | "boolean" | "select" | "multi-select";
-  children: React.ReactNode;
-}) => {
-  const { sprintProfile } = useSprintProfileQuickEdit();
-  
-  // Check if profile has this value set
-  const hasProfileValue = sprintProfile && 
-    profileKey in sprintProfile && 
-    sprintProfile[profileKey] !== null && 
-    sprintProfile[profileKey] !== undefined;
-  
-  if (hasProfileValue) {
-    const value = sprintProfile[profileKey];
-    
-    // Format value for display
-    let displayValue = value;
-    if (typeof value === "boolean") {
-      displayValue = value ? "Yes" : "No";
-    } else if (type === "select" && options) {
-      const option = options.find(opt => opt.value === value);
-      displayValue = option ? option.label : value;
-    }
-    
-    return (
-      <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="font-medium">{label || profileKey}:</span>
-          <span className="text-green-800">{displayValue}</span>
-          <SprintProfileQuickEdit
-            profileKey={profileKey}
-            label={label}
-            type={type}
-            options={options}
-            description="You may change your answer here if needed."
-          />
-        </div>
-        <div className="ml-6 border-l-2 border-slate-300 pl-4">
-          {children}
-        </div>
-      </div>
-    );
-  }
-  
-  return <>{children}</>;
-};
+import { SprintProfileShowOrAsk } from "../SprintProfileShowOrAsk";
 
 export const SprintTaskLogicRouter = ({
   task,
