@@ -22,6 +22,12 @@ const VisionTaskLogic = ({ isCompleted, onComplete, task }: any) => {
         </div>
         {answered !== null && (
           <div>
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-medium mb-2">Next steps:</h3>
+              <p className="text-gray-700">
+                Create a vivid description of your company's ultimate vision and the transformative impact it will have on the industry.
+              </p>
+            </div>
             <div className="mb-2 font-medium">Required upload:</div>
             <ul className="list-disc list-inside mb-2">
               <li>1-pager painting a picture of the ultimate version of your company and its impact</li>

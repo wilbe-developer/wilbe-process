@@ -17,28 +17,38 @@ import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 const SprintProfileShowOrAsk = ({
   profileKey,
   label,
+  options,
+  type = "boolean",
   children,
 }: {
   profileKey: string;
   label: string;
+  options?: { value: string; label: string }[];
+  type?: "string" | "boolean" | "select" | "multi-select";
   children: React.ReactNode;
 }) => {
   const { sprintProfile } = useSprintProfileQuickEdit();
   if (sprintProfile && profileKey in sprintProfile && sprintProfile[profileKey] !== null && sprintProfile[profileKey] !== undefined) {
     return (
-      <div className="mb-6 flex items-center gap-2">
-        <span className="font-medium">{label || profileKey}:</span>
-        <span className="text-green-800">
-          {typeof sprintProfile[profileKey] === "boolean"
-            ? sprintProfile[profileKey] ? "Yes" : "No"
-            : sprintProfile[profileKey]}
-        </span>
-        <SprintProfileQuickEdit
-          profileKey={profileKey}
-          label={label}
-          type={typeof sprintProfile[profileKey] === "boolean" ? "boolean" : "string"}
-          description="You may change your answer here if needed."
-        />
+      <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="font-medium">{label || profileKey}:</span>
+          <span className="text-green-800">
+            {typeof sprintProfile[profileKey] === "boolean"
+              ? sprintProfile[profileKey] ? "Yes" : "No"
+              : sprintProfile[profileKey]}
+          </span>
+          <SprintProfileQuickEdit
+            profileKey={profileKey}
+            label={label}
+            type={type}
+            options={options}
+            description="You may change your answer here if needed."
+          />
+        </div>
+        <div className="ml-6 border-l-2 border-slate-300 pl-4">
+          {children}
+        </div>
       </div>
     );
   }
@@ -58,22 +68,32 @@ export const SprintTaskLogicRouter = ({
   switch (task.title) {
     case "Create Your Pitch Deck":
       return (
-        <DeckTaskLogic
-          isCompleted={isCompleted}
-          onComplete={onComplete}
-          task={task}
-          hideMainQuestion={true} // Skip main q, show quick edit
+        <SprintProfileShowOrAsk 
+          profileKey="has_deck" 
+          label="Do you have a deck?"
+          type="boolean"
         >
-          <SprintProfileShowOrAsk profileKey="has_deck" label="Do you have a deck?">
-            {/* This is now a valid child */}
-            <div>Loading deck question...</div>
-          </SprintProfileShowOrAsk>
-        </DeckTaskLogic>
+          <DeckTaskLogic
+            isCompleted={isCompleted}
+            onComplete={onComplete}
+            task={task}
+            hideMainQuestion={true} // Skip main q, show quick edit
+          />
+        </SprintProfileShowOrAsk>
       );
     case "Develop Team Building Plan":
     case "Team Profile":
       return (
-        <SprintProfileShowOrAsk profileKey="team_status" label="Team status">
+        <SprintProfileShowOrAsk 
+          profileKey="team_status" 
+          label="Team status"
+          type="select"
+          options={[
+            { value: "solo", label: "I'm solo" },
+            { value: "employees", label: "I have a team but they're employees" },
+            { value: "cofounders", label: "I have co-founders" }
+          ]}
+        >
           <TeamTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -83,7 +103,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "Scientific Foundation":
       return (
-        <SprintProfileShowOrAsk profileKey="commercializing_invention" label="Did you come up with an invention?">
+        <SprintProfileShowOrAsk 
+          profileKey="commercializing_invention" 
+          label="Did you come up with an invention?"
+          type="boolean"
+        >
           <ScienceTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -93,7 +117,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "IP Strategy":
       return (
-        <SprintProfileShowOrAsk profileKey="university_ip" label="Is your company reliant on a university invention?">
+        <SprintProfileShowOrAsk 
+          profileKey="university_ip" 
+          label="Is your company reliant on a university invention?"
+          type="boolean"
+        >
           <IpTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -103,7 +131,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "Problem Definition":
       return (
-        <SprintProfileShowOrAsk profileKey="problem_defined" label="Identified a problem to solve?">
+        <SprintProfileShowOrAsk 
+          profileKey="problem_defined" 
+          label="Identified a problem to solve?"
+          type="boolean"
+        >
           <ProblemTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -114,7 +146,16 @@ export const SprintTaskLogicRouter = ({
     case "Customer Insights":
     case "Customer Discovery":
       return (
-        <SprintProfileShowOrAsk profileKey="customer_engagement" label="Spoken to customers?">
+        <SprintProfileShowOrAsk 
+          profileKey="customer_engagement" 
+          label="Spoken to customers?"
+          type="select"
+          options={[
+            { value: "yes", label: "Yes" },
+            { value: "no", label: "No" },
+            { value: "early", label: "It's too early" }
+          ]}
+        >
           <CustomerTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -125,7 +166,11 @@ export const SprintTaskLogicRouter = ({
     case "Market Validation":
     case "Market Analysis":
       return (
-        <SprintProfileShowOrAsk profileKey="market_known" label="Do you know your target market?">
+        <SprintProfileShowOrAsk 
+          profileKey="market_known" 
+          label="Do you know your target market?"
+          type="boolean"
+        >
           <MarketTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -135,7 +180,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "Financial Strategy":
       return (
-        <SprintProfileShowOrAsk profileKey="has_financial_plan" label="Do you have a financial plan?">
+        <SprintProfileShowOrAsk 
+          profileKey="has_financial_plan" 
+          label="Do you have a financial plan?"
+          type="boolean"
+        >
           <FundingTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -145,7 +194,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "Milestone Planning":
       return (
-        <SprintProfileShowOrAsk profileKey="experiment_validated" label="Have you run an experiment to validate your idea?">
+        <SprintProfileShowOrAsk 
+          profileKey="experiment_validated" 
+          label="Have you run an experiment to validate your idea?"
+          type="boolean"
+        >
           <ExperimentTaskLogic
             task={task}
             isCompleted={isCompleted}
@@ -155,7 +208,11 @@ export const SprintTaskLogicRouter = ({
       );
     case "Vision Document":
       return (
-        <SprintProfileShowOrAsk profileKey="industry_changing_vision" label="Will your company change the industry?">
+        <SprintProfileShowOrAsk 
+          profileKey="industry_changing_vision" 
+          label="Will your company change the industry?"
+          type="boolean"
+        >
           <VisionTaskLogic
             task={task}
             isCompleted={isCompleted}

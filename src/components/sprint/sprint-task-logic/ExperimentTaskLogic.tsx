@@ -25,6 +25,12 @@ const ExperimentTaskLogic = ({ isCompleted, onComplete, task }: any) => {
         </div>
         {(answer === "Yes" || answer === "No") && (
           <div>
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-medium mb-2">Why this matters:</h3>
+              <p className="text-gray-700">
+                Successful startups operate with an experimental mindset, continuously testing and validating assumptions about their product, market, and business model.
+              </p>
+            </div>
             <div className="mb-2 font-medium">Required upload:</div>
             <ul className="list-disc list-inside mb-2">
               <li>Upload milestone plan (technical + commercial, based on template)</li>
