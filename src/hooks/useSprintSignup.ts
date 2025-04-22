@@ -29,15 +29,16 @@ export const useSprintSignup = () => {
   const { user, isAuthenticated } = useAuth();
   const { createSprintTasks } = useSprintTasksManager();
   const navigate = useNavigate();
+  
+  // Indicates if we're in authenticated user mode
+  const [isAuthenticatedFlow, setIsAuthenticatedFlow] = useState(false);
 
   useEffect(() => {
     // If user is already authenticated, prepare for update mode
     if (isAuthenticated && user) {
-      // Just a high number to skip form rendering
-      setCurrentStep(99);
+      setIsAuthenticatedFlow(true);
       
       // Fetch existing answers if needed
-      // This could be expanded to pre-fill the form with existing data
       if (user.email) {
         setAnswers(prevAnswers => ({
           ...prevAnswers,
@@ -150,7 +151,7 @@ export const useSprintSignup = () => {
   };
   
   const shouldRenderCurrentStep = () => {
-    return currentStep < 99;
+    return !isAuthenticatedFlow;
   };
 
   return {
@@ -158,6 +159,7 @@ export const useSprintSignup = () => {
     answers,
     isSubmitting,
     uploadedFile,
+    isAuthenticatedFlow,
     handleChange,
     toggleMultiSelect,
     handleFileUpload,

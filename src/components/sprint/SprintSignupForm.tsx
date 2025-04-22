@@ -14,6 +14,7 @@ const SprintSignupForm = () => {
     answers,
     isSubmitting,
     uploadedFile,
+    isAuthenticatedFlow,
     handleChange,
     toggleMultiSelect,
     handleFileUpload,
@@ -27,6 +28,10 @@ const SprintSignupForm = () => {
 
   // Check if the current step is answered
   const isCurrentStepAnswered = () => {
+    // If in authenticated flow, all steps are considered "answered"
+    if (isAuthenticatedFlow) return true;
+    
+    // For regular flow, check if the current step is answered
     const currentStepData = steps[currentStep];
     if (!currentStepData) return false;
     
@@ -56,7 +61,9 @@ const SprintSignupForm = () => {
   };
 
   const isLastStep = currentStep === steps.length - 1;
-  const currentStepData = steps[currentStep];
+  
+  // Get the current step data safely
+  const currentStepData = currentStep < steps.length ? steps[currentStep] : null;
   
   // Only show step indicator if we're within the normal step range
   const isWithinNormalStepRange = currentStep < steps.length;
@@ -68,13 +75,14 @@ const SprintSignupForm = () => {
         <p className="text-muted-foreground">We surface great founders. We help everyone else.</p>
         
         {isAuthenticated && user && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md text-blue-800">
-            <p>Welcome back, {user.firstName}! Complete this form to personalize your founder sprint.</p>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-800">
+            <p className="font-medium">Welcome back, {user.firstName}!</p>
+            <p className="mt-1">To personalize your founder sprint, please click the button below.</p>
           </div>
         )}
       </div>
       
-      {isWithinNormalStepRange && (
+      {isWithinNormalStepRange && !isAuthenticatedFlow && (
         <div className="mb-4 flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
             Step {currentStep + 1} of {steps.length}
@@ -88,7 +96,8 @@ const SprintSignupForm = () => {
         </div>
       )}
       
-      {shouldRenderCurrentStep() && (
+      {/* Render form steps only for non-authenticated users */}
+      {shouldRenderCurrentStep() && currentStepData && (
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col space-y-4">
@@ -110,34 +119,60 @@ const SprintSignupForm = () => {
         </Card>
       )}
       
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={goToPreviousStep}
-          disabled={currentStep === 0 || isSubmitting}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-        </Button>
-        
-        {isLastStep ? (
-          <Button 
-            onClick={silentSignup}
-            disabled={!isCurrentStepAnswered() || isSubmitting}
-            className="ml-auto"
-          >
-            {isSubmitting ? "Creating your sprint..." : isAuthenticated ? "Update My Sprint" : "Personalize My Sprint"} 
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        ) : (
+      {/* For authenticated users, show a direct button to personalize the sprint */}
+      {isAuthenticatedFlow && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <h2 className="text-2xl font-semibold">Personalize Your Founder Sprint</h2>
+              <p className="text-muted-foreground">
+                Click the button below to create a customized sprint experience based on your profile.
+              </p>
+              <Button 
+                onClick={silentSignup}
+                disabled={isSubmitting}
+                size="lg"
+                className="mt-4"
+              >
+                {isSubmitting ? "Creating your sprint..." : "Personalize My Sprint"} 
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Navigation buttons - only show for non-authenticated flow */}
+      {!isAuthenticatedFlow && (
+        <div className="flex justify-between">
           <Button
-            onClick={goToNextStep}
-            disabled={!isCurrentStepAnswered()}
-            className="ml-auto"
+            variant="outline"
+            onClick={goToPreviousStep}
+            disabled={currentStep === 0 || isSubmitting}
           >
-            Next <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
-        )}
-      </div>
+          
+          {isLastStep ? (
+            <Button 
+              onClick={silentSignup}
+              disabled={!isCurrentStepAnswered() || isSubmitting}
+              className="ml-auto"
+            >
+              {isSubmitting ? "Creating your sprint..." : "Personalize My Sprint"} 
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={goToNextStep}
+              disabled={!isCurrentStepAnswered()}
+              className="ml-auto"
+            >
+              Next <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
