@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
@@ -79,6 +78,14 @@ const HomePage = () => {
         
         <MemberPreview />
       </section>
+      
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h2 className="text-xl font-bold mb-2">⚡ Ready to accelerate your science startup?</h2>
+        <p className="mb-4">Join our Founder Sprint program and get personalized guidance to turn your scientific breakthrough into a successful venture.</p>
+        <Link to={PATHS.SPRINT_SIGNUP}>
+          <Button>Start Your Founder Sprint</Button>
+        </Link>
+      </div>
     </div>
   );
 };

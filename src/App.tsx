@@ -29,6 +29,7 @@ import BuildYourDeckPage from "@/pages/BuildYourDeckPage";
 import SprintPage from "@/pages/SprintPage";
 import SprintDashboardPage from "@/pages/SprintDashboardPage";
 import SprintTaskPage from "@/pages/SprintTaskPage";
+import SprintSignupPage from "@/pages/SprintSignupPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -53,6 +54,9 @@ const App = () => (
               <Route path={PATHS.PENDING} element={<PendingApprovalPage />} />
               <Route path={PATHS.LANDING_PAGE} element={<LandingPage />} />
               <Route path={PATHS.BSF_PAGE} element={<BsfPage />} />
+
+              {/* Sprint signup - publicly accessible */}
+              <Route path="/sprint-signup" element={<SprintSignupPage />} />
 
               {/* Sprint routes */}
               <Route path={PATHS.SPRINT} element={<SprintPage />} />
