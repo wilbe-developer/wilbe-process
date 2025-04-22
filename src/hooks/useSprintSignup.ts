@@ -36,7 +36,7 @@ export const useSprintSignup = () => {
 
   const toggleMultiSelect = (field: string, value: string) => {
     const current = answers[field] || [];
-    if (current.includes(value)) {
+    if (Array.isArray(current) && current.includes(value)) {
       setAnswers(prev => ({ 
         ...prev, 
         [field]: current.filter((v: string) => v !== value) 
@@ -44,7 +44,7 @@ export const useSprintSignup = () => {
     } else {
       setAnswers(prev => ({ 
         ...prev, 
-        [field]: [...current, value] 
+        [field]: [...(Array.isArray(current) ? current : []), value] 
       }));
     }
   };
@@ -57,8 +57,8 @@ export const useSprintSignup = () => {
 
   const goToNextStep = () => {
     // Special handling for the funding_details step
-    if (steps[currentStep].id === 'funding_details') {
-      // If the user hasn't selected "yes" for funding received, we can skip this step
+    if (steps[currentStep].id === 'funding_received') {
+      // If the user hasn't selected "yes" for funding received, we can skip the funding_details step
       const fundingReceived = answers['funding_received'];
       if (fundingReceived !== 'yes') {
         setCurrentStep(currentStep + 2); // Skip to the step after funding_details
@@ -73,7 +73,7 @@ export const useSprintSignup = () => {
 
   const goToPreviousStep = () => {
     // Special handling when going back from a step after funding_details
-    if (steps[currentStep - 1]?.id === 'funding_details') {
+    if (currentStep > 1 && steps[currentStep - 1]?.id === 'funding_details') {
       // If the user hasn't selected "yes" for funding received, we should skip back over this step
       const fundingReceived = answers['funding_received'];
       if (fundingReceived !== 'yes') {
@@ -277,14 +277,24 @@ export const useSprintSignup = () => {
         status: "pending"
       });
       
+      console.log("About to check if tasks exist for user:", userId);
+      
       // Check if tasks already exist for this user
-      const { data: existingTasks } = await supabase
+      const { data: existingTasks, error: queryError } = await supabase
         .from('sprint_tasks')
         .select('id')
         .eq('user_id', userId);
+      
+      if (queryError) {
+        console.error('Error querying existing tasks:', queryError);
+        return;
+      }
         
+      console.log("Existing tasks:", existingTasks);
+      
       // If tasks already exist, delete them before creating new ones
       if (existingTasks && existingTasks.length > 0) {
+        console.log("Deleting existing tasks...");
         const { error: deleteError } = await supabase
           .from('sprint_tasks')
           .delete()
@@ -294,6 +304,8 @@ export const useSprintSignup = () => {
           console.error('Error deleting existing tasks:', deleteError);
         }
       }
+      
+      console.log("Creating new tasks...");
       
       // Insert all tasks into the database
       for (const task of sprintTasks) {
@@ -306,147 +318,122 @@ export const useSprintSignup = () => {
         }
       }
       
+      console.log("Created", sprintTasks.length, "tasks for user:", userId);
+      
     } catch (error) {
       console.error('Error creating sprint tasks:', error);
     }
   };
 
-  const handleExistingUserLogin = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email: answers.email,
-        options: {
-          emailRedirectTo: window.location.origin + PATHS.SPRINT_DASHBOARD,
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Magic link sent",
-        description: "Check your email for a login link to access your sprint dashboard.",
-      });
-      
-      // No need to navigate since the user will be redirected after clicking the magic link
-      
-    } catch (error) {
-      console.error('Error during login:', error);
-      toast({
-        title: "Login failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-    }
-  };
-
+  // Modified to directly sign in the user instead of sending a magic link
   const silentSignup = async () => {
     try {
       setIsSubmitting(true);
       
-      // If the user is already authenticated, we can skip the signup
+      // If the user is already authenticated, skip the signup
       if (isAuthenticated && user) {
-        console.log("User already authenticated, skipping signup");
-        // Just create or update the sprint profile and tasks
+        console.log("User already authenticated, updating sprint profile");
         await updateExistingUser();
         return;
       }
       
-      // Check if user already exists (based on email)
-      const { data: userExists } = await supabase.auth.signInWithOtp({
+      console.log("Checking if user exists with email:", answers.email);
+      
+      // Check if user already exists by trying to sign in
+      const { data: { user: existingUser }, error: userCheckError } = await supabase.auth.signInWithOtp({
         email: answers.email,
         options: {
           shouldCreateUser: false
         }
       });
       
-      // If we didn't get an error, the user exists
-      if (userExists) {
-        console.log("User exists, handling login flow");
-        await handleExistingUserLogin();
-        return;
+      if (userCheckError && !userCheckError.message.includes("Email not confirmed")) {
+        console.error("Error checking if user exists:", userCheckError);
+        throw userCheckError;
       }
       
-      // Generate a random password
-      const randomPassword = Math.random().toString(36).slice(-10);
+      console.log("User check result:", existingUser ? "Exists" : "Does not exist");
       
-      // Create a new user with email and password
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: answers.email,
-        password: randomPassword,
-        options: {
-          data: {
-            firstName: answers.name?.split(' ')[0] || '',
-            lastName: answers.name?.split(' ').slice(1).join(' ') || '',
-            linkedIn: answers.linkedin,
+      // If user exists, handle the login differently - sign in directly with OTP
+      if (existingUser || (userCheckError && userCheckError.message.includes("Email not confirmed"))) {
+        console.log("User exists, handling direct sign in");
+        
+        // Generate a random password for auto-login
+        const randomPassword = Math.random().toString(36).slice(-10);
+        
+        // Try to sign up the user to automatically log them in
+        const { data: signInData, error: signInError } = await supabase.auth.signUp({
+          email: answers.email,
+          password: randomPassword,
+          options: {
+            data: {
+              firstName: answers.name?.split(' ')[0] || '',
+              lastName: answers.name?.split(' ').slice(1).join(' ') || '',
+              linkedIn: answers.linkedin,
+            }
           }
-        }
-      });
-      
-      if (authError) {
-        // If the user already exists, handle that case
-        if (authError.message.includes("already exists")) {
-          await handleExistingUserLogin();
+        });
+        
+        if (signInError) {
+          // If the user already exists, we got an error but it's expected
+          console.log("Expected sign-up error since user exists:", signInError);
+          
+          // Continue with automatic sign-in with OTP (magic link)
+          const { data: magicLinkData, error: magicLinkError } = await supabase.auth.signInWithOtp({
+            email: answers.email,
+            options: {
+              emailRedirectTo: window.location.origin + PATHS.SPRINT_DASHBOARD,
+            }
+          });
+          
+          if (magicLinkError) {
+            throw magicLinkError;
+          }
+          
+          console.log("Sent magic link for existing user");
+          
+          toast({
+            title: "Magic link sent",
+            description: "Please check your email for a magic link to access your sprint dashboard.",
+          });
+          
+          // Update their sprint data even though they will need to click the link
+          await updateUserSprintData(null);
+          
           return;
         }
-        throw authError;
+        
+        // If we somehow got past the expected error (unlikely), continue with the new user
+        console.log("Unexpectedly created a new user during sign in:", signInData);
+        await processNewUser(signInData.user);
+      } else {
+        // Create a new user with email and password
+        console.log("Creating new user with signup");
+        const randomPassword = Math.random().toString(36).slice(-10);
+        
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: answers.email,
+          password: randomPassword,
+          options: {
+            data: {
+              firstName: answers.name?.split(' ')[0] || '',
+              lastName: answers.name?.split(' ').slice(1).join(' ') || '',
+              linkedIn: answers.linkedin,
+            }
+          }
+        });
+        
+        if (authError) {
+          throw authError;
+        }
+        
+        if (!authData.user) {
+          throw new Error("Failed to create user");
+        }
+        
+        console.log("Created new user:", authData.user.id);
+        await processNewUser(authData.user);
       }
-      
-      if (!authData.user) {
-        throw new Error("Failed to create user");
-      }
-      
-      // Upload CV if provided
-      let cvUrl = null;
-      if (uploadedFile) {
-        cvUrl = await uploadFileToStorage(uploadedFile, authData.user.id);
-      }
-      
-      // Manual insert to handle the sprint_profiles table
-      const { error: profileError } = await supabase.rpc('create_sprint_profile', {
-        p_user_id: authData.user.id,
-        p_name: answers.name,
-        p_email: answers.email,
-        p_linkedin_url: answers.linkedin,
-        p_cv_url: cvUrl,
-        p_current_job: answers.job,
-        p_company_incorporated: answers.incorporated === 'yes',
-        p_received_funding: answers.funding_received === 'yes',
-        p_funding_details: answers.funding_details,
-        p_has_deck: answers.deck === 'yes',
-        p_team_status: answers.team,
-        p_commercializing_invention: answers.invention === 'yes',
-        p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
-        p_tto_engaged: answers.ip === 'tto_yes',
-        p_problem_defined: answers.problem === 'yes',
-        p_customer_engagement: answers.customers,
-        p_market_known: answers.market_known === 'yes',
-        p_market_gap_reason: answers.market_gap_reason,
-        p_funding_amount: answers.funding_amount_text,
-        p_has_financial_plan: answers.funding_plan === 'yes',
-        p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
-        p_experiment_validated: answers.experiment === 'yes',
-        p_industry_changing_vision: answers.vision === 'yes'
-      });
-      
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        throw profileError;
-      }
-      
-      // Create personalized sprint tasks for this user
-      await createSprintTasks(authData.user.id);
-      
-      // Send welcome email with sprint info
-      await sendWelcomeEmail(answers.email, answers.name);
-      
-      toast({
-        title: "Sprint setup complete!",
-        description: "Welcome to your personalized founder sprint. Let's get started!",
-      });
-      
-      // Navigate to the sprint dashboard
-      navigate(PATHS.SPRINT_DASHBOARD);
       
     } catch (error) {
       console.error('Error during signup:', error);
@@ -460,37 +447,69 @@ export const useSprintSignup = () => {
     }
   };
   
-  const updateExistingUser = async () => {
+  // Helper to process a newly created user
+  const processNewUser = async (user: any) => {
     try {
-      if (!user) return;
+      // Update user sprint data
+      await updateUserSprintData(user.id);
+      
+      // Send welcome email with sprint info
+      await sendWelcomeEmail(answers.email, answers.name || 'Founder');
+      
+      toast({
+        title: "Sprint setup complete!",
+        description: "Welcome to your personalized founder sprint. Let's get started!",
+      });
+      
+      // Navigate to the sprint dashboard
+      navigate(PATHS.SPRINT_DASHBOARD);
+    } catch (error) {
+      console.error('Error processing new user:', error);
+      throw error;
+    }
+  };
+  
+  // Helper to update user sprint data
+  const updateUserSprintData = async (userId: string | null) => {
+    try {
+      // If no userId provided but user is logged in, use that ID
+      const effectiveUserId = userId || (user ? user.id : null);
+      
+      if (!effectiveUserId) {
+        console.error('No user ID available for sprint data update');
+        return;
+      }
       
       // Upload CV if provided
       let cvUrl = null;
       if (uploadedFile) {
-        cvUrl = await uploadFileToStorage(uploadedFile, user.id);
+        cvUrl = await uploadFileToStorage(uploadedFile, effectiveUserId);
       }
+      
+      // Create personalized sprint tasks for this user
+      await createSprintTasks(effectiveUserId);
       
       // Update or create sprint profile
       const { error: profileError } = await supabase.rpc('create_sprint_profile', {
-        p_user_id: user.id,
-        p_name: answers.name || `${user.firstName} ${user.lastName}`,
-        p_email: user.email,
-        p_linkedin_url: answers.linkedin || user.linkedIn || '',
+        p_user_id: effectiveUserId,
+        p_name: answers.name || (user ? `${user.firstName} ${user.lastName}` : ''),
+        p_email: answers.email || (user ? user.email : ''),
+        p_linkedin_url: answers.linkedin || (user ? user.linkedIn : ''),
         p_cv_url: cvUrl,
-        p_current_job: answers.job,
+        p_current_job: answers.job || '',
         p_company_incorporated: answers.incorporated === 'yes',
         p_received_funding: answers.funding_received === 'yes',
-        p_funding_details: answers.funding_details,
+        p_funding_details: answers.funding_details || '',
         p_has_deck: answers.deck === 'yes',
-        p_team_status: answers.team,
+        p_team_status: answers.team || '',
         p_commercializing_invention: answers.invention === 'yes',
         p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
         p_tto_engaged: answers.ip === 'tto_yes',
         p_problem_defined: answers.problem === 'yes',
-        p_customer_engagement: answers.customers,
+        p_customer_engagement: answers.customers || '',
         p_market_known: answers.market_known === 'yes',
-        p_market_gap_reason: answers.market_gap_reason,
-        p_funding_amount: answers.funding_amount_text,
+        p_market_gap_reason: answers.market_gap_reason || '',
+        p_funding_amount: answers.funding_amount_text || '',
         p_has_financial_plan: answers.funding_plan === 'yes',
         p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
         p_experiment_validated: answers.experiment === 'yes',
@@ -498,11 +517,23 @@ export const useSprintSignup = () => {
       });
       
       if (profileError) {
+        console.error('Error creating/updating profile:', profileError);
         throw profileError;
       }
       
-      // Create personalized sprint tasks
-      await createSprintTasks(user.id);
+      console.log("Sprint profile updated successfully for user:", effectiveUserId);
+      
+    } catch (error) {
+      console.error('Error updating user sprint data:', error);
+      throw error;
+    }
+  };
+  
+  const updateExistingUser = async () => {
+    try {
+      if (!user) return;
+      
+      await updateUserSprintData(user.id);
       
       toast({
         title: "Sprint updated!",

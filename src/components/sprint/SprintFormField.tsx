@@ -110,14 +110,25 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
     case 'conditional':
       if (!step.conditional) return null;
       
-      // Find the conditional that matches one of our selections
+      // This step needs to directly render a textarea for entering funding details 
+      // when the user has selected they've received funding
+      if (step.id === 'funding_details') {
+        return (
+          <Textarea
+            value={value || ''}
+            onChange={(e) => onChange(step.id, e.target.value)}
+            placeholder="Please list the amount received and from whom."
+          />
+        );
+      }
+      
+      // For other conditional fields, try to find a matching condition
       const matchedCondition = step.conditional.find(condition => {
         const conditionField = condition.field;
         const conditionValue = condition.value;
         return value?.[conditionField] === conditionValue;
       });
       
-      // If we have a matching condition, render the appropriate component
       if (matchedCondition) {
         const { componentType, componentProps = {} } = matchedCondition;
         
