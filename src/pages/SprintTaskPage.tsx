@@ -3,9 +3,9 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useSprintTasks } from '@/hooks/useSprintTasks.tsx';
 import { SprintTask, UserTaskProgress } from '@/types/sprint';
-import { QuestionForm } from '@/components/sprint/QuestionForm';
-import { FileUploader } from '@/components/sprint/FileUploader';
-import { UploadedFileView } from '@/components/sprint/UploadedFileView';
+import QuestionForm from '@/components/sprint/QuestionForm';
+import FileUploader from '@/components/sprint/FileUploader';
+import UploadedFileView from '@/components/sprint/UploadedFileView';
 
 const SprintTaskPage = () => {
   const { taskId } = useParams<{ taskId: string }>();

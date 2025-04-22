@@ -10,9 +10,10 @@ interface QuestionFormProps {
   task: SprintTask;
   initialAnswers?: Record<string, any>;
   onSubmit: (answers: Record<string, any>) => void;
+  isCompleted?: boolean;
 }
 
-const QuestionForm = ({ task, initialAnswers = {}, onSubmit }: QuestionFormProps) => {
+const QuestionForm = ({ task, initialAnswers = {}, onSubmit, isCompleted }: QuestionFormProps) => {
   const [answers, setAnswers] = useState<Record<string, any>>(initialAnswers);
   
   const handleOptionChange = (value: string) => {
@@ -64,7 +65,7 @@ const QuestionForm = ({ task, initialAnswers = {}, onSubmit }: QuestionFormProps
       
       <Button
         type="submit"
-        disabled={!answers.answer}
+        disabled={!answers.answer || isCompleted}
         className="w-full md:w-auto"
       >
         Submit Answer

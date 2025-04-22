@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,11 +37,10 @@ export const useSprintSignup = () => {
     }
   }, [isAuthenticated]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (field: string, value: any) => {
     setAnswers(prevAnswers => ({
       ...prevAnswers,
-      [name]: value
+      [field]: value
     }));
   };
 

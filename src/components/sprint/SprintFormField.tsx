@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,7 +12,7 @@ interface SprintFormFieldProps {
   step: Step;
   value: any;
   onChange: (field: string, value: any) => void;
-  onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFileUpload: (file: File | null) => void;
   toggleMultiSelect: (field: string, value: string) => void;
   uploadedFile: File | null;
 }
@@ -24,12 +25,27 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
   toggleMultiSelect,
   uploadedFile
 }) => {
+  // Handle input change for text and textarea
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onChange(step.id, e.target.value);
+  };
+
+  // Handle file upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      onFileUpload(files[0]);
+    } else {
+      onFileUpload(null);
+    }
+  };
+
   switch (step.type) {
     case 'text':
       return (
         <Input 
           value={value || ''} 
-          onChange={(e) => onChange(step.id, e.target.value)} 
+          onChange={handleInputChange} 
           placeholder="Your answer" 
         />
       );
@@ -39,7 +55,7 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
         <Input 
           type="email" 
           value={value || ''} 
-          onChange={(e) => onChange(step.id, e.target.value)} 
+          onChange={handleInputChange} 
           placeholder="Your email" 
         />
       );
@@ -48,7 +64,7 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
       return (
         <Textarea 
           value={value || ''} 
-          onChange={(e) => onChange(step.id, e.target.value)} 
+          onChange={handleInputChange} 
           placeholder="Your answer" 
         />
       );
@@ -58,7 +74,7 @@ export const SprintFormField: React.FC<SprintFormFieldProps> = ({
         <div className="flex flex-col space-y-4">
           <Input 
             type="file" 
-            onChange={onFileUpload} 
+            onChange={handleFileChange} 
             className="border-2 border-dashed border-gray-300 p-10 text-center cursor-pointer"
           />
           {uploadedFile && (
