@@ -106,7 +106,7 @@ const MerchPage = () => {
           <>
             <div className="flex flex-col items-center py-8">
               <WilbeLogo 
-                className="w-32 mb-8"
+                className="w-16 mb-8"
                 style={{
                   '--sails-color': '#FF1462',
                   '--text-color': '#0F1F3C',
