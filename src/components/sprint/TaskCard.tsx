@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { TaskChallengeLink } from "@/components/sprint/TaskChallengeLink";
+import { PATHS } from "@/lib/constants";
 
 const TaskCard = ({ task, disabled }) => {
   const navigate = useNavigate();
@@ -10,7 +11,8 @@ const TaskCard = ({ task, disabled }) => {
 
   const handleClick = () => {
     if (!disabled) {
-      navigate(`/sprint/task/${task.id}`);
+      // Fix the navigation path to match the defined route in App.tsx
+      navigate(`${PATHS.SPRINT_TASK}/${task.id}`);
     }
   };
 
