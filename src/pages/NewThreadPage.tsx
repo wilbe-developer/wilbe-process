@@ -20,7 +20,7 @@ const NewThreadPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [challengeId, setChallengeId] = useState<string | null>(null);
-  const { createThread, challenges } = useCommunityThreads();
+  const { createThread, challenges, isLoading: isLoadingChallenges } = useCommunityThreads();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -36,15 +36,21 @@ const NewThreadPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!title.trim() || !content.trim()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     try {
       await createThread.mutateAsync({ 
         title, 
         content,
-        challenge_id: challengeId
+        challenge_id: challengeId || undefined
       });
       toast.success('Thread created successfully');
       navigate('/community');
     } catch (error) {
+      console.error('Error creating thread:', error);
       toast.error('Failed to create thread');
     }
   };
@@ -58,6 +64,14 @@ const NewThreadPage = () => {
     acc[category].push(challenge);
     return acc;
   }, {} as Record<string, Challenge[]>);
+
+  if (isLoadingChallenges) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={isMobile ? 'p-3' : 'p-6'}>
@@ -81,7 +95,10 @@ const NewThreadPage = () => {
           <label htmlFor="challenge" className="block text-sm font-medium mb-1">
             Related Challenge (optional)
           </label>
-          <Select value={challengeId || undefined} onValueChange={(value) => setChallengeId(value || null)}>
+          <Select 
+            value={challengeId || ''} 
+            onValueChange={(value) => setChallengeId(value || null)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a challenge (optional)" />
             </SelectTrigger>

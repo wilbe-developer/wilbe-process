@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCommunityThreads } from '@/hooks/useCommunityThreads';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { CommunitySidebar } from '@/components/community/CommunitySidebar';
@@ -15,6 +15,16 @@ const CommunityPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [selectedTopic, setSelectedTopic] = useState<TopicFilter>('all');
+  const location = useLocation();
+
+  // Check URL parameters for pre-selected challenge
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const challengeId = params.get('challenge');
+    if (challengeId) {
+      setSelectedTopic(challengeId);
+    }
+  }, [location]);
 
   // Filter threads based on selected topic
   const filteredThreads = threads.filter(thread => {

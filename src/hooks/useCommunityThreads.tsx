@@ -70,7 +70,7 @@ export const useCommunityThreads = () => {
     },
   });
 
-  const { data: challenges = [] } = useQuery({
+  const { data: challenges = [], isLoading: isLoadingChallenges } = useQuery({
     queryKey: ['sprint-challenges'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -98,7 +98,10 @@ export const useCommunityThreads = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating thread:', error);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {
@@ -109,7 +112,7 @@ export const useCommunityThreads = () => {
   return {
     threads,
     challenges,
-    isLoading,
+    isLoading: isLoading || isLoadingChallenges,
     createThread,
   };
 };
