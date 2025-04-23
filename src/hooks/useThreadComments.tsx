@@ -15,12 +15,12 @@ export const useThreadComments = (threadId: string) => {
         .from('thread_comments')
         .select(`
           *,
-          profiles!thread_comments_author_id_fkey(
+          profiles:author_id(
             first_name,
             last_name,
             avatar
           ),
-          user_roles!user_roles_user_id_fkey(role)
+          user_roles:author_id(role)
         `)
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true });

@@ -65,7 +65,7 @@ const CommunityPage = () => {
               </div>
             </div>
             <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
-              <span>{thread.thread_comments_aggregate?.count || 0} replies</span>
+              <span>{thread.thread_comments?.[0]?.count || 0} replies</span>
               {thread.challenge_id && (
                 <Badge variant="secondary">From Sprint Challenge</Badge>
               )}

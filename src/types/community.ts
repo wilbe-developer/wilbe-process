@@ -7,6 +7,20 @@ export interface Thread {
   content: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    avatar: string | null;
+  } | null;
+  user_roles?: {
+    role: string | null;
+  } | null;
+  thread_comments?: { 
+    count: number 
+  }[] | null;
+  thread_views?: {
+    last_viewed_at: string;
+  }[] | null;
 }
 
 export interface ThreadComment {
@@ -16,6 +30,14 @@ export interface ThreadComment {
   content: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    first_name: string | null;
+    last_name: string | null;
+    avatar: string | null;
+  } | null;
+  user_roles?: {
+    role: string | null;
+  } | null;
 }
 
 export interface ThreadView {
