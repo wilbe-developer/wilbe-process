@@ -336,6 +336,39 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          created_at: string | null
+          employment_status: string
+          id: string
+          name: string
+          profile_description: string
+          trigger_points: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          employment_status: string
+          id?: string
+          name: string
+          profile_description: string
+          trigger_points?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          employment_status?: string
+          id?: string
+          name?: string
+          profile_description?: string
+          trigger_points?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_files: {
         Row: {
           download_url: string
@@ -374,6 +407,7 @@ export type Database = {
           created_at: string
           file_id: string | null
           id: string
+          task_answers: Json | null
           task_id: string
           user_id: string
         }
@@ -384,6 +418,7 @@ export type Database = {
           created_at?: string
           file_id?: string | null
           id?: string
+          task_answers?: Json | null
           task_id: string
           user_id: string
         }
@@ -394,6 +429,7 @@ export type Database = {
           created_at?: string
           file_id?: string | null
           id?: string
+          task_answers?: Json | null
           task_id?: string
           user_id?: string
         }
