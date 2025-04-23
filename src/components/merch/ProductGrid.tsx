@@ -15,7 +15,7 @@ export interface Product {
 export const products: Product[] = [
   {
     id: 1,
-    name: "Wilbe Original",
+    name: "Wilbe OG",
     image: "https://iatercfyoclqxmohyyke.supabase.co/storage/v1/object/public/merch//unisex-organic-cotton-t-shirt-french-navy-front-and-back-6808b8592850d.png", // Scientists First Tee
     description: "Our original Scientists First t-shirt in navy blue with a white Wilbe logo on the back",
     materials: ["100% cotton"],
