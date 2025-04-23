@@ -96,14 +96,14 @@ const NewThreadPage = () => {
             Related Challenge (optional)
           </label>
           <Select 
-            value={challengeId || ""}
-            onValueChange={(value) => setChallengeId(value || null)}
+            value={challengeId || "none"}
+            onValueChange={(value) => setChallengeId(value === "none" ? null : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a challenge (optional)" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No specific challenge</SelectItem>
+              <SelectItem value="none">No specific challenge</SelectItem>
               
               {Object.entries(groupedChallenges).map(([category, items]) => (
                 <div key={category}>
