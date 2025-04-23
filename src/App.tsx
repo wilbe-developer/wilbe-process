@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +30,9 @@ import SprintPage from "@/pages/SprintPage";
 import SprintDashboardPage from "@/pages/SprintDashboardPage";
 import SprintTaskPage from "@/pages/SprintTaskPage";
 import SprintSignupPage from "@/pages/SprintSignupPage";
+import CommunityPage from "@/pages/CommunityPage";
+import NewThreadPage from "@/pages/NewThreadPage";
+import ThreadPage from "@/pages/ThreadPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -68,6 +70,9 @@ const App = () => (
                 <Route element={<ProtectedRoute />}>
                   <Route path={PATHS.SPRINT_DASHBOARD} element={<SprintDashboardPage />} />
                   <Route path={`${PATHS.SPRINT_TASK}/:taskId`} element={<SprintTaskPage />} />
+                  <Route path="/community" element={<CommunityPage />} />
+                  <Route path="/community/new" element={<NewThreadPage />} />
+                  <Route path="/community/thread/:threadId" element={<ThreadPage />} />
                 </Route>
               </Route>
 
