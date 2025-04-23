@@ -28,12 +28,54 @@ export const useTeamMembers = (taskAnswers: any) => {
     triggerPoints: '' 
   }]);
   const [loading, setLoading] = useState(false);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
 
+  // Load team members from taskAnswers when available (this is from sprint progress)
   useEffect(() => {
-    if (taskAnswers?.team_members) {
+    if (taskAnswers?.team_members && !initialDataLoaded) {
+      console.log("Loading team members from task answers:", taskAnswers.team_members);
       setTeamMembers(taskAnswers.team_members);
+      setInitialDataLoaded(true);
     }
-  }, [taskAnswers]);
+  }, [taskAnswers, initialDataLoaded]);
+
+  // If no task answers, try loading from team_members table
+  useEffect(() => {
+    const loadTeamMembersFromDatabase = async () => {
+      if (!user?.id || initialDataLoaded) return;
+      
+      try {
+        console.log("Attempting to load team members from database for user:", user.id);
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error("Error loading team members:", error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          console.log("Loaded team members from database:", data);
+          // Transform from database format to TeamMember format
+          const loadedMembers = data.map(member => ({
+            name: member.name,
+            profile: member.profile_description,
+            employmentStatus: member.employment_status,
+            triggerPoints: member.trigger_points || ''
+          }));
+          
+          setTeamMembers(loadedMembers);
+          setInitialDataLoaded(true);
+        }
+      } catch (error) {
+        console.error("Error in loadTeamMembersFromDatabase:", error);
+      }
+    };
+    
+    loadTeamMembersFromDatabase();
+  }, [user, initialDataLoaded]);
 
   const addTeamMember = () => {
     setTeamMembers([...teamMembers, { 

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import StepBasedTaskLogic, { Step } from "../StepBasedTaskLogic";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
@@ -11,6 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Json } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { Download, Upload } from "lucide-react";
+import FileUploader from "@/components/sprint/FileUploader";
 
 type Props = {
   isCompleted: boolean;
@@ -21,6 +24,7 @@ type Props = {
 };
 
 const TEAM_BUILDING_VIDEO_ID = "j5TEYCrLDYo";
+const HIRING_TEMPLATE_PLACEHOLDER = "/hiring-template-placeholder.pdf"; // Placeholder path
 
 const TeamTaskLogic: React.FC<Props> = ({ 
   isCompleted, 
@@ -33,7 +37,24 @@ const TeamTaskLogic: React.FC<Props> = ({
   const { user } = useAuth();
   const teamStatus = sprintProfile?.team_status;
   const [neededSkills, setNeededSkills] = useState('');
+  const [uploadedFileId, setUploadedFileId] = useState<string | undefined>();
+  const [hiringPlanStep, setHiringPlanStep] = useState<'download' | 'upload'>('download');
+  
   const { teamMembers, loading, addTeamMember, removeTeamMember, updateTeamMember, saveTeamMembers } = useTeamMembers(task?.progress?.task_answers);
+
+  // Load needed skills from task answers if available
+  useEffect(() => {
+    if (task?.progress?.task_answers?.needed_skills) {
+      setNeededSkills(task.progress.task_answers.needed_skills);
+    }
+  }, [task?.progress?.task_answers]);
+
+  // Load uploaded file ID if available
+  useEffect(() => {
+    if (task?.progress?.file_id) {
+      setUploadedFileId(task.progress.file_id);
+    }
+  }, [task?.progress?.file_id]);
 
   const saveTeamData = async () => {
     if (!user?.id || !task?.id) {
@@ -77,6 +98,7 @@ const TeamTaskLogic: React.FC<Props> = ({
           .update({
             completed: true,
             task_answers: serializedTaskAnswers,
+            file_id: uploadedFileId,
             completed_at: new Date().toISOString()
           })
           .eq('id', existingProgress.id);
@@ -95,6 +117,7 @@ const TeamTaskLogic: React.FC<Props> = ({
             task_id: task.id,
             completed: true,
             task_answers: serializedTaskAnswers,
+            file_id: uploadedFileId,
             completed_at: new Date().toISOString()
           });
 
@@ -105,12 +128,18 @@ const TeamTaskLogic: React.FC<Props> = ({
       }
 
       console.log("Team data saved successfully!");
-      onComplete();
+      onComplete(uploadedFileId);
       toast.success("Data saved successfully");
     } catch (error: any) {
       console.error('Error saving data:', error);
       toast.error(`Failed to save data: ${error.message || 'Unknown error'}`);
     }
+  };
+
+  const handleFileUpload = (fileId: string) => {
+    console.log("File uploaded, ID:", fileId);
+    setUploadedFileId(fileId);
+    toast.success("Hiring plan uploaded successfully!");
   };
 
   const buildSteps = (): Step[] => {
@@ -147,19 +176,53 @@ const TeamTaskLogic: React.FC<Props> = ({
                 rows={5}
                 className="w-full"
               />
-              <div className="bg-blue-50 p-4 rounded-lg mt-4">
-                <h4 className="font-medium mb-2">Hiring Template</h4>
-                <p className="text-sm text-gray-700">
-                  When you're ready to expand your team, consider creating a clear job description that includes:
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-gray-700 space-y-1">
-                  <li>Role and responsibilities</li>
-                  <li>Required skills and experience</li>
-                  <li>Cultural fit indicators</li>
-                  <li>Growth opportunities</li>
-                  <li>Compensation structure</li>
-                </ul>
-              </div>
+            </div>
+          ]
+        },
+        {
+          type: "content",
+          content: [
+            "Hiring Plan Template",
+            <div key="hiring-plan" className="space-y-4">
+              {hiringPlanStep === 'download' ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-700">
+                    Download our hiring plan template to help you structure your future team building efforts.
+                  </p>
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={() => {
+                        // Download template logic
+                        window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
+                        setHiringPlanStep('upload');
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      <Download size={16} />
+                      Download Hiring Template
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-700">
+                    Please upload your completed hiring plan:
+                  </p>
+                  {uploadedFileId ? (
+                    <div className="p-4 border border-green-200 bg-green-50 rounded-md">
+                      <p className="text-green-700 flex items-center gap-2">
+                        <Upload size={16} />
+                        Hiring plan uploaded successfully!
+                      </p>
+                    </div>
+                  ) : (
+                    <FileUploader
+                      onFileUploaded={handleFileUpload}
+                      isCompleted={false}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           ]
         }
