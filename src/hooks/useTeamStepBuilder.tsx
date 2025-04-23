@@ -71,44 +71,43 @@ export const useTeamStepBuilder = ({
       {
         type: "content",
         content: [
-          hiringPlanStep === 'download' ? "Download our hiring plan template" : "Upload your completed hiring plan",
-          <div key="hiring-plan" className="mt-4">
-            {hiringPlanStep === 'download' ? (
-              <div className="flex flex-col items-center space-y-4">
-                <p className="text-sm text-gray-700">
-                  Download our hiring plan template to help you structure your future team building efforts.
-                </p>
-                <Button 
-                  onClick={() => {
-                    window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
-                    onHiringPlanStepChange('upload');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Download size={16} />
-                  Download Hiring Template
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-700">
-                  Please upload your completed hiring plan:
-                </p>
-                {uploadedFileId ? (
-                  <div className="p-4 border border-green-200 bg-green-50 rounded-md">
-                    <p className="text-green-700 flex items-center gap-2">
-                      <Upload size={16} />
-                      Hiring plan uploaded successfully!
-                    </p>
-                  </div>
-                ) : (
-                  <FileUploader
-                    onFileUploaded={onFileUpload}
-                    isCompleted={false}
-                  />
-                )}
-              </div>
-            )}
+          "Hiring Plan Template",
+          <div key="hiring-plan" className="mt-4 space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <p className="text-sm text-gray-700">
+                Download our hiring plan template to help you structure your future team building efforts.
+              </p>
+              <Button 
+                onClick={() => {
+                  window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
+                  onHiringPlanStepChange('upload');
+                }}
+                className="flex items-center gap-2"
+              >
+                <Download size={16} />
+                Download Hiring Template
+              </Button>
+            </div>
+            
+            {/* Upload section - always shown in the final step */}
+            <div className="space-y-4 mt-8 pt-6 border-t border-gray-200">
+              <p className="text-sm text-gray-700 font-medium">
+                Please upload your completed hiring plan:
+              </p>
+              {uploadedFileId ? (
+                <div className="p-4 border border-green-200 bg-green-50 rounded-md">
+                  <p className="text-green-700 flex items-center gap-2">
+                    <Upload size={16} />
+                    Hiring plan uploaded successfully!
+                  </p>
+                </div>
+              ) : (
+                <FileUploader
+                  onFileUploaded={onFileUpload}
+                  isCompleted={false}
+                />
+              )}
+            </div>
           </div>
         ]
       }
