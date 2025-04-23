@@ -29,15 +29,17 @@ export const useCommunityThreads = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our Thread type
-      const transformedData = data.map(thread => ({
-        ...thread,
-        comment_count: thread.comment_count?.length ? 
-          { count: thread.comment_count[0].count } : 
-          { count: 0 }
-      }));
+      // Transform the data to handle the comment count format
+      const transformedData = data.map(thread => {
+        return {
+          ...thread,
+          author_profile: thread.author_profile || null,
+          author_role: thread.author_role || null,
+          comment_count: thread.comment_count || []
+        };
+      });
       
-      return transformedData as Thread[];
+      return transformedData as unknown as Thread[];
     },
   });
 

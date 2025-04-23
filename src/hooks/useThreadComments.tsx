@@ -28,7 +28,17 @@ export const useThreadComments = (threadId: string) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      return data as ThreadComment[];
+      
+      // Transform data to handle null relationships
+      const transformedData = data.map(comment => {
+        return {
+          ...comment,
+          author_profile: comment.author_profile || null,
+          author_role: comment.author_role || null
+        };
+      });
+      
+      return transformedData as unknown as ThreadComment[];
     },
   });
 

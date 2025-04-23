@@ -41,7 +41,13 @@ const ThreadPage = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Handle null relationships
+      return {
+        ...data,
+        author_profile: data.author_profile || null,
+        author_role: data.author_role || null
+      };
     },
   });
 
