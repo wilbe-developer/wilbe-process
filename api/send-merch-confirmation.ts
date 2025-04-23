@@ -18,16 +18,16 @@ const createEmailHtml = (name: string, product: string, size: string, address: s
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
     <h2 style="color: #1a365d;">Your Wilbe Merch Order Confirmation</h2>
-    <p>Dear ${name},</p>
-    <p>Thank you for ordering Wilbe merch! We're excited to get your item to you.</p>
+    <p>Hi there,</p>
+    <p>Thank you for your order! We received your Wilbe Merch request and are getting it ready for you. You'll receive another email once it's on its way.</p>
     <div style="background: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
       <h3 style="margin-top: 0;">Order Details:</h3>
       <p><strong>Item:</strong> ${product}</p>
       <p><strong>Size:</strong> ${size}</p>
       <p><strong>Shipping Address:</strong><br/>${address}</p>
     </div>
-    <p>We'll send you tracking information once your order ships.</p>
-    <p>Best regards,<br/>The Wilbe Team</p>
+    <p>If you have any questions or need to make changes, feel free to reply to this email.</p>
+    <p>Scientists First,<br/>Team Wilbe</p>
   </div>
 </body>
 </html>
@@ -58,6 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       to: email,
       subject: 'Your Wilbe Merch Order Confirmation',
       html: createEmailHtml(name, product, size, address),
+      replyTo: 'capital@wilbe.com'
     });
 
     // Send Slack notification
