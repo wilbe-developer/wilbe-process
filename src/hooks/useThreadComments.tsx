@@ -29,7 +29,7 @@ export const useThreadComments = (threadId?: string) => {
         .from('profiles')
         .select('first_name, last_name, avatar')
         .eq('id', data.author_id)
-        .single();
+        .maybeSingle();
 
       // Get author role - using maybeSingle to handle no results gracefully
       const { data: roleData } = await supabase
@@ -45,11 +45,9 @@ export const useThreadComments = (threadId?: string) => {
           .from('sprint_tasks')
           .select('title')
           .eq('id', data.challenge_id)
-          .single();
+          .maybeSingle();
         
-        if (challengeData) {
-          challengeName = challengeData.title;
-        }
+        challengeName = challengeData?.title;
       }
 
       return {
@@ -84,7 +82,7 @@ export const useThreadComments = (threadId?: string) => {
             .from('profiles')
             .select('first_name, last_name, avatar')
             .eq('id', comment.author_id)
-            .single();
+            .maybeSingle();
 
           // Get author role - using maybeSingle to handle no results gracefully
           const { data: roleData } = await supabase

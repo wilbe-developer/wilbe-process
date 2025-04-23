@@ -27,7 +27,7 @@ export const useCommunityThreads = () => {
             .from('profiles')
             .select('first_name, last_name, avatar')
             .eq('id', thread.author_id)
-            .single();
+            .maybeSingle();
 
           // Get author role - using maybeSingle instead of single to handle no results gracefully
           const { data: roleData } = await supabase
@@ -49,11 +49,9 @@ export const useCommunityThreads = () => {
               .from('sprint_tasks')
               .select('title')
               .eq('id', thread.challenge_id)
-              .single();
+              .maybeSingle();
             
-            if (challengeData) {
-              challengeName = challengeData.title;
-            }
+            challengeName = challengeData?.title;
           }
 
           return {

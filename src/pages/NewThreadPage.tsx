@@ -96,7 +96,7 @@ const NewThreadPage = () => {
             Related Challenge (optional)
           </label>
           <Select 
-            value={challengeId || ''} 
+            value={challengeId || ""}
             onValueChange={(value) => setChallengeId(value || null)}
           >
             <SelectTrigger>
