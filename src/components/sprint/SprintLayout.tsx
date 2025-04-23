@@ -5,25 +5,27 @@ import { Button } from "@/components/ui/button";
 import { PATHS } from "@/lib/constants";
 import { Home, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SprintLayout = () => {
   const { user, logout } = useAuth();
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+      <header className="bg-white shadow-sm py-3 px-4 md:py-4 md:px-6 flex justify-between items-center">
+        <div className="flex items-center">
           <Link to={PATHS.SPRINT_DASHBOARD} className="text-xl font-bold text-brand-pink">
-            Sprint Dashboard
+            {isMobile ? "Sprint Dashboard" : "Sprint Dashboard"}
           </Link>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           <Link to={PATHS.HOME}>
             <Button variant="ghost" size="icon" title="Go to Main App">
               <Home className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 md:space-x-3">
             <div className="hidden md:block text-sm text-right">
               <div className="font-medium">{user?.firstName} {user?.lastName}</div>
               <div className="text-xs text-gray-500">{user?.email}</div>
@@ -38,10 +40,10 @@ const SprintLayout = () => {
           </div>
         </div>
       </header>
-      <main className="flex-1 py-6 px-4 md:px-6 max-w-6xl mx-auto w-full">
+      <main className="flex-1 py-4 px-3 md:py-6 md:px-6 max-w-6xl mx-auto w-full">
         <Outlet />
       </main>
-      <footer className="bg-white py-4 px-6 border-t text-center text-sm text-gray-500">
+      <footer className="bg-white py-3 px-4 md:py-4 md:px-6 border-t text-center text-sm text-gray-500">
         <p>© {new Date().getFullYear()} Wilbe. Sprint Program.</p>
       </footer>
     </div>

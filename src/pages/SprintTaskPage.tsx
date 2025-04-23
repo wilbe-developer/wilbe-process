@@ -2,18 +2,19 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useSprintTasks } from '@/hooks/useSprintTasks.tsx';
-import { SprintTask, UserTaskProgress } from '@/types/sprint';
 import { SprintTaskLogicRouter } from "@/components/sprint/sprint-task-logic";
 import QuestionForm from '@/components/sprint/QuestionForm';
 import FileUploader from '@/components/sprint/FileUploader';
 import UploadedFileView from '@/components/sprint/UploadedFileView';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const SprintTaskPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const { tasksWithProgress, updateProgress, isLoading } = useSprintTasks();
+  const isMobile = useIsMobile();
 
   // Find the current task
-  const currentTask = tasksWithProgress.find(task => task.id === taskId) as UserTaskProgress;
+  const currentTask = tasksWithProgress.find(task => task.id === taskId);
 
   if (isLoading) {
     return (
@@ -56,17 +57,17 @@ const SprintTaskPage = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">{currentTask.title}</h1>
-      <p className="text-gray-600 mb-8">{currentTask.description}</p>
+    <div className={`mx-auto ${isMobile ? 'max-w-full' : 'max-w-4xl'}`}>
+      <h1 className={`${isMobile ? 'text-2xl mb-1' : 'text-3xl mb-2'} font-bold`}>{currentTask.title}</h1>
+      <p className={`text-gray-600 ${isMobile ? 'mb-4 text-sm' : 'mb-8'}`}>{currentTask.description}</p>
 
       {currentTask.content && (
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
+        <div className={`bg-white rounded-lg shadow-sm border ${isMobile ? 'p-3 mb-4' : 'p-6 mb-8'}`}>
           <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: currentTask.content }} />
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
+      <div className={`bg-white rounded-lg shadow-sm border ${isMobile ? 'p-3 mb-4' : 'p-6 mb-8'}`}>
         {LogicComponent || (
           <>
             {currentTask.upload_required ? (

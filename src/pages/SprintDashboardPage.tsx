@@ -1,9 +1,11 @@
 
 import { useSprintTasks } from "@/hooks/useSprintTasks.tsx";
 import TaskCard from "@/components/sprint/TaskCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SprintDashboardPage = () => {
   const { tasksWithProgress, isLoading } = useSprintTasks();
+  const isMobile = useIsMobile();
 
   // Calculate overall completion percentage
   const completedTasks = tasksWithProgress.filter(task => task.progress?.completed).length;
@@ -20,32 +22,32 @@ const SprintDashboardPage = () => {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Your Sprint Journey</h1>
-        <p className="text-gray-600 mb-4">
+      <div className={isMobile ? "mb-4" : "mb-8"}>
+        <h1 className={`${isMobile ? 'text-2xl mb-1' : 'text-3xl mb-2'} font-bold`}>Your Sprint Journey</h1>
+        <p className={`text-gray-600 ${isMobile ? 'text-sm mb-3' : 'mb-4'}`}>
           Complete all tasks to finish your sprint and develop your full project plan.
         </p>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+        <div className={`bg-white rounded-lg shadow-sm border ${isMobile ? 'p-4 mb-4' : 'p-6 mb-6'}`}>
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-medium">Overall Progress</h2>
-            <span className="text-sm font-medium">
+            <h2 className={`${isMobile ? 'text-base' : 'text-lg'} font-medium`}>Overall Progress</h2>
+            <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>
               {completedTasks} of {totalTasks} tasks completed
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
+          <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
             <div 
-              className="bg-brand-pink h-4 rounded-full transition-all duration-500" 
+              className="bg-brand-pink h-3 rounded-full transition-all duration-500" 
               style={{ width: `${completionPercentage}%` }}
             ></div>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-gray-500`}>
             {completionPercentage}% complete
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6">
         {tasksWithProgress.map((task, index) => {
           // Determine if the task should be disabled (all previous tasks must be completed first)
           const previousTasksCompleted = tasksWithProgress

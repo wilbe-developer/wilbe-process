@@ -7,6 +7,7 @@ import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { useTeamTaskState } from "@/hooks/useTeamTaskState";
 import { useTeamStepBuilder } from "@/hooks/useTeamStepBuilder";
 import { useTeamTaskSave } from "@/hooks/useTeamTaskSave";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TeamTaskLogicProps {
   isCompleted: boolean;
@@ -23,6 +24,7 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
   hideMainQuestion, 
   children 
 }) => {
+  const isMobile = useIsMobile();
   const { sprintProfile } = useSprintProfileQuickEdit();
   const { 
     teamMembers, 
@@ -83,8 +85,8 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
   return (
     <div>
       {children}
-      <Card className="mb-8">
-        <CardContent className="p-6">
+      <Card className={`mb-6 ${isMobile ? 'shadow-sm' : 'mb-8'}`}>
+        <CardContent className={isMobile ? "p-3 sm:p-4 md:p-6" : "p-6"}>
           <StepBasedTaskLogic
             steps={steps}
             isCompleted={isCompleted}
