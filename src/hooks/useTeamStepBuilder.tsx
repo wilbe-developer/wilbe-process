@@ -89,7 +89,6 @@ export const useTeamStepBuilder = ({
               </Button>
             </div>
             
-            {/* Upload section - always shown in the final step */}
             <div className="space-y-4 mt-8 pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-700 font-medium">
                 Please upload your completed hiring plan:
