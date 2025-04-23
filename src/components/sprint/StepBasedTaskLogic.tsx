@@ -13,7 +13,7 @@ export type StepType = "question" | "content" | "upload";
 export interface Step {
   type: StepType;
   question?: string;
-  content?: string | string[];
+  content?: string | React.ReactNode | (string | React.ReactNode)[];
   options?: Array<{
     label: string;
     value: string;
@@ -39,6 +39,7 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
     currentStep,
     answers,
     isLastStep,
+    isSubmitting,
     handleAnswerSelect,
     goToNextStep,
     goToPreviousStep,
@@ -111,10 +112,10 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
           ) : isLastStep ? (
             <Button
               onClick={() => handleComplete()}
-              disabled={!hasAnswer || isCompleted}
+              disabled={!hasAnswer || isSubmitting}
               size="sm"
             >
-              Complete
+              {isSubmitting ? 'Saving...' : 'Complete'}
             </Button>
           ) : (
             <Button

@@ -2,21 +2,42 @@
 import React from "react";
 
 interface ContentStepProps {
-  content: string | string[];
+  content: string | React.ReactNode | (string | React.ReactNode)[];
 }
 
 const ContentStep: React.FC<ContentStepProps> = ({ content }) => {
+  if (Array.isArray(content)) {
+    const [title, ...restContent] = content;
+    
+    return (
+      <div className="space-y-4">
+        {title && (
+          <h3 className="text-lg font-semibold">{title}</h3>
+        )}
+        
+        {restContent.length > 0 && (
+          <div className="space-y-4">
+            {restContent.map((item, idx) => (
+              <div key={idx}>
+                {typeof item === 'string' ? (
+                  <p className="text-gray-700">{item}</p>
+                ) : (
+                  item
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  
   return (
-    <div className="bg-blue-50 p-4 rounded-lg mb-4">
-      <h3 className="font-medium mb-2">Information:</h3>
-      {Array.isArray(content) ? (
-        <ul className="list-disc list-inside space-y-2">
-          {content.map((item, idx) => (
-            <li key={idx} className="text-gray-700">{item}</li>
-          ))}
-        </ul>
-      ) : (
+    <div className="bg-blue-50 p-4 rounded-lg">
+      {typeof content === 'string' ? (
         <p className="text-gray-700">{content}</p>
+      ) : (
+        content
       )}
     </div>
   );

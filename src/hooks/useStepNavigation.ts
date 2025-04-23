@@ -17,6 +17,7 @@ export const useStepNavigation = ({
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [uploadedFileId, setUploadedFileId] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleAnswerSelect = (value: string) => {
     setAnswers(prev => ({ ...prev, [currentStep]: value }));
@@ -46,12 +47,18 @@ export const useStepNavigation = ({
   };
   
   const handleComplete = (fileId?: string) => {
-    if (fileId) {
-      setUploadedFileId(fileId);
-    }
+    setIsSubmitting(true);
     
-    if (onComplete) {
-      onComplete(fileId || uploadedFileId);
+    try {
+      if (fileId) {
+        setUploadedFileId(fileId);
+      }
+      
+      if (onComplete) {
+        onComplete(fileId || uploadedFileId);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -62,6 +69,7 @@ export const useStepNavigation = ({
     answers,
     isLastStep,
     uploadedFileId,
+    isSubmitting,
     setUploadedFileId,
     handleAnswerSelect,
     goToNextStep,
