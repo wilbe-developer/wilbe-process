@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Step } from "@/components/sprint/StepBasedTaskLogic";
 import SoloFounderHiringSteps from "@/components/sprint/step-types/SoloFounderHiringSteps";
 import TeamMemberForm from "@/components/sprint/step-types/TeamMemberForm";
