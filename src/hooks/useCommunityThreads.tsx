@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Thread } from '@/types/community';
+import { Thread, Challenge } from '@/types/community';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useCommunityThreads = () => {
@@ -41,18 +41,46 @@ export const useCommunityThreads = () => {
             .from('thread_comments')
             .select('*', { count: 'exact', head: true })
             .eq('thread_id', thread.id);
+            
+          // Get challenge name if challenge_id is present
+          let challengeName = null;
+          if (thread.challenge_id) {
+            const { data: challengeData } = await supabase
+              .from('sprint_tasks')
+              .select('title')
+              .eq('id', thread.challenge_id)
+              .single();
+            
+            if (challengeData) {
+              challengeName = challengeData.title;
+            }
+          }
 
           return {
             ...thread,
             author_profile: profileData || null,
             author_role: roleData || null,
-            comment_count: [{ count: count || 0 }]
+            comment_count: count ? [{ count }] : [{ count: 0 }],
+            challenge_name: challengeName
           };
         })
       );
       
       return threadsWithDetails as Thread[];
     },
+  });
+
+  const { data: challenges = [] } = useQuery({
+    queryKey: ['sprint-challenges'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sprint_tasks')
+        .select('id, title, description, category')
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      return data as Challenge[];
+    }
   });
 
   const createThread = useMutation({
@@ -80,6 +108,7 @@ export const useCommunityThreads = () => {
 
   return {
     threads,
+    challenges,
     isLoading,
     createThread,
   };

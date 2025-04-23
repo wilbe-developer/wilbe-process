@@ -68,6 +68,7 @@ export const useThreadComments = (threadId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['thread-comments', threadId] });
+      queryClient.invalidateQueries({ queryKey: ['threads'] });
     },
   });
 

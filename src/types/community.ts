@@ -16,8 +16,9 @@ export interface Thread {
     role: string | null;
   } | null;
   comment_count?: {
-    count: number | null;
+    count: number;
   }[] | null;
+  challenge_name?: string | null;
 }
 
 export interface ThreadComment {
@@ -42,3 +43,12 @@ export interface ThreadView {
   thread_id: string;
   last_viewed_at: string;
 }
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+}
+
+export type TopicFilter = 'all' | 'challenges' | string;

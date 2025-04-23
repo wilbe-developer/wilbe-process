@@ -1,30 +1,63 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCommunityThreads } from '@/hooks/useCommunityThreads';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
+import { 
+  Select,
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Challenge } from '@/types/community';
 
 const NewThreadPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const { createThread } = useCommunityThreads();
+  const [challengeId, setChallengeId] = useState<string | null>(null);
+  const { createThread, challenges } = useCommunityThreads();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const location = useLocation();
+
+  // Check if we should pre-select a challenge
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const preselectedChallengeId = params.get('challenge');
+    if (preselectedChallengeId) {
+      setChallengeId(preselectedChallengeId);
+    }
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createThread.mutateAsync({ title, content });
+      await createThread.mutateAsync({ 
+        title, 
+        content,
+        challenge_id: challengeId
+      });
       toast.success('Thread created successfully');
       navigate('/community');
     } catch (error) {
       toast.error('Failed to create thread');
     }
   };
+
+  // Group challenges by category for the select dropdown
+  const groupedChallenges = challenges.reduce((acc, challenge) => {
+    const category = challenge.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(challenge);
+    return acc;
+  }, {} as Record<string, Challenge[]>);
 
   return (
     <div className={isMobile ? 'p-3' : 'p-6'}>
@@ -42,6 +75,33 @@ const NewThreadPage = () => {
             placeholder="What would you like to discuss?"
             required
           />
+        </div>
+        
+        <div>
+          <label htmlFor="challenge" className="block text-sm font-medium mb-1">
+            Related Challenge (optional)
+          </label>
+          <Select value={challengeId || undefined} onValueChange={(value) => setChallengeId(value || null)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a challenge (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No specific challenge</SelectItem>
+              
+              {Object.entries(groupedChallenges).map(([category, items]) => (
+                <div key={category}>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 uppercase">
+                    {category}
+                  </div>
+                  {items.map(challenge => (
+                    <SelectItem key={challenge.id} value={challenge.id}>
+                      {challenge.title}
+                    </SelectItem>
+                  ))}
+                </div>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div>

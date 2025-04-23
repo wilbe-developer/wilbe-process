@@ -1,17 +1,20 @@
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useSprintTasks } from '@/hooks/useSprintTasks.tsx';
 import { SprintTaskLogicRouter } from "@/components/sprint/sprint-task-logic";
 import QuestionForm from '@/components/sprint/QuestionForm';
 import FileUploader from '@/components/sprint/FileUploader';
 import UploadedFileView from '@/components/sprint/UploadedFileView';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { MessageCircle } from 'lucide-react';
 
 const SprintTaskPage = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const { tasksWithProgress, updateProgress, isLoading } = useSprintTasks();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Find the current task
   const currentTask = tasksWithProgress.find(task => task.id === taskId);
@@ -58,7 +61,19 @@ const SprintTaskPage = () => {
 
   return (
     <div className={`mx-auto ${isMobile ? 'max-w-full' : 'max-w-4xl'}`}>
-      <h1 className={`${isMobile ? 'text-2xl mb-1' : 'text-3xl mb-2'} font-bold`}>{currentTask.title}</h1>
+      <div className="flex justify-between items-center">
+        <h1 className={`${isMobile ? 'text-2xl mb-1' : 'text-3xl mb-2'} font-bold`}>{currentTask.title}</h1>
+        
+        <Button 
+          variant="outline" 
+          size={isMobile ? "sm" : "default"}
+          onClick={() => navigate(`/community/new?challenge=${currentTask.id}`)}
+        >
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Discuss
+        </Button>
+      </div>
+      
       <p className={`text-gray-600 ${isMobile ? 'mb-4 text-sm' : 'mb-8'}`}>{currentTask.description}</p>
 
       {currentTask.content && (

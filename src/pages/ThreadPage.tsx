@@ -46,11 +46,24 @@ const ThreadPage = () => {
         .select('role')
         .eq('user_id', threadData.author_id)
         .single();
+        
+      // Get challenge data if it exists
+      let challengeData = null;
+      if (threadData.challenge_id) {
+        const { data: challenge } = await supabase
+          .from('sprint_tasks')
+          .select('title, description')
+          .eq('id', threadData.challenge_id)
+          .single();
+          
+        challengeData = challenge;
+      }
 
       return {
         ...threadData,
         author_profile: profileData || null,
-        author_role: roleData || null
+        author_role: roleData || null,
+        challenge: challengeData
       };
     },
   });
@@ -100,7 +113,7 @@ const ThreadPage = () => {
                 {thread.author_profile?.first_name || ''} {thread.author_profile?.last_name || ''}
               </span>
               {thread.author_role?.role === 'admin' && (
-                <Badge variant="default" className="ml-2">Admin</Badge>
+                <Badge variant="default" className="ml-2 bg-brand-pink">Admin</Badge>
               )}
             </div>
             <div className="text-sm text-gray-500">
@@ -112,6 +125,19 @@ const ThreadPage = () => {
         <h1 className={`font-bold mb-4 ${isMobile ? 'text-2xl' : 'text-3xl'}`}>
           {thread.title}
         </h1>
+        
+        {thread.challenge && (
+          <div className="bg-slate-50 p-3 mb-4 rounded-md border border-slate-200">
+            <div className="flex items-center">
+              <Badge variant="secondary" className="mr-2">Sprint Challenge</Badge>
+              <h3 className="font-medium">{thread.challenge.title}</h3>
+            </div>
+            {thread.challenge.description && (
+              <p className="text-sm text-gray-600 mt-1">{thread.challenge.description}</p>
+            )}
+          </div>
+        )}
+        
         <p className="text-gray-700 whitespace-pre-wrap">{thread.content}</p>
       </div>
 
@@ -132,7 +158,7 @@ const ThreadPage = () => {
                     {comment.author_profile?.first_name || ''} {comment.author_profile?.last_name || ''}
                   </span>
                   {comment.author_role?.role === 'admin' && (
-                    <Badge variant="default" className="ml-2">Admin</Badge>
+                    <Badge variant="default" className="ml-2 bg-brand-pink">Admin</Badge>
                   )}
                 </div>
                 <div className="text-sm text-gray-500">
