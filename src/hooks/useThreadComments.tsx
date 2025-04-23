@@ -15,26 +15,20 @@ export const useThreadComments = (threadId: string) => {
         .from('thread_comments')
         .select(`
           *,
-          author_profile:profiles(
-            first_name,
-            last_name,
-            avatar
-          ),
-          author_role:user_roles(
-            role
-          )
+          profiles(first_name, last_name, avatar),
+          user_roles(role)
         `)
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
       
-      // Transform data to handle null relationships
+      // Transform data to handle relations
       const transformedData = data.map(comment => {
         return {
           ...comment,
-          author_profile: comment.author_profile || null,
-          author_role: comment.author_role || null
+          author_profile: comment.profiles || null,
+          author_role: comment.user_roles || null
         };
       });
       

@@ -15,26 +15,20 @@ export const useCommunityThreads = () => {
         .from('discussion_threads')
         .select(`
           *,
-          author_profile:profiles(
-            first_name,
-            last_name,
-            avatar
-          ),
-          author_role:user_roles(
-            role
-          ),
+          profiles(first_name, last_name, avatar),
+          user_roles(role),
           comment_count:thread_comments(count)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      // Transform the data to handle the comment count format
+      // Transform the data to handle the comment count format and relations
       const transformedData = data.map(thread => {
         return {
           ...thread,
-          author_profile: thread.author_profile || null,
-          author_role: thread.author_role || null,
+          author_profile: thread.profiles || null,
+          author_role: thread.user_roles || null,
           comment_count: thread.comment_count || []
         };
       });

@@ -28,25 +28,19 @@ const ThreadPage = () => {
         .from('discussion_threads')
         .select(`
           *,
-          author_profile:profiles(
-            first_name,
-            last_name,
-            avatar
-          ),
-          author_role:user_roles(
-            role
-          )
+          profiles(first_name, last_name, avatar),
+          user_roles(role)
         `)
         .eq('id', threadId)
         .single();
 
       if (error) throw error;
       
-      // Handle null relationships
+      // Handle relations
       return {
         ...data,
-        author_profile: data.author_profile || null,
-        author_role: data.author_role || null
+        author_profile: data.profiles || null,
+        author_role: data.user_roles || null
       };
     },
   });
