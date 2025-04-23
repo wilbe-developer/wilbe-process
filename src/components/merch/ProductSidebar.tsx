@@ -1,4 +1,3 @@
-
 import React from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,13 @@ export const ProductSidebar: React.FC<ProductSidebarProps> = ({
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent>
-        <SheetHeader>
-          <SheetTitle>{product.name}</SheetTitle>
-          <button onClick={onClose} className="absolute top-4 right-4">
+        <SheetHeader className="relative">
+          <SheetTitle className="font-['Poppins']">{product.name}</SheetTitle>
+          <button onClick={onClose} className="absolute right-0 top-0">
             <X className="h-4 w-4" />
           </button>
         </SheetHeader>
-        <div className="mt-6 space-y-6">
+        <div className="mt-6 space-y-6 font-['Poppins']">
           <img
             src={product.image}
             alt={product.name}

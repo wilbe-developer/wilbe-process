@@ -1,9 +1,12 @@
+
 import React, { useState } from "react";
 import { ProductGrid, Product } from "@/components/merch/ProductGrid";
 import { ProductSidebar } from "@/components/merch/ProductSidebar";
 import { ShippingForm } from "@/components/merch/ShippingForm";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import WilbeLogo from "@/assets/WilbeLogo";
+import { Helmet } from "react-helmet";
 
 const MerchPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -93,37 +96,52 @@ const MerchPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {!showForm ? (
-        <>
-          <div className="text-center py-12 px-4">
-            <h1 className="text-3xl md:text-4xl font-semibold mb-2 text-dark">
-              Welcome to the Wilbe family!
-            </h1>
-            <p className="text-gray-600 text-lg max-w-lg mx-auto">
-              Pick your complimentary merch item
-            </p>
+    <>
+      <Helmet>
+        <title>Wilbe Merch</title>
+        <meta name="description" content="Get your Wilbe merch - Welcome to the Wilbe family!" />
+      </Helmet>
+      <div className="min-h-screen bg-white">
+        {!showForm ? (
+          <>
+            <div className="flex flex-col items-center py-8">
+              <WilbeLogo 
+                className="w-32 mb-8"
+                style={{
+                  '--sails-color': '#FF1462',
+                  '--text-color': '#0F1F3C',
+                } as React.CSSProperties}
+              />
+              <div className="text-center px-4">
+                <h1 className="text-3xl md:text-4xl font-semibold mb-2 text-dark font-[Helvetica] tracking-wider">
+                  Welcome to the Wilbe family!
+                </h1>
+                <p className="text-gray-600 text-lg max-w-lg mx-auto font-['Poppins']">
+                  Pick your complimentary merch item
+                </p>
+              </div>
+            </div>
+            <ProductGrid onProductSelect={handleProductSelect} />
+            <ProductSidebar
+              product={selectedProduct}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              onSizeSelect={handleSizeSelect}
+            />
+          </>
+        ) : (
+          <div className="p-8">
+            <ShippingForm
+              onSubmit={handleFormSubmit}
+              selectedProduct={selectedProduct?.name || ""}
+              selectedSize={selectedSize}
+              disabled={submitting}
+              onChangeSelection={handleChangeSelection}
+            />
           </div>
-          <ProductGrid onProductSelect={handleProductSelect} />
-          <ProductSidebar
-            product={selectedProduct}
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-            onSizeSelect={handleSizeSelect}
-          />
-        </>
-      ) : (
-        <div className="p-8">
-          <ShippingForm
-            onSubmit={handleFormSubmit}
-            selectedProduct={selectedProduct?.name || ""}
-            selectedSize={selectedSize}
-            disabled={submitting}
-            onChangeSelection={handleChangeSelection}
-          />
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 
