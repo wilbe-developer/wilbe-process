@@ -11,29 +11,47 @@ export const useCommunityThreads = () => {
   const { data: threads = [], isLoading } = useQuery({
     queryKey: ['threads'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch the threads
+      const { data: threadsData, error: threadsError } = await supabase
         .from('discussion_threads')
-        .select(`
-          *,
-          profiles(first_name, last_name, avatar),
-          user_roles(role),
-          comment_count:thread_comments(count)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (threadsError) throw threadsError;
       
-      // Transform the data to handle the comment count format and relations
-      const transformedData = data.map(thread => {
-        return {
-          ...thread,
-          author_profile: thread.profiles || null,
-          author_role: thread.user_roles || null,
-          comment_count: thread.comment_count || []
-        };
-      });
+      // For each thread, get the author profile, role, and comment count
+      const threadsWithDetails = await Promise.all(
+        threadsData.map(async (thread) => {
+          // Get author profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, avatar')
+            .eq('id', thread.author_id)
+            .single();
+
+          // Get author role
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', thread.author_id)
+            .single();
+
+          // Get comment count
+          const { count } = await supabase
+            .from('thread_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('thread_id', thread.id);
+
+          return {
+            ...thread,
+            author_profile: profileData || null,
+            author_role: roleData || null,
+            comment_count: [{ count: count || 0 }]
+          };
+        })
+      );
       
-      return transformedData as unknown as Thread[];
+      return threadsWithDetails as Thread[];
     },
   });
 

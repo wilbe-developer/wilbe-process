@@ -11,28 +11,41 @@ export const useThreadComments = (threadId: string) => {
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['thread-comments', threadId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch the comments
+      const { data: commentsData, error: commentsError } = await supabase
         .from('thread_comments')
-        .select(`
-          *,
-          profiles(first_name, last_name, avatar),
-          user_roles(role)
-        `)
+        .select('*')
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (commentsError) throw commentsError;
       
-      // Transform data to handle relations
-      const transformedData = data.map(comment => {
-        return {
-          ...comment,
-          author_profile: comment.profiles || null,
-          author_role: comment.user_roles || null
-        };
-      });
+      // For each comment, get the author profile and role
+      const commentsWithDetails = await Promise.all(
+        commentsData.map(async (comment) => {
+          // Get author profile
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, avatar')
+            .eq('id', comment.author_id)
+            .single();
+
+          // Get author role
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', comment.author_id)
+            .single();
+
+          return {
+            ...comment,
+            author_profile: profileData || null,
+            author_role: roleData || null
+          };
+        })
+      );
       
-      return transformedData as unknown as ThreadComment[];
+      return commentsWithDetails as ThreadComment[];
     },
   });
 

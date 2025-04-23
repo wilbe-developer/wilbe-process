@@ -21,26 +21,36 @@ const ThreadPage = () => {
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
-  const { data: thread } = useQuery({
+  const { data: thread, isLoading: threadLoading } = useQuery({
     queryKey: ['thread', threadId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch the thread
+      const { data: threadData, error: threadError } = await supabase
         .from('discussion_threads')
-        .select(`
-          *,
-          profiles(first_name, last_name, avatar),
-          user_roles(role)
-        `)
+        .select('*')
         .eq('id', threadId)
         .single();
 
-      if (error) throw error;
-      
-      // Handle relations
+      if (threadError) throw threadError;
+
+      // Get author profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar')
+        .eq('id', threadData.author_id)
+        .single();
+
+      // Get author role
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', threadData.author_id)
+        .single();
+
       return {
-        ...data,
-        author_profile: data.profiles || null,
-        author_role: data.user_roles || null
+        ...threadData,
+        author_profile: profileData || null,
+        author_role: roleData || null
       };
     },
   });
@@ -56,7 +66,7 @@ const ThreadPage = () => {
     }
   };
 
-  if (!thread) {
+  if (threadLoading || !thread) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
