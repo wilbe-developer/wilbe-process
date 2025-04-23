@@ -15,16 +15,16 @@ export const useCommunityThreads = () => {
         .from('discussion_threads')
         .select(`
           *,
-          profiles:author_id(
+          profiles(
             first_name,
             last_name,
             avatar
           ),
           thread_comments(count),
-          thread_views:thread_views!thread_views_thread_id_fkey(
+          thread_views(
             last_viewed_at
           ),
-          user_roles:author_id(role)
+          user_roles(role)
         `)
         .order('created_at', { ascending: false });
 

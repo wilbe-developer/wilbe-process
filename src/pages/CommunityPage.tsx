@@ -42,17 +42,17 @@ const CommunityPage = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={thread.profiles?.avatar} />
+                    <AvatarImage src={thread.profiles?.[0]?.avatar} />
                     <AvatarFallback>
-                      {thread.profiles?.first_name?.[0]}
-                      {thread.profiles?.last_name?.[0]}
+                      {thread.profiles?.[0]?.first_name?.[0]}
+                      {thread.profiles?.[0]?.last_name?.[0]}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <span className="font-medium">
-                      {thread.profiles?.first_name} {thread.profiles?.last_name}
+                      {thread.profiles?.[0]?.first_name} {thread.profiles?.[0]?.last_name}
                     </span>
-                    {thread.user_roles?.role === 'admin' && (
+                    {thread.user_roles?.[0]?.role === 'admin' && (
                       <Badge variant="default" className="ml-2">Admin</Badge>
                     )}
                   </div>

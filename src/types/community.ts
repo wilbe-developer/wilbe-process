@@ -11,10 +11,10 @@ export interface Thread {
     first_name: string | null;
     last_name: string | null;
     avatar: string | null;
-  } | null;
+  }[] | null;
   user_roles?: {
     role: string | null;
-  } | null;
+  }[] | null;
   thread_comments?: { 
     count: number 
   }[] | null;
@@ -34,10 +34,10 @@ export interface ThreadComment {
     first_name: string | null;
     last_name: string | null;
     avatar: string | null;
-  } | null;
+  }[] | null;
   user_roles?: {
     role: string | null;
-  } | null;
+  }[] | null;
 }
 
 export interface ThreadView {
