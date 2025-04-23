@@ -2,8 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import FileUploader from "@/components/sprint/FileUploader";
-import StepBasedTaskLogic from "../StepBasedTaskLogic";
+import StepBasedTaskLogic, { Step } from "../StepBasedTaskLogic";
+import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 
 type Props = {
   isCompleted: boolean;
@@ -44,33 +44,70 @@ const DECK_TEMPLATE_PLACEHOLDER = (
 );
 
 const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuestion, children }) => {
-  const steps = [
-    {
-      type: 'question',
-      question: "Does your deck fit the 15-slide template?",
-      options: [
-        { label: "Yes", value: "yes" },
-        { label: "No", value: "no" }
-      ]
-    },
-    {
-      type: 'content',
-      content: [
-        "We'll help you create a compelling pitch deck using our proven template",
-        "Listen to the audio guide for detailed explanations of each slide",
-        "Download and customize the template in Canva",
-        "Upload your completed deck when ready"
-      ]
-    },
-    {
-      type: 'upload',
-      action: "Upload your completed pitch deck",
-      uploads: [
-        "15-slide deck based on template",
-        "Audio file accompanying deck explaining each slide (To be uploaded separately)"
-      ]
+  const { sprintProfile } = useSprintProfileQuickEdit();
+  const hasDeck = sprintProfile?.has_deck === true;
+  
+  // Define steps based on whether the user has a deck or not
+  const buildSteps = (): Step[] => {
+    if (!hasDeck) {
+      // If they don't have a deck, show guidance and upload steps
+      return [
+        {
+          type: "content",
+          content: [
+            "We'll help you create a compelling pitch deck using our proven template",
+            "Listen to the audio guide for detailed explanations of each slide",
+            "Download and customize the template in Canva",
+            "Upload your completed deck when ready"
+          ]
+        },
+        {
+          type: "upload",
+          action: "Upload your completed pitch deck",
+          uploads: ["15-slide deck based on template"]
+        }
+      ];
+    } else {
+      // If they have a deck, ask if it fits the template
+      return [
+        {
+          type: "question",
+          question: "Does your deck fit the 15-slide template?",
+          options: [
+            { label: "Yes", value: "yes" },
+            { label: "No", value: "no" }
+          ]
+        },
+        {
+          type: "upload",
+          action: "Upload your existing pitch deck",
+          uploads: ["15-slide deck"]
+        },
+        {
+          type: "content",
+          content: [
+            "We recommend using our proven 15-slide template",
+            "Listen to the audio guide for detailed explanations of each slide",
+            "Download and customize the template in Canva",
+            "Upload your completed deck when ready"
+          ]
+        },
+        {
+          type: "upload",
+          action: "Upload your modified pitch deck",
+          uploads: ["15-slide deck based on template"]
+        }
+      ];
     }
-  ];
+  };
+
+  // Define conditional flow to skip content or upload steps based on answer
+  const conditionalFlow = hasDeck ? {
+    0: { // If on the "Does your deck fit template" question
+      "yes": 1, // If "Yes" - go to the upload step for existing deck
+      "no": 2   // If "No" - go to the content step with instructions
+    }
+  } : {};
 
   return (
     <div>
@@ -81,9 +118,13 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuest
           {DECK_TEMPLATE_PLACEHOLDER}
           
           <StepBasedTaskLogic
-            steps={steps}
+            steps={buildSteps()}
             isCompleted={isCompleted}
-            onComplete={onComplete}
+            onComplete={(fileId) => {
+              // Always pass the fileId to ensure it's captured
+              onComplete(fileId);
+            }}
+            conditionalFlow={conditionalFlow}
           />
         </CardContent>
       </Card>

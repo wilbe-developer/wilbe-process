@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import FileUploader from "../FileUploader";
+import UploadedFileView from "../UploadedFileView";
 
 interface UploadStepProps {
   action?: string;
   uploads?: string[];
   isCompleted: boolean;
-  onComplete: () => void;
+  onComplete: (fileId?: string) => void;
 }
 
 const UploadStep: React.FC<UploadStepProps> = ({
@@ -15,6 +16,8 @@ const UploadStep: React.FC<UploadStepProps> = ({
   isCompleted,
   onComplete,
 }) => {
+  const [uploadedFileId, setUploadedFileId] = useState<string | undefined>();
+  
   return (
     <div>
       {action && (
@@ -34,10 +37,34 @@ const UploadStep: React.FC<UploadStepProps> = ({
         </>
       )}
       
-      <FileUploader
-        isCompleted={isCompleted}
-        onFileUploaded={() => onComplete()}
-      />
+      {uploadedFileId ? (
+        <div className="mb-4">
+          <UploadedFileView fileId={uploadedFileId} />
+          <div className="mt-4 flex justify-between">
+            <button 
+              className="text-sm text-blue-500 hover:underline"
+              onClick={() => setUploadedFileId(undefined)}
+            >
+              Upload a different file
+            </button>
+            <button
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300"
+              onClick={() => onComplete(uploadedFileId)}
+              disabled={isCompleted}
+            >
+              {isCompleted ? "Completed" : "Confirm Upload"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <FileUploader
+          onFileUploaded={(fileId) => {
+            setUploadedFileId(fileId);
+            // Don't auto-complete here, let the user confirm
+          }}
+          isCompleted={false} // Always allow uploads
+        />
+      )}
     </div>
   );
 };

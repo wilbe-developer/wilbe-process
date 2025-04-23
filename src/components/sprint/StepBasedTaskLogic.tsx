@@ -8,26 +8,32 @@ import QuestionStep from "./step-types/QuestionStep";
 import ContentStep from "./step-types/ContentStep";
 import UploadStep from "./step-types/UploadStep";
 
-interface StepBasedTaskLogicProps {
-  steps: Array<{
-    type: "question" | "content" | "upload";
-    question?: string;
-    content?: string | string[];
-    options?: Array<{
-      label: string;
-      value: string;
-    }>;
-    uploads?: string[];
-    action?: string;
+export type StepType = "question" | "content" | "upload";
+
+export interface Step {
+  type: StepType;
+  question?: string;
+  content?: string | string[];
+  options?: Array<{
+    label: string;
+    value: string;
   }>;
+  uploads?: string[];
+  action?: string;
+}
+
+interface StepBasedTaskLogicProps {
+  steps: Step[];
   isCompleted: boolean;
   onComplete: (fileId?: string) => void;
+  conditionalFlow?: Record<number, Record<string, number>>;
 }
 
 const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
   steps,
   isCompleted,
-  onComplete
+  onComplete,
+  conditionalFlow = {}
 }) => {
   const {
     currentStep,
@@ -36,8 +42,13 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
     handleAnswerSelect,
     goToNextStep,
     goToPreviousStep,
-    progress
-  } = useStepNavigation({ totalSteps: steps.length, onComplete });
+    progress,
+    handleComplete
+  } = useStepNavigation({ 
+    totalSteps: steps.length, 
+    onComplete, 
+    conditionalFlow 
+  });
   
   const step = steps[currentStep];
   const hasAnswer = answers[currentStep] !== undefined || step.type === 'content' || step.type === 'upload';
@@ -78,7 +89,7 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
               action={step.action}
               uploads={step.uploads}
               isCompleted={isCompleted}
-              onComplete={() => onComplete()}
+              onComplete={(fileId) => handleComplete(fileId)}
             />
           )}
         </div>
@@ -94,9 +105,12 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
             <ArrowLeft className="mr-2 h-4 w-4" /> Previous
           </Button>
           
-          {isLastStep ? (
+          {step.type === 'upload' ? (
+            // For upload steps, the Complete button is handled by UploadStep component
+            <div></div>
+          ) : isLastStep ? (
             <Button
-              onClick={() => onComplete()}
+              onClick={() => handleComplete()}
               disabled={!hasAnswer || isCompleted}
               size="sm"
             >
