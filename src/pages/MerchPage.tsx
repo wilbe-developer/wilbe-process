@@ -54,22 +54,24 @@ const MerchPage = () => {
 
     // Send confirmation email (via edge function)
     try {
-      await fetch(
-        "https://iatercfyoclqxmohyyke.supabase.co/functions/v1/send-merch-confirmation",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            to: order.email,
-            name: order.full_name,
-            product: order.product_name,
-            size: order.product_size,
-            address: `${order.address}, ${order.city}, ${order.postal}, ${order.country}`,
-          }),
+      // Use the supabase.functions.invoke method instead of direct fetch
+      const { error } = await supabase.functions.invoke("send-merch-confirmation", {
+        body: {
+          to: order.email,
+          name: order.full_name,
+          product: order.product_name,
+          size: order.product_size,
+          address: `${order.address}, ${order.city}, ${order.postal}, ${order.country}`,
         }
-      );
-      emailSent = true;
-    } catch {
+      });
+      
+      emailSent = !error;
+      
+      if (error) {
+        console.error("Error sending email via function:", error);
+      }
+    } catch (e) {
+      console.error("Exception when sending email:", e);
       emailSent = false;
     }
 

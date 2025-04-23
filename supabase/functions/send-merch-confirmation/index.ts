@@ -19,12 +19,17 @@ interface MerchEmailRequest {
 }
 
 serve(async (req: Request) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { to, name, product, size, address } = await req.json() as MerchEmailRequest;
+
+    console.log("Received request to send merch confirmation email:", {
+      to, name, product, size, address
+    });
 
     const emailRes = await resend.emails.send({
       from: "Wilbe <onboarding@resend.dev>",
