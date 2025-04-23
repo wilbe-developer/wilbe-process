@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Step } from "@/components/sprint/StepBasedTaskLogic";
 import TeamMemberForm from "@/components/sprint/step-types/TeamMemberForm";
@@ -6,8 +5,9 @@ import { TeamMember } from "./useTeamMembers";
 import VideoEmbed from "@/components/video-player/VideoEmbed";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Download, Upload } from "lucide-react";
+import { Download } from "lucide-react";
 import FileUploader from "@/components/sprint/FileUploader";
+import UploadedFileView from "@/components/sprint/UploadedFileView";
 
 const TEAM_BUILDING_VIDEO_ID = "j5TEYCrLDYo";
 const HIRING_TEMPLATE_PLACEHOLDER = "/hiring-template-placeholder.pdf";
@@ -40,7 +40,6 @@ export const useTeamStepBuilder = ({
   onHiringPlanStepChange
 }: UseTeamStepBuilderProps): Step[] => {
   if (teamStatus === "solo") {
-    // Split the solo founder steps into three sequential steps
     return [
       {
         type: "content",
@@ -90,16 +89,11 @@ export const useTeamStepBuilder = ({
             </div>
             
             <div className="space-y-4 mt-8 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-700 font-medium">
-                Please upload your completed hiring plan:
-              </p>
               {uploadedFileId ? (
-                <div className="p-4 border border-green-200 bg-green-50 rounded-md">
-                  <p className="text-green-700 flex items-center gap-2">
-                    <Upload size={16} />
-                    Hiring plan uploaded successfully!
-                  </p>
-                </div>
+                <UploadedFileView
+                  fileId={uploadedFileId}
+                  isCompleted={false}
+                />
               ) : (
                 <FileUploader
                   onFileUploaded={onFileUpload}
