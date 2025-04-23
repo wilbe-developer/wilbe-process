@@ -29,12 +29,12 @@ export const useCommunityThreads = () => {
             .eq('id', thread.author_id)
             .single();
 
-          // Get author role
+          // Get author role - using maybeSingle instead of single to handle no results gracefully
           const { data: roleData } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', thread.author_id)
-            .single();
+            .maybeSingle();
 
           // Get comment count
           const { count } = await supabase

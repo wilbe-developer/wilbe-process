@@ -1,28 +1,84 @@
 
+import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ThreadComment } from '@/types/community';
+import { ThreadComment, Thread } from '@/types/community';
 import { useAuth } from '@/hooks/useAuth';
 
-export const useThreadComments = (threadId: string) => {
+export const useThreadComments = (threadId?: string) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [commentAdded, setCommentAdded] = useState(false);
 
-  const { data: comments = [], isLoading } = useQuery({
-    queryKey: ['thread-comments', threadId],
+  // Get thread details
+  const { data: thread, isLoading: isThreadLoading } = useQuery({
+    queryKey: ['thread', threadId],
     queryFn: async () => {
-      // First, fetch the comments
-      const { data: commentsData, error: commentsError } = await supabase
+      if (!threadId) return null;
+
+      const { data, error } = await supabase
+        .from('discussion_threads')
+        .select('*')
+        .eq('id', threadId)
+        .single();
+
+      if (error) throw error;
+
+      // Get author profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar')
+        .eq('id', data.author_id)
+        .single();
+
+      // Get author role - using maybeSingle to handle no results gracefully
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.author_id)
+        .maybeSingle();
+
+      // Get challenge name if challenge_id exists
+      let challengeName = null;
+      if (data.challenge_id) {
+        const { data: challengeData } = await supabase
+          .from('sprint_tasks')
+          .select('title')
+          .eq('id', data.challenge_id)
+          .single();
+        
+        if (challengeData) {
+          challengeName = challengeData.title;
+        }
+      }
+
+      return {
+        ...data,
+        author_profile: profileData || null,
+        author_role: roleData || null,
+        challenge_name: challengeName
+      } as Thread;
+    },
+    enabled: !!threadId,
+  });
+
+  // Get comments for the thread
+  const { data: comments = [], isLoading: isCommentsLoading } = useQuery({
+    queryKey: ['thread-comments', threadId, commentAdded],
+    queryFn: async () => {
+      if (!threadId) return [];
+
+      const { data, error } = await supabase
         .from('thread_comments')
         .select('*')
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true });
 
-      if (commentsError) throw commentsError;
-      
+      if (error) throw error;
+
       // For each comment, get the author profile and role
-      const commentsWithDetails = await Promise.all(
-        commentsData.map(async (comment) => {
+      const commentsWithAuthor = await Promise.all(
+        data.map(async (comment) => {
           // Get author profile
           const { data: profileData } = await supabase
             .from('profiles')
@@ -30,51 +86,79 @@ export const useThreadComments = (threadId: string) => {
             .eq('id', comment.author_id)
             .single();
 
-          // Get author role
+          // Get author role - using maybeSingle to handle no results gracefully
           const { data: roleData } = await supabase
             .from('user_roles')
             .select('role')
             .eq('user_id', comment.author_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...comment,
             author_profile: profileData || null,
-            author_role: roleData || null
+            author_role: roleData || null,
           };
         })
       );
-      
-      return commentsWithDetails as ThreadComment[];
+
+      return commentsWithAuthor as ThreadComment[];
     },
+    enabled: !!threadId,
   });
 
-  const createComment = useMutation({
-    mutationFn: async ({ content }: Pick<ThreadComment, 'content'>) => {
+  // Add a comment to the thread
+  const addComment = useMutation({
+    mutationFn: async ({ threadId, content }: { threadId: string, content: string }) => {
       const { data, error } = await supabase
         .from('thread_comments')
         .insert([
           {
-            content,
             thread_id: threadId,
             author_id: user?.id,
+            content,
           },
         ])
-        .select()
-        .single();
+        .select();
 
       if (error) throw error;
-      return data;
+      return data[0];
     },
     onSuccess: () => {
+      setCommentAdded(prev => !prev); // Toggle to trigger query refetch
       queryClient.invalidateQueries({ queryKey: ['thread-comments', threadId] });
-      queryClient.invalidateQueries({ queryKey: ['threads'] });
+      queryClient.invalidateQueries({ queryKey: ['threads'] }); // Refresh thread list to update comment counts
     },
   });
 
+  // Mark thread as viewed
+  const markThreadAsViewed = useCallback(async (threadId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('thread_views')
+        .upsert(
+          {
+            user_id: user.id,
+            thread_id: threadId,
+            last_viewed_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id,thread_id' }
+        );
+
+      if (error) {
+        console.error('Error marking thread as viewed:', error);
+      }
+    } catch (error) {
+      console.error('Error marking thread as viewed:', error);
+    }
+  }, [user]);
+
   return {
+    thread,
     comments,
-    isLoading,
-    createComment,
+    isLoading: isThreadLoading || isCommentsLoading,
+    addComment,
+    markThreadAsViewed,
   };
 };
