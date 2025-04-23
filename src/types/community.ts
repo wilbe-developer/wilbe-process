@@ -7,17 +7,15 @@ export interface Thread {
   content: string;
   created_at: string;
   updated_at: string;
-  profiles?: {
+  author_profile?: {
     first_name: string | null;
     last_name: string | null;
     avatar: string | null;
-  }[] | null;
-  user_roles?: {
+  } | null;
+  author_role?: {
     role: string | null;
-  }[] | null;
-  thread_comments?: { 
-    count: number 
-  }[] | null;
+  } | null;
+  comment_count?: number;
   thread_views?: {
     last_viewed_at: string;
   }[] | null;
@@ -30,14 +28,14 @@ export interface ThreadComment {
   content: string;
   created_at: string;
   updated_at: string;
-  profiles?: {
+  author_profile?: {
     first_name: string | null;
     last_name: string | null;
     avatar: string | null;
-  }[] | null;
-  user_roles?: {
+  } | null;
+  author_role?: {
     role: string | null;
-  }[] | null;
+  } | null;
 }
 
 export interface ThreadView {

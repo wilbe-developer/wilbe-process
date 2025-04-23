@@ -15,21 +15,20 @@ export const useCommunityThreads = () => {
         .from('discussion_threads')
         .select(`
           *,
-          profiles(
+          author_profile:profiles!discussion_threads_author_id_fkey(
             first_name,
             last_name,
             avatar
           ),
-          thread_comments(count),
-          thread_views(
-            last_viewed_at
+          author_role:user_roles!discussion_threads_author_id_fkey(
+            role
           ),
-          user_roles(role)
+          comment_count:thread_comments(count)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Thread[];
     },
   });
 

@@ -28,12 +28,14 @@ const ThreadPage = () => {
         .from('discussion_threads')
         .select(`
           *,
-          profiles(
+          author_profile:profiles!discussion_threads_author_id_fkey(
             first_name,
             last_name,
             avatar
           ),
-          user_roles(role)
+          author_role:user_roles!discussion_threads_author_id_fkey(
+            role
+          )
         `)
         .eq('id', threadId)
         .single();
@@ -76,18 +78,18 @@ const ThreadPage = () => {
       <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
         <div className="flex items-center gap-3 mb-4">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={thread.profiles?.[0]?.avatar} />
+            <AvatarImage src={thread.author_profile?.avatar || undefined} />
             <AvatarFallback>
-              {thread.profiles?.[0]?.first_name?.[0]}
-              {thread.profiles?.[0]?.last_name?.[0]}
+              {thread.author_profile?.first_name?.[0] || ''}
+              {thread.author_profile?.last_name?.[0] || ''}
             </AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center">
               <span className="font-medium">
-                {thread.profiles?.[0]?.first_name} {thread.profiles?.[0]?.last_name}
+                {thread.author_profile?.first_name || ''} {thread.author_profile?.last_name || ''}
               </span>
-              {thread.user_roles?.[0]?.role === 'admin' && (
+              {thread.author_role?.role === 'admin' && (
                 <Badge variant="default" className="ml-2">Admin</Badge>
               )}
             </div>
@@ -108,18 +110,18 @@ const ThreadPage = () => {
           <div key={comment.id} className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center gap-3 mb-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={comment.profiles?.[0]?.avatar} />
+                <AvatarImage src={comment.author_profile?.avatar || undefined} />
                 <AvatarFallback>
-                  {comment.profiles?.[0]?.first_name?.[0]}
-                  {comment.profiles?.[0]?.last_name?.[0]}
+                  {comment.author_profile?.first_name?.[0] || ''}
+                  {comment.author_profile?.last_name?.[0] || ''}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <div className="flex items-center">
                   <span className="font-medium">
-                    {comment.profiles?.[0]?.first_name} {comment.profiles?.[0]?.last_name}
+                    {comment.author_profile?.first_name || ''} {comment.author_profile?.last_name || ''}
                   </span>
-                  {comment.user_roles?.[0]?.role === 'admin' && (
+                  {comment.author_role?.role === 'admin' && (
                     <Badge variant="default" className="ml-2">Admin</Badge>
                   )}
                 </div>

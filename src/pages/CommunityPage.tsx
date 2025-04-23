@@ -42,17 +42,17 @@ const CommunityPage = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={thread.profiles?.[0]?.avatar} />
+                    <AvatarImage src={thread.author_profile?.avatar || undefined} />
                     <AvatarFallback>
-                      {thread.profiles?.[0]?.first_name?.[0]}
-                      {thread.profiles?.[0]?.last_name?.[0]}
+                      {thread.author_profile?.first_name?.[0] || ''}
+                      {thread.author_profile?.last_name?.[0] || ''}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <span className="font-medium">
-                      {thread.profiles?.[0]?.first_name} {thread.profiles?.[0]?.last_name}
+                      {thread.author_profile?.first_name || ''} {thread.author_profile?.last_name || ''}
                     </span>
-                    {thread.user_roles?.[0]?.role === 'admin' && (
+                    {thread.author_role?.role === 'admin' && (
                       <Badge variant="default" className="ml-2">Admin</Badge>
                     )}
                   </div>
@@ -65,7 +65,7 @@ const CommunityPage = () => {
               </div>
             </div>
             <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
-              <span>{thread.thread_comments?.[0]?.count || 0} replies</span>
+              <span>{thread.comment_count || 0} replies</span>
               {thread.challenge_id && (
                 <Badge variant="secondary">From Sprint Challenge</Badge>
               )}
