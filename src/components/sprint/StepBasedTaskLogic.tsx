@@ -1,13 +1,16 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import FileUploader from "@/components/sprint/FileUploader";
+import { useStepNavigation } from "@/hooks/useStepNavigation";
+import QuestionStep from "./step-types/QuestionStep";
+import ContentStep from "./step-types/ContentStep";
+import UploadStep from "./step-types/UploadStep";
 
 interface StepBasedTaskLogicProps {
   steps: Array<{
-    type: 'question' | 'content' | 'upload';
+    type: "question" | "content" | "upload";
     question?: string;
     content?: string | string[];
     options?: Array<{
@@ -26,29 +29,17 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
   isCompleted,
   onComplete
 }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const {
+    currentStep,
+    answers,
+    isLastStep,
+    handleAnswerSelect,
+    goToNextStep,
+    goToPreviousStep,
+    progress
+  } = useStepNavigation({ totalSteps: steps.length, onComplete });
   
   const step = steps[currentStep];
-  const totalSteps = steps.length;
-  
-  const handleAnswerSelect = (value: string) => {
-    setAnswers(prev => ({ ...prev, [currentStep]: value }));
-  };
-  
-  const goToNextStep = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-  
-  const goToPreviousStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
-    }
-  };
-  
-  const isLastStep = currentStep === totalSteps - 1;
   const hasAnswer = answers[currentStep] !== undefined || step.type === 'content' || step.type === 'upload';
   
   return (
@@ -57,77 +48,38 @@ const StepBasedTaskLogic: React.FC<StepBasedTaskLogicProps> = ({
         {/* Progress indicator */}
         <div className="flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-            Step {currentStep + 1} of {totalSteps}
+            Step {currentStep + 1} of {steps.length}
           </div>
           <div className="w-1/2 bg-gray-200 rounded-full h-2.5">
             <div 
               className="bg-brand-pink h-2.5 rounded-full transition-all duration-500" 
-              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+              style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
         
         {/* Step content */}
         <div className="min-h-[200px]">
-          {step.type === 'question' && step.question && (
-            <>
-              <h2 className="text-lg font-semibold mb-4">{step.question}</h2>
-              {step.options && (
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {step.options.map(option => (
-                    <Button
-                      key={option.value}
-                      variant={answers[currentStep] === option.value ? "default" : "outline"}
-                      onClick={() => handleAnswerSelect(option.value)}
-                      className="flex-grow md:flex-grow-0"
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </>
+          {step.type === 'question' && (
+            <QuestionStep
+              question={step.question || ''}
+              options={step.options}
+              selectedAnswer={answers[currentStep]}
+              onAnswerSelect={handleAnswerSelect}
+            />
           )}
           
-          {step.type === 'content' && (
-            <div className="bg-blue-50 p-4 rounded-lg mb-4">
-              <h3 className="font-medium mb-2">Information:</h3>
-              {Array.isArray(step.content) ? (
-                <ul className="list-disc list-inside space-y-2">
-                  {step.content.map((item, idx) => (
-                    <li key={idx} className="text-gray-700">{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-700">{step.content}</p>
-              )}
-            </div>
+          {step.type === 'content' && step.content && (
+            <ContentStep content={step.content} />
           )}
           
           {step.type === 'upload' && (
-            <div>
-              {step.action && (
-                <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-gray-700">{step.action}</p>
-                </div>
-              )}
-              
-              {step.uploads && step.uploads.length > 0 && (
-                <>
-                  <div className="mb-2 font-medium">Required uploads:</div>
-                  <ul className="list-disc list-inside mb-4">
-                    {step.uploads.map((item, idx) => (
-                      <li key={idx}>{item}</li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              
-              <FileUploader
-                isCompleted={isCompleted}
-                onFileUploaded={() => onComplete()}
-              />
-            </div>
+            <UploadStep
+              action={step.action}
+              uploads={step.uploads}
+              isCompleted={isCompleted}
+              onComplete={() => onComplete()}
+            />
           )}
         </div>
         
