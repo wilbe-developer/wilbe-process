@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Download, Upload } from 'lucide-react';
@@ -18,6 +18,8 @@ interface SoloFounderHiringStepsProps {
   onHiringPlanStepChange: (step: 'download' | 'upload') => void;
 }
 
+// This is just a container component - the actual step progression
+// is handled by StepBasedTaskLogic in useTeamStepBuilder.tsx
 const SoloFounderHiringSteps: React.FC<SoloFounderHiringStepsProps> = ({
   neededSkills,
   onSkillsChange,

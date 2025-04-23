@@ -4,6 +4,14 @@ import { Step } from "@/components/sprint/StepBasedTaskLogic";
 import SoloFounderHiringSteps from "@/components/sprint/step-types/SoloFounderHiringSteps";
 import TeamMemberForm from "@/components/sprint/step-types/TeamMemberForm";
 import { TeamMember } from "./useTeamMembers";
+import VideoEmbed from "@/components/video-player/VideoEmbed";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Download, Upload } from "lucide-react";
+import FileUploader from "@/components/sprint/FileUploader";
+
+const TEAM_BUILDING_VIDEO_ID = "j5TEYCrLDYo";
+const HIRING_TEMPLATE_PLACEHOLDER = "/hiring-template-placeholder.pdf";
 
 interface UseTeamStepBuilderProps {
   teamStatus: string | undefined;
@@ -33,24 +41,73 @@ export const useTeamStepBuilder = ({
   onHiringPlanStepChange
 }: UseTeamStepBuilderProps): Step[] => {
   if (teamStatus === "solo") {
+    // Split the solo founder steps into three sequential steps
     return [
       {
         type: "content",
-        content: "As a solo founder, it's crucial to understand the importance of team culture and future team building."
+        content: [
+          "As a solo founder, it's crucial to understand the importance of team culture and future team building.",
+          <VideoEmbed 
+            key="video"
+            youtubeEmbedId={TEAM_BUILDING_VIDEO_ID} 
+            title="Company Culture and Team Building" 
+          />
+        ]
       },
       {
         type: "content",
         content: [
-          "Company Culture & Team Building",
-          <SoloFounderHiringSteps
-            key="hiring-steps"
-            neededSkills={neededSkills}
-            onSkillsChange={onSkillsChange}
-            uploadedFileId={uploadedFileId}
-            onFileUpload={onFileUpload}
-            hiringPlanStep={hiringPlanStep}
-            onHiringPlanStepChange={onHiringPlanStepChange}
-          />
+          "What technical skills do you need in your future team?",
+          <div key="skills-input" className="mt-4">
+            <Textarea 
+              value={neededSkills}
+              onChange={(e) => onSkillsChange(e.target.value)}
+              placeholder="Example: Technical co-founder with expertise in AI, Marketing professional with B2B SaaS experience, etc."
+              rows={5}
+              className="w-full"
+            />
+          </div>
+        ]
+      },
+      {
+        type: "content",
+        content: hiringPlanStep === 'download' ? [
+          "Download our hiring plan template",
+          <div key="download-template" className="mt-4 flex flex-col items-center">
+            <p className="text-sm text-gray-700 mb-4">
+              Download our hiring plan template to help you structure your future team building efforts.
+            </p>
+            <Button 
+              onClick={() => {
+                window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
+                onHiringPlanStepChange('upload');
+              }}
+              className="flex items-center gap-2"
+            >
+              <Download size={16} />
+              Download Hiring Template
+            </Button>
+          </div>
+        ] : [
+          "Upload your completed hiring plan",
+          <div key="upload-template" className="mt-4">
+            <p className="text-sm text-gray-700 mb-4">
+              Please upload your completed hiring plan:
+            </p>
+            {uploadedFileId ? (
+              <div className="p-4 border border-green-200 bg-green-50 rounded-md">
+                <p className="text-green-700 flex items-center gap-2">
+                  <Upload size={16} />
+                  Hiring plan uploaded successfully!
+                </p>
+              </div>
+            ) : (
+              <FileUploader
+                onFileUploaded={onFileUpload}
+                isCompleted={false}
+              />
+            )}
+          </div>
         ]
       }
     ];

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import StepBasedTaskLogic, { Step } from "../StepBasedTaskLogic";
@@ -43,9 +43,10 @@ const DECK_TEMPLATE_PLACEHOLDER = (
   </div>
 );
 
-const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuestion, children }) => {
+const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, task, hideMainQuestion, children }) => {
   const { sprintProfile } = useSprintProfileQuickEdit();
   const hasDeck = sprintProfile?.has_deck === true;
+  const [uploadedFileId, setUploadedFileId] = useState<string | undefined>(task?.progress?.file_id);
   
   // Define steps based on whether the user has a deck or not
   const buildSteps = (): Step[] => {
@@ -109,6 +110,15 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuest
     }
   } : {};
 
+  const handleFileUploaded = (fileId: string) => {
+    setUploadedFileId(fileId);
+  };
+
+  const handleComplete = (fileId?: string) => {
+    // Use either the fileId passed from the upload step or the one we've stored
+    onComplete(fileId || uploadedFileId);
+  };
+
   return (
     <div>
       {children}
@@ -120,10 +130,7 @@ const DeckTaskLogic: React.FC<Props> = ({ isCompleted, onComplete, hideMainQuest
           <StepBasedTaskLogic
             steps={buildSteps()}
             isCompleted={isCompleted}
-            onComplete={(fileId) => {
-              // Always pass the fileId to ensure it's captured
-              onComplete(fileId);
-            }}
+            onComplete={handleComplete}
             conditionalFlow={conditionalFlow}
           />
         </CardContent>

@@ -59,9 +59,8 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
   });
 
   const handleComplete = async () => {
-    if (teamStatus !== "solo") {
-      await saveTeamMembers();
-    }
+    // Always save team members first regardless of teamStatus
+    await saveTeamMembers();
 
     const success = await saveTeamData(
       task.id,
