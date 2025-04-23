@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ProductGrid, Product } from "@/components/merch/ProductGrid";
 import { ProductSidebar } from "@/components/merch/ProductSidebar";
@@ -52,26 +51,23 @@ const MerchPage = () => {
       saved = false;
     }
 
-    // Send confirmation email (via edge function)
+    // Send confirmation email and Slack notification
     try {
-      // Use the supabase.functions.invoke method instead of direct fetch
-      const { error } = await supabase.functions.invoke("send-merch-confirmation", {
-        body: {
-          to: order.email,
+      const response = await fetch('/api/send-merch-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           name: order.full_name,
+          email: order.email,
           product: order.product_name,
           size: order.product_size,
           address: `${order.address}, ${order.city}, ${order.postal}, ${order.country}`,
-        }
+        }),
       });
-      
-      emailSent = !error;
-      
-      if (error) {
-        console.error("Error sending email via function:", error);
-      }
+
+      emailSent = response.ok;
     } catch (e) {
-      console.error("Exception when sending email:", e);
+      console.error("Error sending notifications:", e);
       emailSent = false;
     }
 
@@ -91,10 +87,9 @@ const MerchPage = () => {
     setSubmitting(false);
   };
 
-  // Handler to go back to size selection
   const handleChangeSelection = () => {
     setShowForm(false);
-    setIsSidebarOpen(true); // Open sidebar with the current product
+    setIsSidebarOpen(true);
   };
 
   return (
@@ -107,7 +102,6 @@ const MerchPage = () => {
             </h1>
             <p className="text-gray-600 text-lg max-w-lg mx-auto">
               Pick your complimentary merch item
-              {/* This intro aligns with user requirements */}
             </p>
           </div>
           <ProductGrid onProductSelect={handleProductSelect} />
