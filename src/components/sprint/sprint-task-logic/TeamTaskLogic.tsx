@@ -42,8 +42,11 @@ const TeamTaskLogic: React.FC<Props> = ({
     }
 
     try {
+      console.log("Starting to save team data...");
+      
       // Save team members
       if (teamStatus !== "solo") {
+        console.log("Saving team members...");
         await saveTeamMembers();
       }
 
@@ -56,24 +59,57 @@ const TeamTaskLogic: React.FC<Props> = ({
 
       console.log("Saving task answers:", JSON.stringify(serializedTaskAnswers));
 
-      // Save task progress
-      const { error: progressError } = await supabase
+      // Check if there's an existing progress entry
+      const { data: existingProgress } = await supabase
         .from('user_sprint_progress')
-        .upsert({
-          user_id: user.id,
-          task_id: task.id,
-          completed: true,
-          task_answers: serializedTaskAnswers,
-          completed_at: new Date().toISOString()
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('task_id', task.id)
+        .single();
+      
+      console.log("Existing progress:", existingProgress);
+      
+      if (existingProgress) {
+        // Update existing progress
+        console.log("Updating existing progress...");
+        const { error: updateError } = await supabase
+          .from('user_sprint_progress')
+          .update({
+            completed: true,
+            task_answers: serializedTaskAnswers,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', existingProgress.id);
 
-      if (progressError) throw progressError;
+        if (updateError) {
+          console.error("Error updating progress:", updateError);
+          throw updateError;
+        }
+      } else {
+        // Insert new progress
+        console.log("Creating new progress...");
+        const { error: insertError } = await supabase
+          .from('user_sprint_progress')
+          .insert({
+            user_id: user.id,
+            task_id: task.id,
+            completed: true,
+            task_answers: serializedTaskAnswers,
+            completed_at: new Date().toISOString()
+          });
 
+        if (insertError) {
+          console.error("Error inserting progress:", insertError);
+          throw insertError;
+        }
+      }
+
+      console.log("Team data saved successfully!");
       onComplete();
       toast.success("Data saved successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving data:', error);
-      toast.error("Failed to save data");
+      toast.error(`Failed to save data: ${error.message || 'Unknown error'}`);
     }
   };
 

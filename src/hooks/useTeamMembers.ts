@@ -63,19 +63,40 @@ export const useTeamMembers = (taskAnswers: any) => {
     setLoading(true);
     
     try {
+      console.log("Current user ID:", user.id);
+      console.log("Team members to save:", JSON.stringify(teamMembers));
+      
       // Delete existing team members for this user
-      const { error: deleteError } = await supabase
+      const { error: deleteError, count } = await supabase
         .from('team_members')
         .delete()
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select('count');
         
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Error deleting existing team members:', deleteError);
+        throw deleteError;
+      }
       
-      // Insert new team members
-      for (const member of teamMembers) {
-        if (!member.name.trim()) continue;
+      console.log(`Deleted ${count} existing team members`);
+      
+      // Only insert members with non-empty names
+      const membersToInsert = teamMembers.filter(member => member.name.trim() !== '');
+      
+      if (membersToInsert.length === 0) {
+        console.log("No team members to insert");
+        toast.success("Team information saved successfully!");
+        setLoading(false);
+        return;
+      }
+      
+      console.log("Inserting team members:", JSON.stringify(membersToInsert));
+      
+      // Insert new team members one by one to handle potential errors individually
+      for (const member of membersToInsert) {
+        console.log("Inserting team member:", JSON.stringify(member));
         
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('team_members')
           .insert({
             user_id: user.id,
@@ -83,15 +104,21 @@ export const useTeamMembers = (taskAnswers: any) => {
             profile_description: member.profile,
             employment_status: member.employmentStatus,
             trigger_points: member.triggerPoints
-          });
+          })
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error inserting team member:', error);
+          throw error;
+        }
+        
+        console.log("Team member inserted successfully:", data);
       }
 
       toast.success("Team information saved successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving team members:', error);
-      toast.error("Failed to save team information");
+      toast.error(`Failed to save team information: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
