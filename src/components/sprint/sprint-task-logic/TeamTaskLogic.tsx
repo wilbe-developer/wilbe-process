@@ -5,11 +5,12 @@ import StepBasedTaskLogic, { Step } from "../StepBasedTaskLogic";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 import VideoEmbed from "@/components/video-player/VideoEmbed";
 import { Textarea } from "@/components/ui/textarea";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+import { useTeamMembers, serializeTeamMembers } from "@/hooks/useTeamMembers";
 import TeamMemberForm from "../step-types/TeamMemberForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { Json } from "@/integrations/supabase/types";
 
 type Props = {
   isCompleted: boolean;
@@ -46,19 +47,26 @@ const TeamTaskLogic: React.FC<Props> = ({
         await saveTeamMembers();
       }
 
-      // Save task progress
-      const taskAnswers = {
+      // Create a properly serialized task_answers object
+      const taskAnswersData = {
         team_members: teamMembers,
         needed_skills: neededSkills
       };
 
+      // Convert to a format compatible with Json type
+      const serializedTaskAnswers = {
+        team_members: serializeTeamMembers(teamMembers),
+        needed_skills: neededSkills
+      } as Json;
+
+      // Save task progress
       const { error: progressError } = await supabase
         .from('user_sprint_progress')
         .upsert({
           user_id: user.id,
           task_id: task.id,
           completed: true,
-          task_answers: taskAnswers,
+          task_answers: serializedTaskAnswers,
           completed_at: new Date().toISOString()
         });
 

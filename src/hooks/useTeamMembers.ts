@@ -3,13 +3,19 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "./useAuth";
+import { Json } from "@/integrations/supabase/types";
 
-interface TeamMember {
+export interface TeamMember {
   name: string;
   profile: string;
   employmentStatus: string;
   triggerPoints: string;
 }
+
+// Helper function to ensure TeamMember objects are JSON serializable
+export const serializeTeamMembers = (teamMembers: TeamMember[]): Json => {
+  return teamMembers as unknown as Json;
+};
 
 export const useTeamMembers = (taskAnswers: any) => {
   const { user } = useAuth();
@@ -95,6 +101,7 @@ export const useTeamMembers = (taskAnswers: any) => {
     addTeamMember,
     removeTeamMember,
     updateTeamMember,
-    saveTeamMembers
+    saveTeamMembers,
+    serializeTeamMembers
   };
 };
