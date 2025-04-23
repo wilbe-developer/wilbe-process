@@ -15,12 +15,12 @@ export const useCommunityThreads = () => {
         .from('discussion_threads')
         .select(`
           *,
-          author_profile:profiles!discussion_threads_author_id_fkey(
+          author_profile:profiles(
             first_name,
             last_name,
             avatar
           ),
-          author_role:user_roles!discussion_threads_author_id_fkey(
+          author_role:user_roles(
             role
           ),
           comment_count:thread_comments(count)
@@ -28,7 +28,16 @@ export const useCommunityThreads = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Thread[];
+      
+      // Transform the data to match our Thread type
+      const transformedData = data.map(thread => ({
+        ...thread,
+        comment_count: thread.comment_count?.length ? 
+          { count: thread.comment_count[0].count } : 
+          { count: 0 }
+      }));
+      
+      return transformedData as Thread[];
     },
   });
 

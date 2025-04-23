@@ -15,9 +15,8 @@ export interface Thread {
   author_role?: {
     role: string | null;
   } | null;
-  comment_count?: number;
-  thread_views?: {
-    last_viewed_at: string;
+  comment_count?: {
+    count: number | null;
   }[] | null;
 }
 

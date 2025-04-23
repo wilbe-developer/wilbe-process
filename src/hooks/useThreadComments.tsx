@@ -15,12 +15,12 @@ export const useThreadComments = (threadId: string) => {
         .from('thread_comments')
         .select(`
           *,
-          author_profile:profiles!thread_comments_author_id_fkey(
+          author_profile:profiles(
             first_name,
             last_name,
             avatar
           ),
-          author_role:user_roles!thread_comments_author_id_fkey(
+          author_role:user_roles(
             role
           )
         `)

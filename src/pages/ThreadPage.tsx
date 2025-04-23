@@ -28,12 +28,12 @@ const ThreadPage = () => {
         .from('discussion_threads')
         .select(`
           *,
-          author_profile:profiles!discussion_threads_author_id_fkey(
+          author_profile:profiles(
             first_name,
             last_name,
             avatar
           ),
-          author_role:user_roles!discussion_threads_author_id_fkey(
+          author_role:user_roles(
             role
           )
         `)
