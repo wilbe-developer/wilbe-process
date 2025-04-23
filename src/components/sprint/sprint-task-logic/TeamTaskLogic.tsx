@@ -1,11 +1,15 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import StepBasedTaskLogic, { Step } from "../StepBasedTaskLogic";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
 import VideoEmbed from "@/components/video-player/VideoEmbed";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Props = {
   isCompleted: boolean;
@@ -17,6 +21,13 @@ type Props = {
 
 const TEAM_BUILDING_VIDEO_ID = "j5TEYCrLDYo";
 
+interface TeamMember {
+  name: string;
+  profile: string;
+  employmentStatus: string;
+  triggerPoints: string;
+}
+
 const TeamTaskLogic: React.FC<Props> = ({ 
   isCompleted, 
   onComplete, 
@@ -25,24 +36,82 @@ const TeamTaskLogic: React.FC<Props> = ({
 }) => {
   const { sprintProfile } = useSprintProfileQuickEdit();
   const teamStatus = sprintProfile?.team_status;
-  
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([{ 
+    name: '', 
+    profile: '', 
+    employmentStatus: '',
+    triggerPoints: '' 
+  }]);
+  const [neededSkills, setNeededSkills] = useState('');
+
+  const addTeamMember = () => {
+    setTeamMembers([...teamMembers, { 
+      name: '', 
+      profile: '', 
+      employmentStatus: '',
+      triggerPoints: '' 
+    }]);
+  };
+
+  const removeTeamMember = (index: number) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index));
+  };
+
+  const updateTeamMember = (index: number, field: keyof TeamMember, value: string) => {
+    const updatedMembers = [...teamMembers];
+    updatedMembers[index] = { ...updatedMembers[index], [field]: value };
+    setTeamMembers(updatedMembers);
+  };
+
+  const saveTeamMembers = async () => {
+    try {
+      // Save team members to database
+      for (const member of teamMembers) {
+        const { error } = await supabase
+          .from('team_members')
+          .insert({
+            name: member.name,
+            profile_description: member.profile,
+            employment_status: member.employmentStatus,
+            trigger_points: member.triggerPoints
+          });
+
+        if (error) throw error;
+      }
+
+      // Update task progress with answers
+      const { error: progressError } = await supabase
+        .from('user_sprint_progress')
+        .update({
+          task_answers: {
+            team_members: teamMembers,
+            needed_skills: neededSkills
+          }
+        })
+        .eq('task_id', task.id);
+
+      if (progressError) throw progressError;
+
+      toast.success("Team information saved successfully!");
+      onComplete();
+    } catch (error) {
+      console.error('Error saving team members:', error);
+      toast.error("Failed to save team information");
+    }
+  };
+
   // Define steps based on team status
   const buildSteps = (): Step[] => {
     if (teamStatus === "solo") {
-      // Solo path
       return [
         {
           type: "content",
-          content: [
-            "As a solo founder, it's crucial to understand the importance of team culture and future team building.",
-            "Watch the video below to learn about company culture and team building strategies."
-          ]
+          content: ["As a solo founder, it's crucial to understand the importance of team culture and future team building. Watch the video below to learn about company culture and team building strategies."]
         },
         {
           type: "content",
-          content: (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold">Company Culture & Team Building</h3>
+          content: ["Company Culture & Team Building",
+            <div key="video" className="space-y-6">
               <VideoEmbed 
                 youtubeEmbedId={TEAM_BUILDING_VIDEO_ID} 
                 title="Company Culture and Team Building" 
@@ -51,93 +120,86 @@ const TeamTaskLogic: React.FC<Props> = ({
                 Understanding how to build a strong team culture is essential, even as a solo founder planning for future growth.
               </p>
             </div>
-          )
-        },
-        {
-          type: "content",
-          content: [
-            "List the additional skills you'll need on your team to complement your own expertise."
           ]
         },
         {
           type: "content",
-          content: (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Skills Needed Analysis</h3>
+          content: ["What additional skills will you need on your team to complement your own expertise?",
+            <div key="skills" className="space-y-4">
               <Textarea 
+                value={neededSkills}
+                onChange={(e) => setNeededSkills(e.target.value)}
                 placeholder="Example: Technical co-founder with expertise in AI, Marketing professional with B2B SaaS experience, etc."
                 rows={5}
                 className="w-full"
               />
             </div>
-          )
-        },
-        {
-          type: "upload",
-          action: "Download the hiring plan template, complete it, and upload your plan",
-          uploads: ["Hiring plan based on template"]
+          ]
         }
       ];
-    } else if (teamStatus === "employees" || teamStatus === "cofounders") {
+    } else {
+      // For both employees and co-founders
       const memberType = teamStatus === "employees" ? "team member" : "co-founder";
       
       return [
         {
           type: "content",
-          content: [
-            `Provide details about your ${memberType}s.`,
-            `For each ${memberType}, include their name, a detailed profile explaining why they're crucial to your venture.`
-          ]
-        },
-        {
-          type: "content",
-          content: (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">{`Add ${memberType}s`}</h3>
-              <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Input placeholder="Name" />
-                  <Input placeholder="Role" />
+          content: [`Tell us about your ${memberType}s`,
+            <div key="members" className="space-y-6">
+              {teamMembers.map((member, index) => (
+                <div key={index} className="space-y-4 border p-4 rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">{`${memberType} ${index + 1}`}</h3>
+                    {index > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeTeamMember(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid gap-4">
+                    <Input
+                      placeholder="Name"
+                      value={member.name}
+                      onChange={(e) => updateTeamMember(index, 'name', e.target.value)}
+                    />
+                    <Textarea
+                      placeholder={`Why is this ${memberType} essential to your venture? Describe their personal and professional strengths.`}
+                      value={member.profile}
+                      onChange={(e) => updateTeamMember(index, 'profile', e.target.value)}
+                      rows={4}
+                    />
+                    <Input
+                      placeholder="Full-time/Part-time status"
+                      value={member.employmentStatus}
+                      onChange={(e) => updateTeamMember(index, 'employmentStatus', e.target.value)}
+                    />
+                    <Input
+                      placeholder="Trigger points for going full-time"
+                      value={member.triggerPoints}
+                      onChange={(e) => updateTeamMember(index, 'triggerPoints', e.target.value)}
+                    />
+                  </div>
                 </div>
-                <Textarea 
-                  placeholder={`Why is this ${memberType} essential to your venture? Describe their personal and professional strengths.`}
-                  rows={4}
-                />
-              </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addTeamMember}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Another {memberType}
+              </Button>
             </div>
-          )
-        },
-        {
-          type: "content",
-          content: (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Employment Details</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <Input placeholder="Full-time/Part-time status" />
-                <Input placeholder="Trigger points for going full-time" />
-              </div>
-            </div>
-          )
-        }
-      ];
-    } else {
-      // Default case if teamStatus is not set
-      return [
-        {
-          type: "question",
-          question: "Is this a solo project or do you have a team?",
-          options: [
-            { label: "I'm solo", value: "solo" },
-            { label: "I have a team but they're employees", value: "employees" },
-            { label: "I have co-founders", value: "cofounders" }
           ]
         }
       ];
     }
   };
-
-  // Define conditional flow to handle navigation based on answers
-  const conditionalFlow = {};
 
   return (
     <div>
@@ -147,11 +209,8 @@ const TeamTaskLogic: React.FC<Props> = ({
           <StepBasedTaskLogic
             steps={buildSteps()}
             isCompleted={isCompleted}
-            onComplete={(fileId) => {
-              // Always pass the fileId to ensure it's captured
-              onComplete(fileId);
-            }}
-            conditionalFlow={conditionalFlow}
+            onComplete={saveTeamMembers}
+            conditionalFlow={{}}
           />
         </CardContent>
       </Card>
