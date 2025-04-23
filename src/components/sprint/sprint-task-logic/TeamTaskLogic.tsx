@@ -48,16 +48,13 @@ const TeamTaskLogic: React.FC<Props> = ({
       }
 
       // Create a properly serialized task_answers object
-      const taskAnswersData = {
-        team_members: teamMembers,
-        needed_skills: neededSkills
-      };
-
-      // Convert to a format compatible with Json type
+      // Convert team members to a JSON-serializable format
       const serializedTaskAnswers = {
         team_members: serializeTeamMembers(teamMembers),
         needed_skills: neededSkills
       } as Json;
+
+      console.log("Saving task answers:", JSON.stringify(serializedTaskAnswers));
 
       // Save task progress
       const { error: progressError } = await supabase
@@ -73,6 +70,7 @@ const TeamTaskLogic: React.FC<Props> = ({
       if (progressError) throw progressError;
 
       onComplete();
+      toast.success("Data saved successfully");
     } catch (error) {
       console.error('Error saving data:', error);
       toast.error("Failed to save data");
