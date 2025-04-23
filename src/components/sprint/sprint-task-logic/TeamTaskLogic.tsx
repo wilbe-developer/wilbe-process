@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import StepBasedTaskLogic from "../StepBasedTaskLogic";
 import { useSprintProfileQuickEdit } from "@/hooks/useSprintProfileQuickEdit";
@@ -28,8 +28,9 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
     teamMembers, 
     addTeamMember, 
     removeTeamMember, 
-    updateTeamMember, 
-    saveTeamMembers 
+    updateTeamMember,
+    saveTeamMembers, 
+    loadTeamMembers
   } = useTeamMembers(task?.progress?.task_answers);
 
   const {
@@ -43,6 +44,13 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
   } = useTeamTaskState(task, sprintProfile);
 
   const { saveTeamData } = useTeamTaskSave();
+
+  // Effect to reload team members when team status changes
+  useEffect(() => {
+    if (teamStatus) {
+      loadTeamMembers();
+    }
+  }, [teamStatus, loadTeamMembers]);
 
   const steps = useTeamStepBuilder({
     teamStatus,
@@ -59,9 +67,7 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
   });
 
   const handleComplete = async () => {
-    // Always save team members first regardless of teamStatus
-    await saveTeamMembers();
-
+    // Always save team data to both tables
     const success = await saveTeamData(
       task.id,
       teamMembers,
@@ -81,7 +87,7 @@ const TeamTaskLogic: React.FC<TeamTaskLogicProps> = ({
         <CardContent className="p-6">
           <StepBasedTaskLogic
             steps={steps}
-            isCompleted={false}
+            isCompleted={isCompleted}
             onComplete={handleComplete}
             conditionalFlow={{}}
           />

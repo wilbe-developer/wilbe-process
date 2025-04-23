@@ -21,7 +21,7 @@ export const useTeamTaskSave = () => {
   ) => {
     if (!user?.id) {
       toast.error("Missing required information");
-      return;
+      return false;
     }
 
     try {
@@ -39,12 +39,17 @@ export const useTeamTaskSave = () => {
 
       console.log("Saving task answers:", JSON.stringify(serializedTaskAnswers));
 
-      const { data: existingProgress } = await supabase
+      // Save to user_sprint_progress
+      const { data: existingProgress, error: progressError } = await supabase
         .from('user_sprint_progress')
         .select('id')
         .eq('user_id', user.id)
         .eq('task_id', taskId)
         .single();
+      
+      if (progressError && progressError.code !== 'PGRST116') {
+        throw progressError;
+      }
       
       console.log("Existing progress:", existingProgress);
       
@@ -75,6 +80,38 @@ export const useTeamTaskSave = () => {
           });
 
         if (insertError) throw insertError;
+      }
+
+      // Also save team members to the team_members table
+      // This is done regardless of solo/team status to ensure consistency
+      console.log("Now saving team members to team_members table...");
+      
+      // Delete existing team members for this user
+      const { error: deleteError } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('user_id', user.id);
+        
+      if (deleteError) throw deleteError;
+      
+      // Filter out empty team members
+      const validTeamMembers = teamMembers.filter(member => member.name.trim() !== '');
+      
+      if (validTeamMembers.length > 0) {
+        // Insert all valid team members
+        for (const member of validTeamMembers) {
+          const { error: insertMemberError } = await supabase
+            .from('team_members')
+            .insert({
+              user_id: user.id,
+              name: member.name,
+              profile_description: member.profile,
+              employment_status: member.employmentStatus,
+              trigger_points: member.triggerPoints
+            });
+  
+          if (insertMemberError) throw insertMemberError;
+        }
       }
 
       console.log("Team data saved successfully!");

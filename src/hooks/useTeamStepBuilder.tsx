@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Step } from "@/components/sprint/StepBasedTaskLogic";
-import SoloFounderHiringSteps from "@/components/sprint/step-types/SoloFounderHiringSteps";
 import TeamMemberForm from "@/components/sprint/step-types/TeamMemberForm";
 import { TeamMember } from "./useTeamMembers";
 import VideoEmbed from "@/components/video-player/VideoEmbed";
@@ -71,41 +70,44 @@ export const useTeamStepBuilder = ({
       },
       {
         type: "content",
-        content: hiringPlanStep === 'download' ? [
-          "Download our hiring plan template",
-          <div key="download-template" className="mt-4 flex flex-col items-center">
-            <p className="text-sm text-gray-700 mb-4">
-              Download our hiring plan template to help you structure your future team building efforts.
-            </p>
-            <Button 
-              onClick={() => {
-                window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
-                onHiringPlanStepChange('upload');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Download size={16} />
-              Download Hiring Template
-            </Button>
-          </div>
-        ] : [
-          "Upload your completed hiring plan",
-          <div key="upload-template" className="mt-4">
-            <p className="text-sm text-gray-700 mb-4">
-              Please upload your completed hiring plan:
-            </p>
-            {uploadedFileId ? (
-              <div className="p-4 border border-green-200 bg-green-50 rounded-md">
-                <p className="text-green-700 flex items-center gap-2">
-                  <Upload size={16} />
-                  Hiring plan uploaded successfully!
+        content: [
+          hiringPlanStep === 'download' ? "Download our hiring plan template" : "Upload your completed hiring plan",
+          <div key="hiring-plan" className="mt-4">
+            {hiringPlanStep === 'download' ? (
+              <div className="flex flex-col items-center space-y-4">
+                <p className="text-sm text-gray-700">
+                  Download our hiring plan template to help you structure your future team building efforts.
                 </p>
+                <Button 
+                  onClick={() => {
+                    window.open(HIRING_TEMPLATE_PLACEHOLDER, '_blank');
+                    onHiringPlanStepChange('upload');
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Download size={16} />
+                  Download Hiring Template
+                </Button>
               </div>
             ) : (
-              <FileUploader
-                onFileUploaded={onFileUpload}
-                isCompleted={false}
-              />
+              <div className="space-y-4">
+                <p className="text-sm text-gray-700">
+                  Please upload your completed hiring plan:
+                </p>
+                {uploadedFileId ? (
+                  <div className="p-4 border border-green-200 bg-green-50 rounded-md">
+                    <p className="text-green-700 flex items-center gap-2">
+                      <Upload size={16} />
+                      Hiring plan uploaded successfully!
+                    </p>
+                  </div>
+                ) : (
+                  <FileUploader
+                    onFileUploaded={onFileUpload}
+                    isCompleted={false}
+                  />
+                )}
+              </div>
             )}
           </div>
         ]

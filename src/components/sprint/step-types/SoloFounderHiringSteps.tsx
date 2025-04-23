@@ -18,8 +18,8 @@ interface SoloFounderHiringStepsProps {
   onHiringPlanStepChange: (step: 'download' | 'upload') => void;
 }
 
-// This is just a container component - the actual step progression
-// is handled by StepBasedTaskLogic in useTeamStepBuilder.tsx
+// This component is mainly kept for reference - we're now using the step-by-step approach
+// in useTeamStepBuilder.tsx instead
 const SoloFounderHiringSteps: React.FC<SoloFounderHiringStepsProps> = ({
   neededSkills,
   onSkillsChange,

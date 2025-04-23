@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "./useAuth";
@@ -39,43 +38,70 @@ export const useTeamMembers = (taskAnswers: any) => {
     }
   }, [taskAnswers, initialDataLoaded]);
 
-  // If no task answers, try loading from team_members table
-  useEffect(() => {
-    const loadTeamMembersFromDatabase = async () => {
-      if (!user?.id || initialDataLoaded) return;
-      
-      try {
-        console.log("Attempting to load team members from database for user:", user.id);
-        const { data, error } = await supabase
-          .from('team_members')
-          .select('*')
-          .eq('user_id', user.id);
-        
-        if (error) {
-          console.error("Error loading team members:", error);
-          return;
-        }
-        
-        if (data && data.length > 0) {
-          console.log("Loaded team members from database:", data);
-          // Transform from database format to TeamMember format
-          const loadedMembers = data.map(member => ({
-            name: member.name,
-            profile: member.profile_description,
-            employmentStatus: member.employment_status,
-            triggerPoints: member.trigger_points || ''
-          }));
-          
-          setTeamMembers(loadedMembers);
-          setInitialDataLoaded(true);
-        }
-      } catch (error) {
-        console.error("Error in loadTeamMembersFromDatabase:", error);
-      }
-    };
+  // Function to load team members from database - can be called manually when needed
+  const loadTeamMembers = useCallback(async () => {
+    if (!user?.id) return;
     
-    loadTeamMembersFromDatabase();
-  }, [user, initialDataLoaded]);
+    setLoading(true);
+    try {
+      console.log("Attempting to load team members from database for user:", user.id);
+      
+      // First try to get from task answers if available
+      if (taskAnswers?.team_members && taskAnswers.team_members.length > 0) {
+        console.log("Using team members from task answers:", taskAnswers.team_members);
+        setTeamMembers(taskAnswers.team_members);
+        setInitialDataLoaded(true);
+        setLoading(false);
+        return;
+      }
+      
+      // Otherwise load from team_members table
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) {
+        console.error("Error loading team members:", error);
+        setLoading(false);
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        console.log("Loaded team members from database:", data);
+        // Transform from database format to TeamMember format
+        const loadedMembers = data.map(member => ({
+          name: member.name,
+          profile: member.profile_description,
+          employmentStatus: member.employment_status,
+          triggerPoints: member.trigger_points || ''
+        }));
+        
+        setTeamMembers(loadedMembers);
+        setInitialDataLoaded(true);
+      } else if (!initialDataLoaded) {
+        // If no team members found, and we haven't loaded any initial data yet, reset to default
+        setTeamMembers([{ 
+          name: '', 
+          profile: '', 
+          employmentStatus: '',
+          triggerPoints: '' 
+        }]);
+        setInitialDataLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error in loadTeamMembers:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user, initialDataLoaded, taskAnswers]);
+
+  // Initial load from team_members table
+  useEffect(() => {
+    if (!initialDataLoaded && user?.id) {
+      loadTeamMembers();
+    }
+  }, [user, initialDataLoaded, loadTeamMembers]);
 
   const addTeamMember = () => {
     setTeamMembers([...teamMembers, { 
@@ -99,7 +125,7 @@ export const useTeamMembers = (taskAnswers: any) => {
   const saveTeamMembers = async () => {
     if (!user?.id) {
       toast.error("You must be logged in to save team information");
-      return;
+      return false;
     }
     
     setLoading(true);
@@ -109,18 +135,15 @@ export const useTeamMembers = (taskAnswers: any) => {
       console.log("Team members to save:", JSON.stringify(teamMembers));
       
       // Delete existing team members for this user
-      const { error: deleteError, count } = await supabase
+      const { error: deleteError } = await supabase
         .from('team_members')
         .delete()
-        .eq('user_id', user.id)
-        .select('count');
+        .eq('user_id', user.id);
         
       if (deleteError) {
         console.error('Error deleting existing team members:', deleteError);
         throw deleteError;
       }
-      
-      console.log(`Deleted ${count} existing team members`);
       
       // Only insert members with non-empty names
       const membersToInsert = teamMembers.filter(member => member.name.trim() !== '');
@@ -129,7 +152,7 @@ export const useTeamMembers = (taskAnswers: any) => {
         console.log("No team members to insert");
         toast.success("Team information saved successfully!");
         setLoading(false);
-        return;
+        return true;
       }
       
       console.log("Inserting team members:", JSON.stringify(membersToInsert));
@@ -138,7 +161,7 @@ export const useTeamMembers = (taskAnswers: any) => {
       for (const member of membersToInsert) {
         console.log("Inserting team member:", JSON.stringify(member));
         
-        const { error, data } = await supabase
+        const { error } = await supabase
           .from('team_members')
           .insert({
             user_id: user.id,
@@ -146,21 +169,20 @@ export const useTeamMembers = (taskAnswers: any) => {
             profile_description: member.profile,
             employment_status: member.employmentStatus,
             trigger_points: member.triggerPoints
-          })
-          .select();
+          });
 
         if (error) {
           console.error('Error inserting team member:', error);
           throw error;
         }
-        
-        console.log("Team member inserted successfully:", data);
       }
 
       toast.success("Team information saved successfully!");
+      return true;
     } catch (error: any) {
       console.error('Error saving team members:', error);
       toast.error(`Failed to save team information: ${error.message || 'Unknown error'}`);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -173,6 +195,7 @@ export const useTeamMembers = (taskAnswers: any) => {
     removeTeamMember,
     updateTeamMember,
     saveTeamMembers,
+    loadTeamMembers,
     serializeTeamMembers
   };
 };
