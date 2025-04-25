@@ -28,29 +28,46 @@ export const useSprintSignup = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
-  // Indicates if we're in authenticated user mode
-  const [isAuthenticatedFlow, setIsAuthenticatedFlow] = useState(false);
+  const [hasSprintProfile, setHasSprintProfile] = useState(false);
 
   useEffect(() => {
-    // If user is already authenticated, prepare for update mode
-    if (isAuthenticated && user) {
-      setIsAuthenticatedFlow(true);
-      
-      // Fetch existing answers if needed
-      if (user.email) {
-        setAnswers(prevAnswers => ({
-          ...prevAnswers,
-          email: user.email
-        }));
+    // Fetch existing sprint profile if user is authenticated
+    const fetchSprintProfile = async () => {
+      if (isAuthenticated && user) {
+        const { data: profile, error } = await supabase
+          .from('sprint_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (!error && profile) {
+          setHasSprintProfile(true);
+          // Convert the profile data to match our form structure
+          setAnswers({
+            deck: profile.has_deck ? 'yes' : 'no',
+            team: profile.team_status,
+            invention: profile.commercializing_invention ? 'yes' : 'no',
+            ip: profile.university_ip 
+              ? (profile.tto_engaged ? 'tto_yes' : 'tto_no') 
+              : 'own',
+            problem: profile.problem_defined ? 'yes' : 'no',
+            customers: profile.customer_engagement,
+            market_known: profile.market_known ? 'yes' : 'no',
+            funding_plan: profile.has_financial_plan ? 'yes' : 'no',
+            funding_received: profile.received_funding ? 'yes' : 'no',
+            funding_details: profile.funding_details || '',
+            sprint_goals: [],
+            founder_profile: null,
+            funding_amount_text: profile.funding_amount || '',
+            funding_sources: profile.funding_sources || [],
+            experiment: profile.experiment_validated ? 'yes' : 'no',
+            vision: profile.industry_changing_vision ? 'yes' : 'no'
+          });
+        }
       }
-      
-      if (user.firstName && user.lastName) {
-        setAnswers(prevAnswers => ({
-          ...prevAnswers,
-          name: `${user.firstName} ${user.lastName}`
-        }));
-      }
-    }
+    };
+
+    fetchSprintProfile();
   }, [isAuthenticated, user]);
 
   const handleChange = (field: string, value: any) => {
@@ -124,20 +141,38 @@ export const useSprintSignup = () => {
   const silentSignup = async () => {
     setIsSubmitting(true);
     try {
-      if (!user) {
-        toast.error("User not found. Please sign in.");
-        return;
+      let userId = user?.id;
+
+      // If no user exists, create one
+      if (!isAuthenticated) {
+        const tempEmail = `user_${Date.now()}@temporary.com`;
+        const tempPassword = Math.random().toString(36).slice(-10);
+        
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: tempEmail,
+          password: tempPassword,
+          options: {
+            data: { tempAccount: true }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+        userId = authData.user?.id;
       }
 
-      // Upload file and get file path
-      const filePath = await uploadFounderProfile(user.id);
+      if (!userId) {
+        throw new Error("Failed to get user ID");
+      }
+
+      // Upload file if provided
+      const filePath = uploadedFile ? await uploadFounderProfile(userId) : null;
       if (filePath) {
         setAnswers(prevAnswers => ({ ...prevAnswers, founder_profile: filePath }));
       }
 
       // Create/update the profile in Supabase
-      const { error } = await supabase.rpc('create_sprint_profile', {
-        p_user_id: user.id,
+      const { error: profileError } = await supabase.rpc('create_sprint_profile', {
+        p_user_id: userId,
         p_name: answers.name || '',
         p_email: answers.email || '',
         p_linkedin_url: answers.linkedin || '',
@@ -162,32 +197,56 @@ export const useSprintSignup = () => {
         p_industry_changing_vision: answers.vision === 'yes'
       });
 
-      if (error) {
-        console.error("Failed to update profile:", error);
-        toast.error("Failed to update your profile. Please try again.");
-        return;
+      if (profileError) {
+        throw profileError;
       }
 
-      toast.success("Sprint personalized successfully!");
+      toast.success("Sprint profile updated successfully!");
       navigate(PATHS.SPRINT_DASHBOARD);
     } catch (error) {
-      console.error("Signup failed:", error);
-      toast.error("Failed to personalize sprint. Please try again.");
+      console.error("Profile update failed:", error);
+      toast.error("Failed to update sprint profile. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  const shouldRenderCurrentStep = () => {
-    return !isAuthenticatedFlow;
+
+  const uploadFounderProfile = async (userId: string) => {
+    if (!uploadedFile) return null;
+
+    try {
+      const fileExt = uploadedFile.name.split('.').pop();
+      const filePath = `founder-profiles/${userId}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('sprint-storage')
+        .upload(filePath, uploadedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error("File upload error:", error);
+        toast.error("Failed to upload file.");
+        return null;
+      }
+
+      return filePath;
+    } catch (error) {
+      console.error("Unexpected error during file upload:", error);
+      return null;
+    }
   };
+  
+  // We always want to show the form now, regardless of auth status
+  const shouldRenderCurrentStep = () => true;
 
   return {
     currentStep,
     answers,
     isSubmitting,
     uploadedFile,
-    isAuthenticatedFlow,
+    hasSprintProfile,
     handleChange,
     toggleMultiSelect,
     handleFileUpload,
