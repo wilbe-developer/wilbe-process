@@ -1,48 +1,55 @@
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const useSprintFileUpload = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setUploadedFile(e.target.files[0]);
-    }
+  const handleFileUpload = (file: File | null) => {
+    setUploadedFile(file);
   };
 
-  const uploadFileToStorage = async (file: File, userId: string): Promise<string | null> => {
+  const uploadFounderProfile = async (userId: string) => {
+    if (!uploadedFile) {
+      console.log("No file to upload");
+      return null;
+    }
+
+    setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}-cv.${fileExt}`;
-      const filePath = `cvs/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('sprint-uploads')
-        .upload(filePath, file, {
-          upsert: true
+      const fileExt = uploadedFile.name.split('.').pop();
+      const filePath = `founder-profiles/${userId}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('sprint-storage')
+        .upload(filePath, uploadedFile, {
+          cacheControl: '3600',
+          upsert: false
         });
 
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
+      if (error) {
+        console.error("File upload error:", error);
+        toast.error("Failed to upload file.");
         return null;
       }
-      
-      const { data } = supabase.storage
-        .from('sprint-uploads')
-        .getPublicUrl(filePath);
-      
-      return data.publicUrl;
+
+      console.log("File uploaded successfully:", data);
+      return filePath;
     } catch (error) {
-      console.error('Error in file upload:', error);
+      console.error("Unexpected error during file upload:", error);
+      toast.error("Unexpected error during file upload.");
       return null;
+    } finally {
+      setIsUploading(false);
     }
   };
 
   return {
     uploadedFile,
-    setUploadedFile,
+    isUploading,
     handleFileUpload,
-    uploadFileToStorage
+    uploadFounderProfile
   };
 };
