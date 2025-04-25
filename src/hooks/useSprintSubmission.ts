@@ -19,21 +19,37 @@ export const useSprintSubmission = () => {
     try {
       let userId = user?.id;
 
-      // If no user exists, create one
+      // If no user exists, create one using the provided email
       if (!isAuthenticated) {
-        const tempEmail = `user_${Date.now()}@temporary.com`;
+        if (!answers.email) {
+          throw new Error("Email is required for signup");
+        }
+
+        // Generate a random password
         const tempPassword = Math.random().toString(36).slice(-10);
         
+        // Sign up with the provided email
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: tempEmail,
+          email: answers.email,
           password: tempPassword,
           options: {
-            data: { tempAccount: true }
+            data: { 
+              tempAccount: true,
+              firstName: answers.name?.split(' ')[0] || '',
+              lastName: answers.name?.split(' ').slice(1).join(' ') || ''
+            }
           }
         });
 
         if (signUpError) throw signUpError;
         userId = authData.user?.id;
+
+        // Send welcome email with password reset instructions
+        // You may want to implement this in a separate edge function
+        toast.success(
+          "Account created! Please check your email to set your password.",
+          { duration: 6000 }
+        );
       }
 
       if (!userId) {

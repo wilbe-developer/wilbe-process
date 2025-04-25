@@ -1,13 +1,11 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { SprintSignupAnswers } from "@/types/sprint-signup";
-import { sendWelcomeEmail } from "@/services/emailService";
 import { useSprintTasksManager } from "./useSprintTasks";
 import { useSprintFileUpload } from "./useSprintFileUpload";
 
 export const useSprintProfile = () => {
   const { createSprintTasks } = useSprintTasksManager();
-  const { uploadFileToStorage } = useSprintFileUpload();
+  const { uploadFounderProfile } = useSprintFileUpload();
 
   const updateUserSprintData = async (userId: string | null, answers: SprintSignupAnswers, uploadedFile: File | null) => {
     try {
@@ -19,7 +17,7 @@ export const useSprintProfile = () => {
       // Upload CV if provided
       let cvUrl = null;
       if (uploadedFile) {
-        cvUrl = await uploadFileToStorage(uploadedFile, userId);
+        cvUrl = await uploadFounderProfile(userId);
       }
 
       // Create personalized sprint tasks for this user
