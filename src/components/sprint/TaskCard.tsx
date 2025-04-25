@@ -4,15 +4,20 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { TaskChallengeLink } from "@/components/sprint/TaskChallengeLink";
 import { PATHS } from "@/lib/constants";
+import { UserTaskProgress } from "@/types/sprint";
 
-const TaskCard = ({ task, disabled }) => {
+interface TaskCardProps {
+  task: UserTaskProgress;
+  disabled: boolean;
+}
+
+const TaskCard = ({ task, disabled }: TaskCardProps) => {
   const navigate = useNavigate();
   const isCompleted = task.progress?.completed || false;
 
   const handleClick = () => {
     if (!disabled) {
-      // Fix the navigation path to match the defined route in App.tsx
-      navigate(`${PATHS.SPRINT_TASK}/${task.id}`);
+      navigate(`/sprint/task/${task.id}`);
     }
   };
 

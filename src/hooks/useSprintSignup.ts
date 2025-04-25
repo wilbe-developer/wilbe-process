@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "./useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { SprintSignupAnswers } from "@/types/sprint-signup";
-import { useSprintTasksManager } from "./useSprintTasks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { PATHS } from "@/lib/constants";
@@ -27,7 +26,6 @@ export const useSprintSignup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const { user, isAuthenticated } = useAuth();
-  const { createSprintTasks } = useSprintTasksManager();
   const navigate = useNavigate();
   
   // Indicates if we're in authenticated user mode
@@ -137,8 +135,38 @@ export const useSprintSignup = () => {
         setAnswers(prevAnswers => ({ ...prevAnswers, founder_profile: filePath }));
       }
 
-      // Call createSprintTasks to create tasks
-      await createSprintTasks(user.id, answers);
+      // Create/update the profile in Supabase
+      const { error } = await supabase.rpc('create_sprint_profile', {
+        p_user_id: user.id,
+        p_name: answers.name || '',
+        p_email: answers.email || '',
+        p_linkedin_url: answers.linkedin || '',
+        p_cv_url: filePath,
+        p_current_job: answers.job || '',
+        p_company_incorporated: answers.incorporated === 'yes',
+        p_received_funding: answers.funding_received === 'yes',
+        p_funding_details: answers.funding_details || '',
+        p_has_deck: answers.deck === 'yes',
+        p_team_status: answers.team || '',
+        p_commercializing_invention: answers.invention === 'yes',
+        p_university_ip: answers.ip === 'tto_yes' || answers.ip === 'tto_no',
+        p_tto_engaged: answers.ip === 'tto_yes',
+        p_problem_defined: answers.problem === 'yes',
+        p_customer_engagement: answers.customers || '',
+        p_market_known: answers.market_known === 'yes',
+        p_market_gap_reason: answers.market_gap_reason || '',
+        p_funding_amount: answers.funding_amount_text || '',
+        p_has_financial_plan: answers.funding_plan === 'yes',
+        p_funding_sources: Array.isArray(answers.funding_sources) ? answers.funding_sources : [],
+        p_experiment_validated: answers.experiment === 'yes',
+        p_industry_changing_vision: answers.vision === 'yes'
+      });
+
+      if (error) {
+        console.error("Failed to update profile:", error);
+        toast.error("Failed to update your profile. Please try again.");
+        return;
+      }
 
       toast.success("Sprint personalized successfully!");
       navigate(PATHS.SPRINT_DASHBOARD);
