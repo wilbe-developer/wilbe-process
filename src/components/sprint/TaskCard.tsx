@@ -17,7 +17,7 @@ const TaskCard = ({ task, disabled }: TaskCardProps) => {
 
   const handleClick = () => {
     if (!disabled) {
-      navigate(`/sprint/task/${task.id}`);
+      navigate(`${PATHS.SPRINT_TASK}/${task.id}`);
     }
   };
 
@@ -33,11 +33,6 @@ const TaskCard = ({ task, disabled }: TaskCardProps) => {
       <div className="p-5">
         <div className="flex items-start justify-between mb-2">
           <h3 className="text-lg font-semibold">{task.title}</h3>
-          {task.category && (
-            <Badge variant="outline" className="ml-2">
-              {task.category}
-            </Badge>
-          )}
         </div>
 
         <p className="text-gray-600 mb-3 text-sm line-clamp-2">{task.description}</p>
