@@ -17,14 +17,18 @@ export const useSprintSubmission = () => {
   const silentSignup = async (answers: SprintSignupAnswers) => {
     setIsSubmitting(true);
     try {
+      // Make sure we have an email for creating a new account
+      if (!isAuthenticated && !answers.email) {
+        toast.error("Email is required to create your sprint profile.");
+        return;
+      }
+
       let userId = user?.id;
 
       // If no user exists, create one using the provided email
       if (!isAuthenticated) {
-        if (!answers.email) {
-          throw new Error("Email is required for signup");
-        }
-
+        console.log("Creating new user with email:", answers.email);
+        
         // Generate a random password
         const tempPassword = Math.random().toString(36).slice(-10);
         
@@ -41,11 +45,19 @@ export const useSprintSubmission = () => {
           }
         });
 
-        if (signUpError) throw signUpError;
-        userId = authData.user?.id;
+        if (signUpError) {
+          console.error("Signup error:", signUpError);
+          throw signUpError;
+        }
+        
+        if (!authData.user) {
+          throw new Error("Failed to create user account");
+        }
+        
+        console.log("User created successfully:", authData.user.id);
+        userId = authData.user.id;
 
         // Send welcome email with password reset instructions
-        // You may want to implement this in a separate edge function
         toast.success(
           "Account created! Please check your email to set your password.",
           { duration: 6000 }
@@ -55,6 +67,8 @@ export const useSprintSubmission = () => {
       if (!userId) {
         throw new Error("Failed to get user ID");
       }
+
+      console.log("Creating/updating sprint profile for user:", userId);
 
       // Create/update the profile in Supabase
       const { error: profileError } = await supabase.rpc('create_sprint_profile', {
@@ -84,9 +98,11 @@ export const useSprintSubmission = () => {
       });
 
       if (profileError) {
+        console.error("Profile error:", profileError);
         throw profileError;
       }
 
+      console.log("Sprint profile updated successfully");
       toast.success("Sprint profile updated successfully!");
       navigate(PATHS.SPRINT_DASHBOARD);
     } catch (error) {

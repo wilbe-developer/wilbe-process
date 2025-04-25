@@ -55,9 +55,21 @@ const SprintSignupForm = () => {
     return !!answers[currentStepData.id];
   };
 
+  // Validate that we have email before submitting
+  const canSubmit = () => {
+    // If user is authenticated, they already have an email
+    if (isAuthenticated) return isCurrentStepAnswered();
+    
+    // For new users, ensure we have an email before allowing submission
+    return isCurrentStepAnswered() && !!answers.email;
+  };
+
   const isLastStep = currentStep === steps.length - 1;
   const currentStepData = currentStep < steps.length ? steps[currentStep] : null;
   const isWithinNormalStepRange = currentStep < steps.length;
+
+  // Show error if we're on the final step and missing email
+  const showEmailRequiredError = isLastStep && !isAuthenticated && !answers.email;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -113,6 +125,13 @@ const SprintSignupForm = () => {
         </Card>
       )}
       
+      {showEmailRequiredError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+          <p className="text-sm font-medium">Email is required to create your account.</p>
+          <p className="text-xs mt-1">Please navigate to the "Contact Information" step to provide your email.</p>
+        </div>
+      )}
+      
       <div className="flex justify-between">
         <Button
           variant="outline"
@@ -124,8 +143,8 @@ const SprintSignupForm = () => {
         
         {isLastStep ? (
           <Button 
-            onClick={silentSignup}
-            disabled={!isCurrentStepAnswered() || isSubmitting}
+            onClick={() => silentSignup(answers)}
+            disabled={!canSubmit() || isSubmitting}
             className="ml-auto"
           >
             {isSubmitting 
