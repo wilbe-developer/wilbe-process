@@ -61,7 +61,13 @@ export const useSprintSignup = () => {
             funding_amount_text: profile.funding_amount || '',
             funding_sources: profile.funding_sources || [],
             experiment: profile.experiment_validated ? 'yes' : 'no',
-            vision: profile.industry_changing_vision ? 'yes' : 'no'
+            vision: profile.industry_changing_vision ? 'yes' : 'no',
+            name: profile.name || '',
+            email: profile.email || '',
+            linkedin: profile.linkedin_url || '',
+            job: profile.current_job || '',
+            incorporated: profile.company_incorporated ? 'yes' : 'no',
+            market_gap_reason: profile.market_gap_reason || ''
           });
         }
       }
@@ -208,33 +214,6 @@ export const useSprintSignup = () => {
       toast.error("Failed to update sprint profile. Please try again.");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const uploadFounderProfile = async (userId: string) => {
-    if (!uploadedFile) return null;
-
-    try {
-      const fileExt = uploadedFile.name.split('.').pop();
-      const filePath = `founder-profiles/${userId}.${fileExt}`;
-
-      const { data, error } = await supabase.storage
-        .from('sprint-storage')
-        .upload(filePath, uploadedFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) {
-        console.error("File upload error:", error);
-        toast.error("Failed to upload file.");
-        return null;
-      }
-
-      return filePath;
-    } catch (error) {
-      console.error("Unexpected error during file upload:", error);
-      return null;
     }
   };
   
