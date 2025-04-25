@@ -48,22 +48,13 @@ const SprintDashboardPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6">
-        {tasksWithProgress.map((task, index) => {
-          // Determine if the task should be disabled (all previous tasks must be completed first)
-          const previousTasksCompleted = tasksWithProgress
-            .slice(0, index)
-            .every(t => t.progress?.completed);
-          
-          const disabled = index > 0 && !previousTasksCompleted;
-          
-          return (
-            <TaskCard 
-              key={task.id} 
-              task={task} 
-              disabled={disabled}
-            />
-          );
-        })}
+        {tasksWithProgress.map((task) => (
+          <TaskCard 
+            key={task.id} 
+            task={task} 
+            disabled={false} // All tasks are now enabled
+          />
+        ))}
       </div>
     </div>
   );
