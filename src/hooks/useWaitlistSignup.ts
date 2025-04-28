@@ -40,21 +40,21 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Then increment the referral count - UPDATED to use p_referrer_id
-          try {
-            const { error: rpcError } = await supabase
-              .rpc('increment_referral_count', {
-                p_referrer_id: referrerId
-              });
+          // Then increment the referral count with explicit logging
+          console.log("Calling increment_referral_count with p_referrer_id:", referrerId);
+          const { data: rpcData, error: rpcError } = await supabase
+            .rpc('increment_referral_count', {
+              p_referrer_id: referrerId
+            });
           
-            if (rpcError) {
-              console.error("Failed to increment referral count:", rpcError);
-              // We'll still continue even if the increment fails
-              toast.error("Referral was recorded but counter update failed. Please contact support.");
-            }
-          } catch (rpcCatchError: any) {
-            console.error("Exception in increment_referral_count RPC:", rpcCatchError);
-            // Don't throw here, allow the flow to continue
+          console.log("RPC Response:", rpcData, "Error:", rpcError);
+          
+          if (rpcError) {
+            console.error("Failed to increment referral count:", rpcError);
+            // We'll still continue even if the increment fails
+            toast.error("Referral was recorded but counter update failed. Please contact support.");
+          } else {
+            console.log("Successfully incremented referral count");
           }
           
           navigate('/sprint/referral', { 
