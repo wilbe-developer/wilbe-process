@@ -38,7 +38,7 @@ export function WaitlistForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="h-12 rounded-none"
+          className="h-12 rounded-none w-full"
           disabled={isLoading}
         />
         <Input
@@ -47,7 +47,7 @@ export function WaitlistForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="h-12 rounded-none"
+          className="h-12 rounded-none w-full"
           disabled={isLoading}
         />
         <Button 
