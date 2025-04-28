@@ -17,21 +17,31 @@ export const useWaitlistSignup = () => {
       // If this user was referred, find the referrer
       let referrerId = null;
       if (referralCode) {
-        const { data: referrer } = await supabase
+        console.log("Referral code provided:", referralCode);
+        const { data: referrer, error: referrerError } = await supabase
           .from('waitlist_signups')
           .select('id, successful_referrals')
           .eq('referral_code', referralCode)
           .single();
         
+        console.log("Referrer data:", referrer, "Error:", referrerError);
+        
         if (referrer) {
           referrerId = referrer.id;
+          console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
+          
           // Increment successful_referrals for the referrer
-          // Use the .update method with a calculated value instead of using sql property
           const newReferralCount = (referrer.successful_referrals || 0) + 1;
-          await supabase
+          console.log("Updating referrer's successful_referrals to:", newReferralCount);
+          
+          const { error: updateError } = await supabase
             .from('waitlist_signups')
             .update({ successful_referrals: newReferralCount })
             .eq('id', referrerId);
+          
+          if (updateError) {
+            console.error("Error updating referrer count:", updateError);
+          }
         }
       }
 
