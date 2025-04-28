@@ -30,10 +30,24 @@ export const useWaitlistSignup = () => {
           referrerId = referrer.id;
           console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
           
-          // Increment successful_referrals for the referrer
-          const newReferralCount = (referrer.successful_referrals || 0) + 1;
+          // Construct the new referral count, defaulting to 0 if null
+          const currentCount = referrer.successful_referrals !== null ? referrer.successful_referrals : 0;
+          const newReferralCount = currentCount + 1;
           console.log("Updating referrer's successful_referrals to:", newReferralCount);
           
+          // First create the new signup to ensure it exists before updating the referrer
+          const { error: signupError } = await supabase
+            .from('waitlist_signups')
+            .insert({
+              name,
+              email,
+              referral_code: newReferralCode,
+              referrer_id: referrerId
+            });
+
+          if (signupError) throw signupError;
+          
+          // Now update the referrer's count in a separate transaction
           const { error: updateError } = await supabase
             .from('waitlist_signups')
             .update({ successful_referrals: newReferralCount })
@@ -41,11 +55,21 @@ export const useWaitlistSignup = () => {
           
           if (updateError) {
             console.error("Error updating referrer count:", updateError);
+            // Continue anyway to ensure the user gets to the referral page
           }
+          
+          // Navigate to referral page with the new referral link
+          navigate('/sprint/referral', { 
+            state: { 
+              referralLink: `${window.location.origin}/sprint/ref/${newReferralCode}` 
+            } 
+          });
+          
+          return; // Exit early as we've already handled everything
         }
       }
 
-      // Insert the new signup
+      // If no referrer or if the referrer wasn't found, just insert the new signup
       const { error } = await supabase
         .from('waitlist_signups')
         .insert({
