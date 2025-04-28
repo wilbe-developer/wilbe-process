@@ -44,7 +44,7 @@ export const useWaitlistSignup = () => {
           try {
             const { error: rpcError } = await supabase
               .rpc('increment_referral_count', {
-                referrer_id: referrerId
+                p_referrer_id: referrerId
               });
           
             if (rpcError) {
