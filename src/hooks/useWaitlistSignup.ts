@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,7 @@ export const useWaitlistSignup = () => {
           referrerId = referrer.id;
           console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
           
+          // First insert the new signup
           const { error: signupError } = await supabase
             .from('waitlist_signups')
             .insert({
@@ -38,14 +40,21 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          const { error: rpcError } = await supabase
-            .rpc('increment_referral_count', {
-              referrer_id: referrerId
-            });
-        
-          if (rpcError) {
-            console.error("Failed to increment referral count:", rpcError);
-            toast.error("Referral was recorded but counter update failed. Please contact support.");
+          // Then increment the referral count
+          try {
+            const { error: rpcError } = await supabase
+              .rpc('increment_referral_count', {
+                referrer_id: referrerId
+              });
+          
+            if (rpcError) {
+              console.error("Failed to increment referral count:", rpcError);
+              // We'll still continue even if the increment fails
+              toast.error("Referral was recorded but counter update failed. Please contact support.");
+            }
+          } catch (rpcCatchError: any) {
+            console.error("Exception in increment_referral_count RPC:", rpcCatchError);
+            // Don't throw here, allow the flow to continue
           }
           
           navigate('/sprint/referral', { 
@@ -58,6 +67,7 @@ export const useWaitlistSignup = () => {
         }
       }
 
+      // If there's no referrer or referral code, just add the new signup
       const { error } = await supabase
         .from('waitlist_signups')
         .insert({
