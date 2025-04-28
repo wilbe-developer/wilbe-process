@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -76,6 +75,11 @@ const App = () => (
                   <Route path="/community/thread/:threadId" element={<ThreadPage />} />
                 </Route>
               </Route>
+
+              {/* Sprint waitlist routes */}
+              <Route path="/sprint-waitlist" element={<SprintWaitlistPage />} />
+              <Route path="/sprint/referral" element={<SprintReferralPage />} />
+              <Route path="/sprint/ref/:code" element={<SprintWaitlistPage />} />
 
               {/* Protected routes */}
               <Route element={<Layout />}>
