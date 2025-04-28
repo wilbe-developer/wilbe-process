@@ -19,16 +19,18 @@ export const useWaitlistSignup = () => {
       if (referralCode) {
         const { data: referrer } = await supabase
           .from('waitlist_signups')
-          .select('id')
+          .select('id, successful_referrals')
           .eq('referral_code', referralCode)
           .single();
         
         if (referrer) {
           referrerId = referrer.id;
           // Increment successful_referrals for the referrer
+          // Use the .update method with a calculated value instead of using sql property
+          const newReferralCount = (referrer.successful_referrals || 0) + 1;
           await supabase
             .from('waitlist_signups')
-            .update({ successful_referrals: supabase.sql`successful_referrals + 1` })
+            .update({ successful_referrals: newReferralCount })
             .eq('id', referrerId);
         }
       }
