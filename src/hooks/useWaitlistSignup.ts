@@ -40,8 +40,14 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Then increment the referral count with explicit logging
+          // Then increment the referral count with detailed logging
           console.log("Calling increment_referral_count with p_referrer_id:", referrerId);
+          
+          // Explicitly verify the function exists before calling
+          const { data: functions } = await supabase
+            .rpc('get_function_info', { function_name: 'increment_referral_count' });
+          console.log("Function info:", functions);
+          
           const { data: rpcData, error: rpcError } = await supabase
             .rpc('increment_referral_count', {
               p_referrer_id: referrerId
@@ -55,6 +61,15 @@ export const useWaitlistSignup = () => {
             toast.error("Referral was recorded but counter update failed. Please contact support.");
           } else {
             console.log("Successfully incremented referral count");
+            
+            // Double-check if the count was actually incremented
+            const { data: updatedReferrer } = await supabase
+              .from('waitlist_signups')
+              .select('successful_referrals')
+              .eq('id', referrerId)
+              .single();
+              
+            console.log("Referral count after update:", updatedReferrer?.successful_referrals);
           }
           
           navigate('/sprint/referral', { 
