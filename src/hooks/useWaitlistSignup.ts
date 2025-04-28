@@ -42,23 +42,36 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Construct the new referral count, ensuring it's a number
-          const currentCount = typeof referrer.successful_referrals === 'number' ? referrer.successful_referrals : 0;
-          const newReferralCount = currentCount + 1;
-          console.log("Updating referrer's successful_referrals to:", newReferralCount);
-          
-          // Update the referrer's count with explicit typing
-          const { error: updateError, data: updateData } = await supabase
-            .from('waitlist_signups')
-            .update({ successful_referrals: newReferralCount })
-            .eq('id', referrerId)
-            .select();
-          
-          console.log("Update result:", updateData, "Update error:", updateError);
-          
-          if (updateError) {
-            console.error("Error updating referrer count:", updateError);
-            // Continue anyway to ensure the user gets to the referral page
+          try {
+            // Try direct increment approach instead of read-then-update
+            const { data: updateData, error: updateError } = await supabase.rpc(
+              'increment_referral_count',
+              { referrer_id: referrerId }
+            );
+            
+            console.log("RPC result:", updateData, "RPC error:", updateError);
+            
+            if (updateError) {
+              console.error("RPC Error:", updateError);
+              
+              // Fallback to traditional update if RPC fails
+              console.log("Falling back to traditional update");
+              const { data: fallbackData, error: fallbackError } = await supabase
+                .from('waitlist_signups')
+                .update({ 
+                  successful_referrals: referrer.successful_referrals === null ? 1 : referrer.successful_referrals + 1 
+                })
+                .eq('id', referrerId)
+                .select();
+              
+              console.log("Fallback update result:", fallbackData, "Fallback error:", fallbackError);
+              
+              if (fallbackError) {
+                console.error("Fallback update error:", fallbackError);
+              }
+            }
+          } catch (rpcError) {
+            console.error("Caught RPC error:", rpcError);
           }
           
           // Navigate to referral page with the new referral link
