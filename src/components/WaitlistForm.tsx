@@ -1,19 +1,19 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useWaitlistSignup } from "@/hooks/useWaitlistSignup";
+import { useParams } from "react-router-dom";
 
 export function WaitlistForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const navigate = useNavigate();
+  const { code: referralCode } = useParams();
+  const { signup, isLoading } = useWaitlistSignup();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const uniqueCode = btoa(email).slice(0, 8);
-    const referralLink = `${window.location.origin}/sprint/ref/${uniqueCode}`;
-    navigate('/sprint/referral', { state: { referralLink } });
+    await signup(name, email, referralCode);
   };
 
   // Array of colors for instant hover changes
@@ -39,6 +39,7 @@ export function WaitlistForm() {
           onChange={(e) => setName(e.target.value)}
           required
           className="h-12 rounded-none"
+          disabled={isLoading}
         />
         <Input
           type="email"
@@ -47,14 +48,16 @@ export function WaitlistForm() {
           onChange={(e) => setEmail(e.target.value)}
           required
           className="h-12 rounded-none"
+          disabled={isLoading}
         />
         <Button 
           type="submit" 
           className="w-full h-12 text-lg font-semibold rounded-none transition-colors"
           style={{ backgroundColor: buttonColor }}
           onMouseEnter={() => setButtonColor(getRandomColor())}
+          disabled={isLoading}
         >
-          Join waitlist
+          {isLoading ? "Joining..." : "Join waitlist"}
         </Button>
       </form>
     </div>
