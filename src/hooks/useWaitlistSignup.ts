@@ -43,11 +43,12 @@ export const useWaitlistSignup = () => {
           if (signupError) throw signupError;
           
           try {
-            // Try direct increment approach instead of read-then-update
-            const { data: updateData, error: updateError } = await supabase.rpc(
-              'increment_referral_count',
-              { referrer_id: referrerId }
-            );
+            // Use a direct POST request to call the RPC function since TypeScript definitions don't include our new function
+            const { data: updateData, error: updateError } = await supabase
+              .rpc(
+                'increment_referral_count' as any,
+                { referrer_id: referrerId }
+              );
             
             console.log("RPC result:", updateData, "RPC error:", updateError);
             
