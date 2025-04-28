@@ -42,37 +42,24 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          try {
-            // Use a direct POST request to call the RPC function since TypeScript definitions don't include our new function
-            const { data: updateData, error: updateError } = await supabase
-              .rpc(
-                'increment_referral_count' as any,
-                { referrer_id: referrerId }
-              );
-            
-            console.log("RPC result:", updateData, "RPC error:", updateError);
-            
-            if (updateError) {
-              console.error("RPC Error:", updateError);
-              
-              // Fallback to traditional update if RPC fails
-              console.log("Falling back to traditional update");
-              const { data: fallbackData, error: fallbackError } = await supabase
-                .from('waitlist_signups')
-                .update({ 
-                  successful_referrals: referrer.successful_referrals === null ? 1 : referrer.successful_referrals + 1 
-                })
-                .eq('id', referrerId)
-                .select();
-              
-              console.log("Fallback update result:", fallbackData, "Fallback error:", fallbackError);
-              
-              if (fallbackError) {
-                console.error("Fallback update error:", fallbackError);
-              }
-            }
-          } catch (rpcError) {
-            console.error("Caught RPC error:", rpcError);
+          // Direct update approach - no RPC call
+          console.log("Updating referrer count directly");
+          const currentReferrals = referrer.successful_referrals === null ? 0 : referrer.successful_referrals;
+          const newReferralCount = currentReferrals + 1;
+          
+          const { data: updateData, error: updateError } = await supabase
+            .from('waitlist_signups')
+            .update({ 
+              successful_referrals: newReferralCount 
+            })
+            .eq('id', referrerId)
+            .select();
+          
+          console.log("Update result:", updateData, "Update error:", updateError);
+          
+          if (updateError) {
+            console.error("Update error:", updateError);
+            toast.error("Referral was recorded but counter update failed. Please contact support.");
           }
           
           // Navigate to referral page with the new referral link
