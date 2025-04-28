@@ -40,44 +40,20 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Then attempt to increment the referral count directly with an update query
-          // This serves as a fallback in case the RPC method isn't working correctly
-          console.log("Directly updating referral count for ID:", referrerId);
-          
-          const { data: directUpdateData, error: directUpdateError } = await supabase
-            .from('waitlist_signups')
-            .update({ successful_referrals: referrer.successful_referrals + 1 })
-            .eq('id', referrerId)
-            .select('successful_referrals');
-          
-          console.log("Direct update result:", directUpdateData, "Error:", directUpdateError);
-          
-          // Then try the RPC call as well for completeness
+          // Now increment the referral count using the RPC call
           console.log("Calling increment_referral_count with p_referrer_id:", referrerId);
           
-          const { data: rpcData, error: rpcError } = await supabase
+          const { error: rpcError } = await supabase
             .rpc('increment_referral_count', {
               p_referrer_id: referrerId
             });
           
-          console.log("RPC Response:", rpcData, "Error:", rpcError);
-          
           if (rpcError) {
             console.error("Failed to increment referral count:", rpcError);
-            // We'll still continue even if the increment fails
             toast.error("Referral was recorded but counter update failed. Please contact support.");
           } else {
             console.log("Successfully incremented referral count");
           }
-          
-          // Double-check the final count after both methods tried
-          const { data: updatedReferrer } = await supabase
-            .from('waitlist_signups')
-            .select('successful_referrals')
-            .eq('id', referrerId)
-            .single();
-              
-          console.log("Final referral count after updates:", updatedReferrer?.successful_referrals);
           
           navigate('/sprint/referral', { 
             state: { 
