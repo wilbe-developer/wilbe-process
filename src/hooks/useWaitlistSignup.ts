@@ -30,12 +30,7 @@ export const useWaitlistSignup = () => {
           referrerId = referrer.id;
           console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
           
-          // Construct the new referral count, defaulting to 0 if null
-          const currentCount = referrer.successful_referrals !== null ? referrer.successful_referrals : 0;
-          const newReferralCount = currentCount + 1;
-          console.log("Updating referrer's successful_referrals to:", newReferralCount);
-          
-          // First create the new signup to ensure it exists before updating the referrer
+          // First create the new signup
           const { error: signupError } = await supabase
             .from('waitlist_signups')
             .insert({
@@ -47,11 +42,19 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Now update the referrer's count in a separate transaction
-          const { error: updateError } = await supabase
+          // Construct the new referral count, ensuring it's a number
+          const currentCount = typeof referrer.successful_referrals === 'number' ? referrer.successful_referrals : 0;
+          const newReferralCount = currentCount + 1;
+          console.log("Updating referrer's successful_referrals to:", newReferralCount);
+          
+          // Update the referrer's count with explicit typing
+          const { error: updateError, data: updateData } = await supabase
             .from('waitlist_signups')
             .update({ successful_referrals: newReferralCount })
-            .eq('id', referrerId);
+            .eq('id', referrerId)
+            .select();
+          
+          console.log("Update result:", updateData, "Update error:", updateError);
           
           if (updateError) {
             console.error("Error updating referrer count:", updateError);
