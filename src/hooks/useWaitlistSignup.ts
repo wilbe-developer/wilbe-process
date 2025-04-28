@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,10 +10,8 @@ export const useWaitlistSignup = () => {
   const signup = async (name: string, email: string, referralCode?: string) => {
     setIsLoading(true);
     try {
-      // Generate a unique referral code for this user
       const newReferralCode = btoa(email).slice(0, 8);
       
-      // If this user was referred, find the referrer
       let referrerId = null;
       if (referralCode) {
         console.log("Referral code provided:", referralCode);
@@ -30,7 +27,6 @@ export const useWaitlistSignup = () => {
           referrerId = referrer.id;
           console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
           
-          // First create the new signup
           const { error: signupError } = await supabase
             .from('waitlist_signups')
             .insert({
@@ -42,38 +38,26 @@ export const useWaitlistSignup = () => {
 
           if (signupError) throw signupError;
           
-          // Direct update approach - no RPC call
-          console.log("Updating referrer count directly");
-          const currentReferrals = referrer.successful_referrals === null ? 0 : referrer.successful_referrals;
-          const newReferralCount = currentReferrals + 1;
-          
-          const { data: updateData, error: updateError } = await supabase
-            .from('waitlist_signups')
-            .update({ 
-              successful_referrals: newReferralCount 
-            })
-            .eq('id', referrerId)
-            .select();
-          
-          console.log("Update result:", updateData, "Update error:", updateError);
-          
-          if (updateError) {
-            console.error("Update error:", updateError);
+          const { error: rpcError } = await supabase
+            .rpc('increment_referral_count', {
+              referrer_id: referrerId
+            });
+        
+          if (rpcError) {
+            console.error("Failed to increment referral count:", rpcError);
             toast.error("Referral was recorded but counter update failed. Please contact support.");
           }
           
-          // Navigate to referral page with the new referral link
           navigate('/sprint/referral', { 
             state: { 
               referralLink: `${window.location.origin}/sprint/ref/${newReferralCode}` 
             } 
           });
           
-          return; // Exit early as we've already handled everything
+          return;
         }
       }
 
-      // If no referrer or if the referrer wasn't found, just insert the new signup
       const { error } = await supabase
         .from('waitlist_signups')
         .insert({
@@ -85,7 +69,6 @@ export const useWaitlistSignup = () => {
 
       if (error) throw error;
 
-      // Navigate to referral page with the new referral link
       navigate('/sprint/referral', { 
         state: { 
           referralLink: `${window.location.origin}/sprint/ref/${newReferralCode}` 
