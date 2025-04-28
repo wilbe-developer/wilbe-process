@@ -750,7 +750,7 @@ export type Database = {
         Returns: boolean
       }
       increment_referral_count: {
-        Args: { referrer_id: string }
+        Args: { p_referrer_id: string }
         Returns: undefined
       }
       is_admin: {
