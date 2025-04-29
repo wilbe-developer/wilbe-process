@@ -47,6 +47,30 @@ export type Database = {
           },
         ]
       }
+      email_domains: {
+        Row: {
+          created_at: string | null
+          domain: string
+          good_pattern: string | null
+          is_catchall: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          domain: string
+          good_pattern?: string | null
+          is_catchall?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          domain?: string
+          good_pattern?: string | null
+          is_catchall?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       merch_orders: {
         Row: {
           address: string
@@ -89,6 +113,45 @@ export type Database = {
           postal?: string
           product_name?: string
           product_size?: string
+        }
+        Relationships: []
+      }
+      metrics: {
+        Row: {
+          created_at: string | null
+          domain: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          is_catchall: boolean | null
+          latency_ms: number | null
+          mx_found: boolean | null
+          pattern_tried: string | null
+          smtp_success: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          domain?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          is_catchall?: boolean | null
+          latency_ms?: number | null
+          mx_found?: boolean | null
+          pattern_tried?: string | null
+          smtp_success?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          domain?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          is_catchall?: boolean | null
+          latency_ms?: number | null
+          mx_found?: boolean | null
+          pattern_tried?: string | null
+          smtp_success?: boolean | null
         }
         Relationships: []
       }
@@ -471,18 +534,21 @@ export type Database = {
       universities: {
         Row: {
           created_at: string | null
+          domain: string | null
           id: string
           is_default: boolean
           name: string
         }
         Insert: {
           created_at?: string | null
+          domain?: string | null
           id?: string
           is_default?: boolean
           name: string
         }
         Update: {
           created_at?: string | null
+          domain?: string | null
           id?: string
           is_default?: boolean
           name?: string

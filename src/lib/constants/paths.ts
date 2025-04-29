@@ -19,7 +19,10 @@ export const PATHS = {
   SPRINT_DASHBOARD: '/sprint/dashboard',
   SPRINT_TASK: '/sprint/task',
   SPRINT_SIGNUP: '/sprint-signup',
-  LEAD_GENERATOR: '/lead-generator'
+  LEAD_GENERATOR: '/lead-generator',
+  API: {
+    FIND_EMAILS: '/api/find-emails'
+  }
 } as const;
 
 export const NAV_ITEMS = [

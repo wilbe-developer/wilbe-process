@@ -12,11 +12,13 @@ interface University {
   id: string;
   name: string;
   is_default: boolean;
+  domain?: string;
 }
 
 export const UniversityManagement = () => {
   const [universities, setUniversities] = useState<University[]>([]);
   const [newUniversityName, setNewUniversityName] = useState("");
+  const [newUniversityDomain, setNewUniversityDomain] = useState("");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -51,8 +53,9 @@ export const UniversityManagement = () => {
     }
 
     try {
-      await addUniversity(newUniversityName);
+      await addUniversity(newUniversityName, newUniversityDomain);
       setNewUniversityName("");
+      setNewUniversityDomain("");
       toast({
         title: "Success",
         description: "University added successfully",
@@ -92,6 +95,27 @@ export const UniversityManagement = () => {
     }
   };
 
+  const handleUpdateDomain = async (university: University, domain: string) => {
+    try {
+      await updateUniversity(university.id, { domain });
+      setUniversities(
+        universities.map((u) =>
+          u.id === university.id ? { ...u, domain } : u
+        )
+      );
+      toast({
+        title: "Success",
+        description: "University domain updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update university domain",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteUniversity = async (id: string) => {
     try {
       await deleteUniversity(id);
@@ -113,14 +137,28 @@ export const UniversityManagement = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Manage Default Universities</h2>
       
-      <div className="flex gap-2">
-        <Input
-          placeholder="New university name"
-          value={newUniversityName}
-          onChange={(e) => setNewUniversityName(e.target.value)}
-          className="max-w-md"
-        />
-        <Button onClick={handleAddUniversity}>Add University</Button>
+      <div className="flex flex-col gap-4 md:flex-row">
+        <div className="flex-1">
+          <label htmlFor="universityName" className="text-sm font-medium mb-1 block">University Name</label>
+          <Input
+            id="universityName"
+            placeholder="New university name"
+            value={newUniversityName}
+            onChange={(e) => setNewUniversityName(e.target.value)}
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="universityDomain" className="text-sm font-medium mb-1 block">Domain</label>
+          <Input
+            id="universityDomain"
+            placeholder="university.edu"
+            value={newUniversityDomain}
+            onChange={(e) => setNewUniversityDomain(e.target.value)}
+          />
+        </div>
+        <div className="flex items-end">
+          <Button onClick={handleAddUniversity} className="w-full md:w-auto whitespace-nowrap">Add University</Button>
+        </div>
       </div>
       
       {loading ? (
@@ -133,14 +171,15 @@ export const UniversityManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>University Name</TableHead>
-                <TableHead className="w-[150px] text-center">Default</TableHead>
+                <TableHead>Domain</TableHead>
+                <TableHead className="w-[120px] text-center">Default</TableHead>
                 <TableHead className="w-[100px] text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {universities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-4">
+                  <TableCell colSpan={4} className="text-center py-4">
                     No universities found
                   </TableCell>
                 </TableRow>
@@ -148,6 +187,19 @@ export const UniversityManagement = () => {
                 universities.map((university) => (
                   <TableRow key={university.id}>
                     <TableCell>{university.name}</TableCell>
+                    <TableCell>
+                      <Input
+                        value={university.domain || ""}
+                        onChange={(e) => handleUpdateDomain(university, e.target.value)}
+                        placeholder="e.g., university.edu"
+                        className="max-w-xs"
+                        onBlur={(e) => {
+                          if (e.target.value !== university.domain) {
+                            handleUpdateDomain(university, e.target.value);
+                          }
+                        }}
+                      />
+                    </TableCell>
                     <TableCell className="text-center">
                       <Checkbox
                         checked={university.is_default}
