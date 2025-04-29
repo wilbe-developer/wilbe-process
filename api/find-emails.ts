@@ -17,7 +17,8 @@ console.log('Environment check:', {
   NODE_ENV: process.env.NODE_ENV,
   hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
   hasSupabaseUrl: !!process.env.SUPABASE_URL,
-  usingUrl: SUPABASE_URL
+  usingUrl: SUPABASE_URL,
+  usingKey: SUPABASE_ANON_KEY ? 'Key is set (not showing for security)' : 'Key is missing'
 });
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -338,6 +339,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Fetching default universities from Supabase');
       
       try {
+        // First, let's make sure the Supabase client is working by checking if the universities table exists
+        const { data: tableTest, error: tableError } = await supabase
+          .from('universities')
+          .select('count(*)', { count: 'exact', head: true });
+        
+        if (tableError) {
+          console.error('Error testing Supabase connection:', tableError);
+          console.log('Full error details:', JSON.stringify(tableError));
+          throw new Error(`Supabase connection test failed: ${tableError.message}`);
+        }
+        
+        console.log('Supabase connection test successful. Table exists.');
+        
+        // Now get all universities to check if any exist
+        const { data: allUniversities, error: allError } = await supabase
+          .from('universities')
+          .select('id, name, is_default')
+          .order('name');
+        
+        if (allError) {
+          console.error('Error checking all universities:', allError);
+          throw allError;
+        }
+        
+        console.log(`Found ${allUniversities?.length || 0} total universities in database`);
+        
+        // Now get the default universities
         const { data, error } = await supabase
           .from('universities')
           .select('id, name, domain')
@@ -345,11 +373,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         if (error) {
           console.error('Supabase error fetching default universities:', error);
+          console.log('Full error details:', JSON.stringify(error));
           throw error;
         }
         
         if (!data || data.length === 0) {
           console.log('No default universities found in database');
+          
+          // Log how many universities exist and how many have is_default set to true
+          console.log(`Total universities: ${allUniversities?.length || 0}`);
+          const defaultCount = allUniversities?.filter(u => u.is_default)?.length || 0;
+          console.log(`Universities with is_default=true: ${defaultCount}`);
+          
           return res.status(200).json([]);
         }
         

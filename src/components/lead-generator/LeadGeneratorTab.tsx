@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Info, Database } from "lucide-react";
 import { findEmails, getUniversities } from "@/services/universityService";
 import { MultiSelect } from "./MultiSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -34,6 +35,7 @@ export const LeadGeneratorTab = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMissingDomains, setHasMissingDomains] = useState(false);
+  const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
   const resultsPerPage = 5;
   const { toast } = useToast();
 
@@ -85,6 +87,40 @@ export const LeadGeneratorTab = () => {
     }
   }, [selectedUniversities, universities, useCustomUniversities]);
 
+  const checkForDefaultUniversities = async () => {
+    setIsCheckingDefaults(true);
+    try {
+      // Check if there are any universities set as default
+      const defaultUniversities = universities.filter(u => u.is_default);
+      
+      if (defaultUniversities.length === 0) {
+        setError("No default universities found. Please add some in the University Management tab.");
+        toast({
+          title: "No Default Universities",
+          description: "Please go to the University Management tab and set at least one university as default.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      // Check if default universities have domains
+      const missingDomains = defaultUniversities.filter(u => !u.domain);
+      if (missingDomains.length > 0 && missingDomains.length === defaultUniversities.length) {
+        setError("All default universities are missing domain information. Please add domains in the University Management tab.");
+        toast({
+          title: "Missing Domains",
+          description: "All default universities are missing domain information. Please add domains in the University Management tab.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    } finally {
+      setIsCheckingDefaults(false);
+    }
+  };
+
   const handleRunSearch = async () => {
     try {
       setError(null);
@@ -110,6 +146,15 @@ export const LeadGeneratorTab = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // If using default universities, do an additional check
+      if (!useCustomUniversities) {
+        const defaultsOk = await checkForDefaultUniversities();
+        if (!defaultsOk) {
+          setLoading(false);
+          return;
+        }
       }
 
       // Count universities with missing domains
@@ -232,12 +277,12 @@ export const LeadGeneratorTab = () => {
             <Button 
               onClick={handleRunSearch} 
               className="w-full"
-              disabled={loading || (useCustomUniversities && selectedUniversities.length === 0)}
+              disabled={loading || isCheckingDefaults || (useCustomUniversities && selectedUniversities.length === 0)}
             >
-              {loading ? (
+              {loading || isCheckingDefaults ? (
                 <>
                   <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                  Searching...
+                  {isCheckingDefaults ? "Checking..." : "Searching..."}
                 </>
               ) : "Run Search"}
             </Button>
@@ -260,6 +305,18 @@ export const LeadGeneratorTab = () => {
               )}
             </div>
           )}
+          
+          <div className="pt-4 border-t mt-4">
+            <h4 className="text-sm font-medium mb-2">Database Status</h4>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <Database className="h-3 w-3" />
+              <span>Total Universities: {universities.length}</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
+              <Database className="h-3 w-3" />
+              <span>Default Universities: {defaultUniversities.length}</span>
+            </div>
+          </div>
         </div>
         
         <div className="md:col-span-3 space-y-4">
