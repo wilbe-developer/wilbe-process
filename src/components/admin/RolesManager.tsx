@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Define a type for the valid role values
 type UserRole = "user" | "admin" | "member";
@@ -25,7 +26,7 @@ const RolesManager = () => {
     try {
       setLoading(true);
       
-      // Fetch all approved profiles
+      // Fetch all profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*');
@@ -107,8 +108,10 @@ const RolesManager = () => {
         if (error) throw error;
         
         toast({
-          title: "Role Removed",
-          description: `${role} role has been removed.`
+          title: role === "admin" ? "Admin Role Removed" : "Member Access Revoked",
+          description: role === "admin" 
+            ? "Admin privileges have been removed."
+            : "Member access has been revoked."
         });
       } else {
         // Add role
@@ -122,8 +125,10 @@ const RolesManager = () => {
         if (error) throw error;
         
         toast({
-          title: "Role Added",
-          description: `${role} role has been added.`
+          title: role === "admin" ? "Admin Role Added" : "Member Access Granted",
+          description: role === "admin" 
+            ? "Admin privileges have been added."
+            : "Member access has been granted."
         });
       }
       
@@ -167,7 +172,7 @@ const RolesManager = () => {
               {users.map((user) => {
                 const userRolesList = userRoles[user.id] || [];
                 const isAdmin = userRolesList.includes("admin");
-                const isMember = userRolesList.includes("user");
+                const isMember = userRolesList.includes("user"); // 'user' role in DB = 'Member' in UI
                 
                 return (
                   <TableRow key={user.id}>
@@ -188,7 +193,8 @@ const RolesManager = () => {
                       <div className="flex flex-wrap gap-1">
                         {userRolesList.map(role => (
                           <Badge key={role} variant="outline" className="capitalize">
-                            {role}
+                            {/* Display "Member" in the UI instead of "user" */}
+                            {role === "user" ? "Member" : role}
                           </Badge>
                         ))}
                         {userRolesList.length === 0 && (
@@ -198,20 +204,43 @@ const RolesManager = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant={isAdmin ? "destructive" : "outline"}
-                          onClick={() => handleRoleToggle(user.id, "admin" as UserRole, isAdmin)}
-                        >
-                          {isAdmin ? "Remove Admin" : "Make Admin"}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant={isMember ? "destructive" : "outline"}
-                          onClick={() => handleRoleToggle(user.id, "user" as UserRole, isMember)}
-                        >
-                          {isMember ? "Remove Member" : "Make Member"}
-                        </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant={isAdmin ? "destructive" : "outline"}
+                                onClick={() => handleRoleToggle(user.id, "admin" as UserRole, isAdmin)}
+                              >
+                                {isAdmin ? "Remove Admin" : "Make Admin"}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {isAdmin 
+                                ? "Remove administrator privileges" 
+                                : "Grant administrator privileges to this user"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                size="sm" 
+                                variant={isMember ? "destructive" : "outline"}
+                                onClick={() => handleRoleToggle(user.id, "user" as UserRole, isMember)}
+                              >
+                                {isMember ? "Revoke Member" : "Make Member"}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {isMember 
+                                ? "Revoke access to member-only content" 
+                                : "Grant access to member-only content"}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </TableCell>
                   </TableRow>

@@ -1,4 +1,3 @@
-
 export interface UserProfile {
   id: string;
   firstName: string;
@@ -50,6 +49,7 @@ export interface Video {
   deckBuilderModuleId?: string; // To store the deck builder specific module
 }
 
+// Updated to match what's actually used in the database
 export type UserRole = 'user' | 'admin';
 
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
