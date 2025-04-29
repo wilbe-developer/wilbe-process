@@ -1,3 +1,4 @@
+
 export const APP_NAME = "Wilbe";
 
 export const PATHS = {
@@ -19,6 +20,7 @@ export const PATHS = {
   SPRINT: '/sprint',
   SPRINT_DASHBOARD: '/sprint/dashboard',
   SPRINT_TASK: '/sprint/task',
+  SPRINT_SIGNUP: '/sprint-signup',
   LEAD_GENERATOR: '/lead-generator'
 } as const;
 
