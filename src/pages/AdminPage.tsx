@@ -25,6 +25,7 @@ import { PATHS } from "@/lib/constants";
 import { UserProfile, ApprovalStatus } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import RolesManager from "../components/admin/RolesManager";
 
 const AdminPage = () => {
   const { isAdmin, user } = useAuth();
@@ -110,13 +111,31 @@ const AdminPage = () => {
 
   const handleApprovalAction = async (userId: string, status: ApprovalStatus) => {
     try {
-      const { error } = await supabase
+      // First, update the profile's approved field for backward compatibility
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({ approved: status === 'approved' })
         .eq('id', userId);
 
-      if (error) {
-        throw error;
+      if (profileError) {
+        throw profileError;
+      }
+
+      // If approving the user, add the user role
+      if (status === 'approved') {
+        // Add user role if approved
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .upsert({ 
+            user_id: userId, 
+            role: 'user' 
+          }, { 
+            onConflict: 'user_id,role' 
+          });
+
+        if (roleError) {
+          throw roleError;
+        }
       }
 
       setPendingUsers(pendingUsers.filter(user => user.id !== userId));
@@ -276,6 +295,7 @@ const AdminPage = () => {
       <Tabs defaultValue="approvals" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="approvals">User Approvals</TabsTrigger>
+          <TabsTrigger value="roles">User Roles</TabsTrigger>
           <TabsTrigger value="content">Content Management</TabsTrigger>
           <TabsTrigger value="settings">Platform Settings</TabsTrigger>
         </TabsList>
@@ -360,6 +380,10 @@ const AdminPage = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="roles">
+          <RolesManager />
         </TabsContent>
 
         <TabsContent value="content">

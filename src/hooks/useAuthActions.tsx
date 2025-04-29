@@ -1,3 +1,4 @@
+
 import { useCallback } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { UserProfile } from "@/types";
@@ -40,7 +41,7 @@ export const useAuthActions = ({
         return;
       }
       
-      // Check if user has admin role using our new function
+      // Check if user has admin role using our database function
       const { data: isAdminData, error: isAdminError } = await supabase
         .rpc('is_admin', { user_id: userId });
       
@@ -48,7 +49,7 @@ export const useAuthActions = ({
         console.error('Error checking admin role:', isAdminError);
       }
       
-      // Check if user is approved using our new function
+      // Check if user is approved using our database function
       const { data: isApprovedData, error: isApprovedError } = await supabase
         .rpc('is_approved', { user_id: userId });
       
@@ -57,7 +58,7 @@ export const useAuthActions = ({
       }
       
       const isAdmin = isAdminData || false;
-      const isApproved = isApprovedData || profileData?.approved || false;
+      const isApproved = isApprovedData || false; // No longer falling back to profile.approved
       
       if (profileData) {
         console.log("User profile found:", profileData, "Is admin:", isAdmin, "Is approved:", isApproved);
@@ -70,13 +71,13 @@ export const useAuthActions = ({
           linkedIn: profileData.linked_in,
           institution: profileData.institution,
           location: profileData.location,
-          role: profileData.role,
+          role: profileData.role, // This is just job role, not system role
           bio: profileData.bio,
           about: profileData.about,
-          approved: isApproved,
+          approved: isApproved, // Using the role-based check only
           createdAt: new Date(profileData.created_at || new Date()),
           avatar: profileData.avatar,
-          isAdmin: isAdmin,
+          isAdmin: isAdmin, // Using the role-based check only
           twitterHandle: profileData.twitter_handle,
           expertise: profileData.expertise,
           activityStatus: profileData.activity_status,
@@ -211,7 +212,7 @@ export const useAuthActions = ({
       if (data.linkedIn !== undefined) dbData.linked_in = data.linkedIn;
       if (data.institution !== undefined) dbData.institution = data.institution;
       if (data.location !== undefined) dbData.location = data.location;
-      if (data.role !== undefined && !user.isAdmin) dbData.role = data.role;
+      if (data.role !== undefined) dbData.role = data.role; // This is just job role, not access role
       if (data.bio !== undefined) dbData.bio = data.bio;
       if (data.about !== undefined) dbData.about = data.about;
       if (data.avatar !== undefined) dbData.avatar = data.avatar;
@@ -219,6 +220,10 @@ export const useAuthActions = ({
       if (data.expertise !== undefined) dbData.expertise = data.expertise;
       if (data.activityStatus !== undefined) dbData.activity_status = data.activityStatus;
       if (data.status !== undefined) dbData.status = data.status;
+      
+      // Important: Remove ability to update approval or admin status via profile updates
+      // These fields are now controlled by the user_roles table
+      delete dbData.approved;
       
       // Update profile in Supabase
       const { error } = await supabase
@@ -230,10 +235,12 @@ export const useAuthActions = ({
         throw error;
       }
       
-      // Update local user state
+      // Update local user state - but preserve auth status fields
       const updatedUser = {
         ...user,
         ...data,
+        approved: user.approved, // Preserve existing approval status
+        isAdmin: user.isAdmin     // Preserve existing admin status
       };
       
       setUser(updatedUser);
