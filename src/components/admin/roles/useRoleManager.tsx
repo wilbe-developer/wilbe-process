@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfile, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { fetchUsersByRole, fetchUserRoles, fetchRoleCounts, mapProfilesToUserProfiles } from "./RoleUtils";
+import { fetchUsersByRole, fetchRoleCounts, mapProfilesToUserProfiles } from "./RoleUtils";
 
 export const useRoleManager = () => {
   const { toast } = useToast();
@@ -27,51 +27,35 @@ export const useRoleManager = () => {
       // Get role counts for filter indicators
       const counts = await fetchRoleCounts();
       setRoleCounts(counts);
-      console.log("Role counts:", counts);
       
       // Fetch users based on the current filter and page
-      const { data: fetchedUsers, count } = await fetchUsersByRole(filter, currentPage, pageSize);
-      setTotalUsers(count);
-      
-      // Build a role map for these users
-      const userRoleMap: Record<string, UserRole[]> = {};
-      
-      // This is a more efficient way to get all roles for the fetched users in one go
-      const userIds = fetchedUsers.map(user => user.id);
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role')
-        .in('user_id', userIds);
-      
-      if (rolesError) throw rolesError;
-      
-      console.log(`Fetched ${rolesData?.length || 0} roles for ${userIds.length} users`);
-      
-      // Process role data
-      if (rolesData) {
-        rolesData.forEach(row => {
-          if (!userRoleMap[row.user_id]) {
-            userRoleMap[row.user_id] = [];
-          }
-          userRoleMap[row.user_id].push(row.role as UserRole);
+      try {
+        const { data: fetchedUsers, count, userRoleMap } = await fetchUsersByRole(filter, currentPage, pageSize);
+        setTotalUsers(count);
+        
+        // Update user roles state
+        setUserRoles(userRoleMap || {});
+        
+        // Map to UserProfile format with role information
+        const enhancedProfiles = mapProfilesToUserProfiles(fetchedUsers, userRoleMap);
+        
+        console.log(`Successfully processed ${enhancedProfiles.length} user profiles`);
+        console.log(`Admin count in current page: ${enhancedProfiles.filter(p => p.isAdmin).length}`);
+        
+        setUsers(enhancedProfiles);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch users. Please try again.",
+          variant: "destructive"
         });
       }
-      
-      // Update state with role information
-      setUserRoles(userRoleMap);
-      
-      // Map to UserProfile format with role information
-      const enhancedProfiles = mapProfilesToUserProfiles(fetchedUsers, userRoleMap);
-      
-      console.log(`Successfully processed ${enhancedProfiles.length} user profiles`);
-      console.log(`Admin count in current page: ${enhancedProfiles.filter(p => p.isAdmin).length}`);
-      
-      setUsers(enhancedProfiles);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error in useRoleManager:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch users. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     } finally {
