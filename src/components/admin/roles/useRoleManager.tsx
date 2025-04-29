@@ -9,6 +9,8 @@ export const useRoleManager = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
+  const [filter, setFilter] = useState<UserRole | 'all'>('all');
+  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
 
   const fetchUsers = async () => {
     try {
@@ -70,6 +72,8 @@ export const useRoleManager = () => {
         }));
         
         setUsers(enhancedProfiles);
+        // Initially set filtered users to all users
+        applyFilter(enhancedProfiles, filter);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -81,6 +85,25 @@ export const useRoleManager = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyFilter = (userList: UserProfile[], filterValue: UserRole | 'all') => {
+    if (filterValue === 'all') {
+      setFilteredUsers(userList);
+      return;
+    }
+    
+    const filtered = userList.filter(user => {
+      const userRoleList = userRoles[user.id] || [];
+      return userRoleList.includes(filterValue as UserRole);
+    });
+    
+    setFilteredUsers(filtered);
+  };
+
+  const handleFilterChange = (newFilter: UserRole | 'all') => {
+    setFilter(newFilter);
+    applyFilter(users, newFilter);
   };
 
   const handleRoleToggle = async (userId: string, role: UserRole, hasRole: boolean) => {
@@ -138,9 +161,12 @@ export const useRoleManager = () => {
 
   return {
     users,
+    filteredUsers,
     loading,
     userRoles,
+    filter,
     handleRoleToggle,
+    handleFilterChange,
     fetchUsers
   };
 };

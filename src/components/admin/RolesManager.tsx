@@ -4,9 +4,17 @@ import { useRoleManager } from "./roles/useRoleManager";
 import UsersTable from "./roles/UsersTable";
 import LoadingState from "./roles/LoadingState";
 import EmptyState from "./roles/EmptyState";
+import UserRoleFilter from "./roles/UserRoleFilter";
 
 const RolesManager = () => {
-  const { users, loading, userRoles, handleRoleToggle } = useRoleManager();
+  const { 
+    filteredUsers, 
+    loading, 
+    userRoles, 
+    handleRoleToggle, 
+    filter, 
+    handleFilterChange 
+  } = useRoleManager();
 
   return (
     <Card>
@@ -19,14 +27,20 @@ const RolesManager = () => {
       <CardContent>
         {loading ? (
           <LoadingState />
-        ) : users.length > 0 ? (
-          <UsersTable 
-            users={users} 
-            userRoles={userRoles} 
-            onRoleToggle={handleRoleToggle} 
-          />
         ) : (
-          <EmptyState />
+          <>
+            <UserRoleFilter filter={filter} onFilterChange={handleFilterChange} />
+            
+            {filteredUsers.length > 0 ? (
+              <UsersTable 
+                users={filteredUsers} 
+                userRoles={userRoles} 
+                onRoleToggle={handleRoleToggle} 
+              />
+            ) : (
+              <EmptyState />
+            )}
+          </>
         )}
       </CardContent>
     </Card>
