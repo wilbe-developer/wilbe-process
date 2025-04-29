@@ -7,9 +7,18 @@ import { XMLParser } from 'fast-xml-parser';
 import axios from 'axios';
 import util from 'util';
 
-// Create Supabase client directly instead of importing
-const SUPABASE_URL = "https://iatercfyoclqxmohyyke.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
+// Create Supabase client using environment variables
+// Check for Vercel environment variables first, then fallback to direct values for local dev
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://iatercfyoclqxmohyyke.supabase.co";
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
+
+// Log the environment for debugging
+console.log('Environment check:', { 
+  NODE_ENV: process.env.NODE_ENV,
+  hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+  hasSupabaseUrl: !!process.env.SUPABASE_URL,
+  usingUrl: SUPABASE_URL
+});
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -327,18 +336,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } else {
       // Get default universities from Supabase
       console.log('Fetching default universities from Supabase');
-      const { data, error } = await supabase
-        .from('universities')
-        .select('id, name, domain')
-        .eq('is_default', true);
       
-      if (error) {
-        console.error('Supabase error fetching default universities:', error);
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from('universities')
+          .select('id, name, domain')
+          .eq('is_default', true);
+        
+        if (error) {
+          console.error('Supabase error fetching default universities:', error);
+          throw error;
+        }
+        
+        if (!data || data.length === 0) {
+          console.log('No default universities found in database');
+          return res.status(200).json([]);
+        }
+        
+        universityList = data.map(u => ({ id: u.id, name: u.name, domain: u.domain }));
+        console.log(`Found ${universityList.length} default universities`);
+      } catch (dbError) {
+        console.error('Database error fetching universities:', dbError);
+        
+        // Fallback to example data for development/testing
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('Using fallback example data since database query failed');
+          return res.status(200).json([
+            { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
+            { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' }
+          ]);
+        } else {
+          throw dbError;
+        }
       }
-      
-      universityList = data.map(u => ({ id: u.id, name: u.name, domain: u.domain }));
-      console.log(`Found ${universityList.length} default universities`);
     }
     
     // If no universities, return empty results

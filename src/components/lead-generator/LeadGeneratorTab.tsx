@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ export const LeadGeneratorTab = () => {
 
   const fetchUniversities = async () => {
     try {
+      setLoading(true);
       const data = await getUniversities();
       setUniversities(data);
       
@@ -52,6 +52,16 @@ export const LeadGeneratorTab = () => {
         .filter(u => u.is_default && !u.domain)
         .length > 0;
       
+      const defaultsCount = data.filter(u => u.is_default).length;
+      
+      if (defaultsCount === 0) {
+        toast({
+          title: "No Default Universities",
+          description: "No default universities found. Please add some in the University Management tab.",
+          variant: "destructive",
+        });
+      }
+      
       setHasMissingDomains(defaultsWithoutDomains);
     } catch (error) {
       toast({
@@ -59,6 +69,8 @@ export const LeadGeneratorTab = () => {
         description: "Failed to load universities",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -83,6 +95,22 @@ export const LeadGeneratorTab = () => {
       const uniList = useCustomUniversities 
         ? universities.filter(u => selectedUniversities.includes(u.id))
         : universities.filter(u => u.is_default);
+      
+      if (uniList.length === 0) {
+        setError(useCustomUniversities 
+          ? "Please select at least one university" 
+          : "No default universities found. Please add some in the University Management tab.");
+        setLoading(false);
+        
+        toast({
+          title: "No Universities Selected",
+          description: useCustomUniversities 
+            ? "Please select at least one university" 
+            : "No default universities found. Please add some in the University Management tab.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Count universities with missing domains
       const missingDomains = uniList.filter(u => !u.domain).length;
@@ -92,7 +120,6 @@ export const LeadGeneratorTab = () => {
         toast({
           title: "Warning",
           description: `${missingDomains} universities are missing domain information and will be skipped.`,
-          // Fix the variant type to be compatible with toast
           variant: "destructive",
         });
       }
@@ -113,7 +140,6 @@ export const LeadGeneratorTab = () => {
         toast({
           title: "No results",
           description: "No leads found. Make sure universities have domain information.",
-          // Fix the variant type to be compatible with toast
           variant: "destructive",
         });
       } else {
@@ -166,6 +192,16 @@ export const LeadGeneratorTab = () => {
             />
             <label htmlFor="custom-universities">Use custom universities</label>
           </div>
+          
+          {!useCustomUniversities && defaultUniversities.length === 0 && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>No Default Universities</AlertTitle>
+              <AlertDescription>
+                Please go to the University Management tab and set some universities as default.
+              </AlertDescription>
+            </Alert>
+          )}
           
           {hasMissingDomains && (
             <Alert variant="default" className="mt-2 bg-amber-50 border-amber-200">
