@@ -5,12 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { UserProfile } from "@/types";
+import { UserProfile, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-// Define a type for the valid role values
-type UserRole = "user" | "admin" | "member";
 
 const RolesManager = () => {
   const { toast } = useToast();
@@ -210,7 +207,7 @@ const RolesManager = () => {
                               <Button 
                                 size="sm" 
                                 variant={isAdmin ? "destructive" : "outline"}
-                                onClick={() => handleRoleToggle(user.id, "admin" as UserRole, isAdmin)}
+                                onClick={() => handleRoleToggle(user.id, "admin", isAdmin)}
                               >
                                 {isAdmin ? "Remove Admin" : "Make Admin"}
                               </Button>
@@ -229,15 +226,15 @@ const RolesManager = () => {
                               <Button 
                                 size="sm" 
                                 variant={isMember ? "destructive" : "outline"}
-                                onClick={() => handleRoleToggle(user.id, "user" as UserRole, isMember)}
+                                onClick={() => handleRoleToggle(user.id, "user", isMember)}
                               >
-                                {isMember ? "Revoke Member" : "Make Member"}
+                                {isMember ? "Revoke Member" : "Approve Member"}
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
                               {isMember 
-                                ? "Revoke access to member-only content" 
-                                : "Grant access to member-only content"}
+                                ? "Revoke access to members-only content" 
+                                : "Grant access to members-only content"}
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
