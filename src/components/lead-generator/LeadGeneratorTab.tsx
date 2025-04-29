@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -42,7 +41,7 @@ export const LeadGeneratorTab = () => {
   const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
   const [universityCount, setUniversityCount] = useState(0);
   const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
-  resultsPerPage = 5;
+  const resultsPerPage = 5;
   const { toast } = useToast();
 
   // Check authentication status
