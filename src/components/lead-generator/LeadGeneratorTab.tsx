@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Info, Database, AlertCircle } from "lucide-react";
+import { AlertTriangle, Info, Database, AlertCircle, RefreshCw } from "lucide-react";
 import { findEmails, getUniversities } from "@/services/universityService";
 import { MultiSelect } from "./MultiSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -33,6 +33,7 @@ export const LeadGeneratorTab = () => {
   const [lastSearchTime, setLastSearchTime] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMissingDomains, setHasMissingDomains] = useState(false);
@@ -50,6 +51,7 @@ export const LeadGeneratorTab = () => {
     try {
       setLoading(true);
       setConnectionError(null);
+      setError(null);
       const data = await getUniversities();
       setUniversities(data);
       setUniversityCount(data.length);
@@ -131,9 +133,12 @@ export const LeadGeneratorTab = () => {
 
   const handleRunSearch = async () => {
     try {
+      // Reset state for new search
       setError(null);
+      setApiError(null);
       setLoading(true);
       setPage(1);
+      setSearchResults([]);
       
       // Check which universities will be used
       const uniList = useCustomUniversities 
@@ -184,22 +189,40 @@ export const LeadGeneratorTab = () => {
       
       console.log("Running search with filters:", filters);
       try {
-        const results = await findEmails(filters);
-        setSearchResults(results);
+        const result = await findEmails(filters);
+        
+        if (result.error) {
+          setApiError(result.error);
+          if (result.data?.length === 0) {
+            toast({
+              title: "API Error",
+              description: result.error,
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Warning",
+              description: result.error,
+              variant: "destructive",
+            });
+          }
+        }
+        
+        setSearchResults(result.data || []);
         
         const now = new Date();
         setLastSearchTime(now.toLocaleString());
         
-        if (results.length === 0) {
+        if (result.data?.length === 0 && !result.error) {
           toast({
             title: "No results",
             description: "No leads found. Make sure universities have domain information.",
             variant: "destructive",
           });
-        } else {
+        } else if (result.data?.length > 0) {
           toast({
             title: "Search Complete",
-            description: `Found ${results.length} potential leads`,
+            description: `Found ${result.data.length} potential leads`,
           });
         }
       } catch (searchError: any) {
@@ -258,7 +281,8 @@ export const LeadGeneratorTab = () => {
           <AlertDescription>
             {connectionError}
             <div className="mt-2">
-              <Button size="sm" variant="outline" onClick={refreshData}>
+              <Button size="sm" variant="outline" onClick={refreshData} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
                 Retry Connection
               </Button>
             </div>
@@ -358,7 +382,8 @@ export const LeadGeneratorTab = () => {
               <span>Default Universities: {defaultUniversityCount}</span>
             </div>
             <div className="mt-2">
-              <Button size="sm" variant="outline" onClick={refreshData} className="w-full text-xs">
+              <Button size="sm" variant="outline" onClick={refreshData} className="w-full text-xs gap-1">
+                <RefreshCw className="h-3 w-3" />
                 Refresh Data
               </Button>
             </div>
@@ -373,6 +398,16 @@ export const LeadGeneratorTab = () => {
                 Error
               </h4>
               <p className="mt-1">{error}</p>
+            </div>
+          )}
+
+          {apiError && (
+            <div className="p-4 border border-amber-200 bg-amber-50 rounded-md text-amber-800">
+              <h4 className="font-bold flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                API Warning
+              </h4>
+              <p className="mt-1">{apiError}</p>
             </div>
           )}
         
@@ -401,7 +436,7 @@ export const LeadGeneratorTab = () => {
                         <div className="flex justify-center">
                           <div className="animate-spin h-6 w-6 border-4 border-primary border-t-transparent rounded-full"></div>
                         </div>
-                      ) : error ? (
+                      ) : error || apiError ? (
                         <span>Search failed. Please try again.</span>
                       ) : lastSearchTime ? (
                         <span>No results found for your search criteria. Make sure universities have domain information set.</span>

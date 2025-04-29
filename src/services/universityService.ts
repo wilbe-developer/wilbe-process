@@ -63,11 +63,14 @@ export async function findEmails(filters: {
     // For local development without API, return example data
     if (process.env.NODE_ENV === 'development' && !process.env.VERCEL && window.location.hostname === 'localhost') {
       console.log("Using example data for local development");
-      return [
-        { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
-        { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' },
-        { name: 'Cara Li', institution: 'University of Oxford', email: 'cara.li@ox.ac.uk', verified: 'Yes' },
-      ];
+      return {
+        data: [
+          { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
+          { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' },
+          { name: 'Cara Li', institution: 'University of Oxford', email: 'cara.li@ox.ac.uk', verified: 'Yes' },
+        ],
+        error: null
+      };
     }
 
     // Construct query parameters
@@ -84,26 +87,36 @@ export async function findEmails(filters: {
     console.log('API query params:', Object.fromEntries(queryParams.entries()));
 
     const response = await fetch(apiUrl);
+    const data = await response.json();
     
     if (!response.ok) {
-      let errorMessage = `Error fetching email leads: ${response.status} ${response.statusText}`;
-      try {
-        const errorData = await response.json();
-        console.error("API error response:", errorData);
-        if (errorData.error) errorMessage = errorData.error;
-        if (errorData.details) errorMessage += `: ${errorData.details}`;
-      } catch (parseError) {
-        console.error("Could not parse error response:", parseError);
-      }
-      throw new Error(errorMessage);
+      console.error("API error response:", data);
+      return {
+        data: [],
+        error: data.error || `Error: ${response.status} ${response.statusText}`
+      };
     }
     
-    const data = await response.json();
+    // Check if the API returned an error with data
+    if (data.error) {
+      console.log(`API returned an error with ${data.data?.length || 0} leads`);
+      return {
+        data: data.data || [],
+        error: data.error
+      };
+    }
+    
     console.log(`API returned ${data.length} leads`);
-    return data;
-  } catch (error) {
+    return {
+      data: data,
+      error: null
+    };
+  } catch (error: any) {
     console.error("Error finding emails:", error);
-    throw error;
+    return {
+      data: [],
+      error: error.message || "An unexpected error occurred"
+    };
   }
 }
 

@@ -7,23 +7,33 @@ import { XMLParser } from 'fast-xml-parser';
 import axios from 'axios';
 import util from 'util';
 
-// Create Supabase client - Prioritize actual environment variables for server context
-// Do NOT use VITE_ prefixed variables in server code as they're for browser only
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://iatercfyoclqxmohyyke.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
+// Create Supabase client - Use the Vercel environment variables without fallbacks
+// Note: Vercel uses VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as shown in the environment variables
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
-// Log the environment for debugging, but avoid exposing full key values
+// Log the environment variables for debugging (without exposing full values)
 console.log('Environment variables check:', { 
   NODE_ENV: process.env.NODE_ENV,
-  SUPABASE_URL_SET: !!process.env.SUPABASE_URL,
-  SUPABASE_ANON_KEY_SET: !!process.env.SUPABASE_ANON_KEY,
-  USING_URL: SUPABASE_URL,
+  SUPABASE_URL_SET: !!SUPABASE_URL,
+  SUPABASE_ANON_KEY_SET: !!SUPABASE_ANON_KEY,
+  USING_URL_PREFIX: SUPABASE_URL ? SUPABASE_URL.substring(0, 20) + '...' : 'URL is missing',
   USING_KEY_PREFIX: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'Key is missing'
 });
+
+// Check if environment variables are properly set
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('Missing required environment variables for Supabase connection');
+  console.error('Available env vars:', Object.keys(process.env).filter(key => !key.includes('SECRET') && !key.includes('KEY')).join(', '));
+}
 
 // Create Supabase client with improved error handling
 let supabase;
 try {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase connection credentials are missing. Check environment variables.');
+  }
+  
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   console.log('Supabase client created successfully');
 } catch (error) {
@@ -349,7 +359,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         // First, verify we can connect to Supabase by doing a simple query
         if (!supabase) {
-          throw new Error('Supabase client is not initialized');
+          throw new Error('Supabase client is not initialized. Check environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
         }
 
         // Test if universities table exists with a simple count query
@@ -389,7 +399,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             console.log(`Universities with is_default=true: ${allUniversities.filter(u => u.is_default).length}`);
           }
           
-          return res.status(200).json([]);
+          // Return empty results instead of throwing an error
+          return res.status(200).json({
+            error: 'No default universities found. Please add and set some universities as default in the University Management tab.',
+            data: []
+          });
         }
         
         universityList = data.map(u => ({ id: u.id, name: u.name, domain: u.domain }));
@@ -402,27 +416,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.error('This appears to be a connection issue. Check Supabase credentials and network.');
         }
         
-        // Provide fallback data for development/testing
-        if (process.env.NODE_ENV !== 'production') {
-          console.log('Using fallback example data since database query failed');
-          return res.status(200).json([
-            { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
-            { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' }
-          ]);
-        } else {
-          await logMetric({
-            eventType: 'api_error',
-            errorMessage: dbError.message || 'Unknown database error',
-          });
-          throw dbError;
-        }
+        // Provide a clear error to the frontend
+        return res.status(500).json({
+          error: 'Failed to connect to the database. Please check your Supabase connection details.',
+          details: dbError.message,
+          suggestion: 'Verify that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables are correctly set in Vercel.'
+        });
       }
     }
     
-    // If no universities, return empty results
+    // If no universities, return empty results with a clear message
     if (!universityList.length) {
       console.log('No universities to search, returning empty results');
-      return res.status(200).json([]);
+      return res.status(200).json({
+        error: 'No universities found to search. Please add universities and set some as default.',
+        data: []
+      });
     }
     
     // Check if any universities don't have domains
