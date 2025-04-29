@@ -8,11 +8,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { UserProfile } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 
+// Define a type for the valid role values
+type UserRole = "user" | "admin" | "member";
+
 const RolesManager = () => {
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
+  const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
 
   useEffect(() => {
     fetchUsers();
@@ -54,14 +57,16 @@ const RolesManager = () => {
         if (rolesError) throw rolesError;
         
         // Create a map of user_id -> roles array
-        const roleMap: Record<string, string[]> = {};
+        const roleMap: Record<string, UserRole[]> = {};
         
         if (rolesData) {
           rolesData.forEach(row => {
             if (!roleMap[row.user_id]) {
               roleMap[row.user_id] = [];
             }
-            roleMap[row.user_id].push(row.role);
+            // Ensure the role is one of the valid enum values
+            const role = row.role as UserRole;
+            roleMap[row.user_id].push(role);
           });
         }
         
@@ -71,8 +76,8 @@ const RolesManager = () => {
         // Update user profiles with role information
         const enhancedProfiles = userProfiles.map(profile => ({
           ...profile,
-          approved: roleMap[profile.id]?.includes('user') || false,
-          isAdmin: roleMap[profile.id]?.includes('admin') || false
+          approved: roleMap[profile.id]?.includes("user") || false,
+          isAdmin: roleMap[profile.id]?.includes("admin") || false
         }));
         
         setUsers(enhancedProfiles);
@@ -89,7 +94,7 @@ const RolesManager = () => {
     }
   };
 
-  const handleRoleToggle = async (userId: string, role: string, hasRole: boolean) => {
+  const handleRoleToggle = async (userId: string, role: UserRole, hasRole: boolean) => {
     try {
       if (hasRole) {
         // Remove role
@@ -161,8 +166,8 @@ const RolesManager = () => {
             <TableBody>
               {users.map((user) => {
                 const userRolesList = userRoles[user.id] || [];
-                const isAdmin = userRolesList.includes('admin');
-                const isMember = userRolesList.includes('user');
+                const isAdmin = userRolesList.includes("admin");
+                const isMember = userRolesList.includes("user");
                 
                 return (
                   <TableRow key={user.id}>
@@ -196,14 +201,14 @@ const RolesManager = () => {
                         <Button 
                           size="sm" 
                           variant={isAdmin ? "destructive" : "outline"}
-                          onClick={() => handleRoleToggle(user.id, 'admin', isAdmin)}
+                          onClick={() => handleRoleToggle(user.id, "admin" as UserRole, isAdmin)}
                         >
                           {isAdmin ? "Remove Admin" : "Make Admin"}
                         </Button>
                         <Button 
                           size="sm" 
                           variant={isMember ? "destructive" : "outline"}
-                          onClick={() => handleRoleToggle(user.id, 'user', isMember)}
+                          onClick={() => handleRoleToggle(user.id, "user" as UserRole, isMember)}
                         >
                           {isMember ? "Remove Member" : "Make Member"}
                         </Button>
