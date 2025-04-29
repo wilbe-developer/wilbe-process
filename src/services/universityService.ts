@@ -86,9 +86,16 @@ export async function findEmails(filters: {
     const response = await fetch(apiUrl);
     
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error("API error response:", errorData);
-      throw new Error(errorData.error || `Error fetching email leads: ${response.status} ${response.statusText}`);
+      let errorMessage = `Error fetching email leads: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        console.error("API error response:", errorData);
+        if (errorData.error) errorMessage = errorData.error;
+        if (errorData.details) errorMessage += `: ${errorData.details}`;
+      } catch (parseError) {
+        console.error("Could not parse error response:", parseError);
+      }
+      throw new Error(errorMessage);
     }
     
     const data = await response.json();

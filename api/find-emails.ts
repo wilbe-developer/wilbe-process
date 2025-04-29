@@ -7,21 +7,29 @@ import { XMLParser } from 'fast-xml-parser';
 import axios from 'axios';
 import util from 'util';
 
-// Create Supabase client using environment variables
-// Check for Vercel environment variables first, then fallback to direct values for local dev
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://iatercfyoclqxmohyyke.supabase.co";
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
+// Create Supabase client - Prioritize actual environment variables for server context
+// Do NOT use VITE_ prefixed variables in server code as they're for browser only
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://iatercfyoclqxmohyyke.supabase.co";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
 
-// Log the environment for debugging
-console.log('Environment check:', { 
+// Log the environment for debugging, but avoid exposing full key values
+console.log('Environment variables check:', { 
   NODE_ENV: process.env.NODE_ENV,
-  hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
-  hasSupabaseUrl: !!process.env.SUPABASE_URL,
-  usingUrl: SUPABASE_URL,
-  usingKey: SUPABASE_ANON_KEY ? 'Key is set (not showing for security)' : 'Key is missing'
+  SUPABASE_URL_SET: !!process.env.SUPABASE_URL,
+  SUPABASE_ANON_KEY_SET: !!process.env.SUPABASE_ANON_KEY,
+  USING_URL: SUPABASE_URL,
+  USING_KEY_PREFIX: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'Key is missing'
 });
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create Supabase client with improved error handling
+let supabase;
+try {
+  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  console.log('Supabase client created successfully');
+} catch (error) {
+  console.error('Failed to create Supabase client:', error);
+  // Continue execution - we'll handle the error when we try to use the client
+}
 
 // Convert DNS resolve to Promise-based
 const dnsResolveMx = util.promisify(dns.resolveMx);
@@ -319,14 +327,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const useCustomUniversities = useCustom === 'true';
     
     console.log(`Using custom universities: ${useCustomUniversities}`);
-    if (useCustomUniversities) {
-      console.log('Custom universities:', universities);
+    if (useCustomUniversities && universities) {
+      console.log('Custom universities parameter provided');
     }
     
     let universityList = [];
     
     // Get the list of universities to search
-    if (useCustomUniversities) {
+    if (useCustomUniversities && universities) {
       try {
         universityList = JSON.parse(universities as string);
         console.log(`Parsed ${universityList.length} custom universities`);
@@ -339,33 +347,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Fetching default universities from Supabase');
       
       try {
-        // First, let's make sure the Supabase client is working by checking if the universities table exists
-        const { data: tableTest, error: tableError } = await supabase
+        // First, verify we can connect to Supabase by doing a simple query
+        if (!supabase) {
+          throw new Error('Supabase client is not initialized');
+        }
+
+        // Test if universities table exists with a simple count query
+        console.log('Testing Supabase connection with a simple query...');
+        const { count, error: countError } = await supabase
           .from('universities')
-          .select('count(*)', { count: 'exact', head: true });
-        
-        if (tableError) {
-          console.error('Error testing Supabase connection:', tableError);
-          console.log('Full error details:', JSON.stringify(tableError));
-          throw new Error(`Supabase connection test failed: ${tableError.message}`);
+          .select('*', { count: 'exact', head: true });
+          
+        if (countError) {
+          console.error('Error testing Supabase connection:', countError);
+          throw new Error(`Supabase connection failed: ${countError.message || 'Unknown error'}`);
         }
         
-        console.log('Supabase connection test successful. Table exists.');
+        console.log(`Table exists with approximately ${count} rows`);
         
-        // Now get all universities to check if any exist
-        const { data: allUniversities, error: allError } = await supabase
-          .from('universities')
-          .select('id, name, is_default')
-          .order('name');
-        
-        if (allError) {
-          console.error('Error checking all universities:', allError);
-          throw allError;
-        }
-        
-        console.log(`Found ${allUniversities?.length || 0} total universities in database`);
-        
-        // Now get the default universities
+        // Get the default universities
         const { data, error } = await supabase
           .from('universities')
           .select('id, name, domain')
@@ -373,17 +373,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         
         if (error) {
           console.error('Supabase error fetching default universities:', error);
-          console.log('Full error details:', JSON.stringify(error));
           throw error;
         }
         
         if (!data || data.length === 0) {
           console.log('No default universities found in database');
           
-          // Log how many universities exist and how many have is_default set to true
-          console.log(`Total universities: ${allUniversities?.length || 0}`);
-          const defaultCount = allUniversities?.filter(u => u.is_default)?.length || 0;
-          console.log(`Universities with is_default=true: ${defaultCount}`);
+          // Additional diagnostics: check total count of universities
+          const { data: allUniversities, error: allError } = await supabase
+            .from('universities')
+            .select('id, name, is_default');
+          
+          if (!allError && allUniversities) {
+            console.log(`Total universities in database: ${allUniversities.length}`);
+            console.log(`Universities with is_default=true: ${allUniversities.filter(u => u.is_default).length}`);
+          }
           
           return res.status(200).json([]);
         }
@@ -393,7 +397,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (dbError) {
         console.error('Database error fetching universities:', dbError);
         
-        // Fallback to example data for development/testing
+        // Add specific diagnostics for connection issues
+        if (dbError.message && dbError.message.includes('connection')) {
+          console.error('This appears to be a connection issue. Check Supabase credentials and network.');
+        }
+        
+        // Provide fallback data for development/testing
         if (process.env.NODE_ENV !== 'production') {
           console.log('Using fallback example data since database query failed');
           return res.status(200).json([
@@ -401,6 +410,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' }
           ]);
         } else {
+          await logMetric({
+            eventType: 'api_error',
+            errorMessage: dbError.message || 'Unknown database error',
+          });
           throw dbError;
         }
       }
@@ -607,9 +620,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     await logMetric({
       eventType: 'api_error',
-      errorMessage: error.message,
+      errorMessage: error.message || 'Unknown error',
     });
     
-    return res.status(500).json({ error: 'Internal server error', details: error.message });
+    return res.status(500).json({ 
+      error: 'Internal server error', 
+      details: error.message,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined 
+    });
   }
 }

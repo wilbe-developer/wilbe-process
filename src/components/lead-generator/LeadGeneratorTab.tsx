@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Info, Database } from "lucide-react";
+import { AlertTriangle, Info, Database, AlertCircle } from "lucide-react";
 import { findEmails, getUniversities } from "@/services/universityService";
 import { MultiSelect } from "./MultiSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
@@ -33,9 +33,12 @@ export const LeadGeneratorTab = () => {
   const [lastSearchTime, setLastSearchTime] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMissingDomains, setHasMissingDomains] = useState(false);
   const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
+  const [universityCount, setUniversityCount] = useState(0);
+  const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
   const resultsPerPage = 5;
   const { toast } = useToast();
 
@@ -46,29 +49,34 @@ export const LeadGeneratorTab = () => {
   const fetchUniversities = async () => {
     try {
       setLoading(true);
+      setConnectionError(null);
       const data = await getUniversities();
       setUniversities(data);
+      setUniversityCount(data.length);
       
       // Check if default universities are missing domains
-      const defaultsWithoutDomains = data
-        .filter(u => u.is_default && !u.domain)
+      const defaultUnis = data.filter(u => u.is_default);
+      setDefaultUniversityCount(defaultUnis.length);
+      
+      const defaultsWithoutDomains = defaultUnis
+        .filter(u => !u.domain)
         .length > 0;
       
-      const defaultsCount = data.filter(u => u.is_default).length;
+      setHasMissingDomains(defaultsWithoutDomains);
       
-      if (defaultsCount === 0) {
+      if (defaultUnis.length === 0) {
         toast({
           title: "No Default Universities",
           description: "No default universities found. Please add some in the University Management tab.",
           variant: "destructive",
         });
       }
-      
-      setHasMissingDomains(defaultsWithoutDomains);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error fetching universities:", error);
+      setConnectionError("Failed to connect to the database. Please check your connection and try again.");
       toast({
-        title: "Error",
-        description: "Failed to load universities",
+        title: "Connection Error",
+        description: error.message || "Failed to load universities",
         variant: "destructive",
       });
     } finally {
@@ -175,22 +183,32 @@ export const LeadGeneratorTab = () => {
       };
       
       console.log("Running search with filters:", filters);
-      const results = await findEmails(filters);
-      setSearchResults(results);
-      
-      const now = new Date();
-      setLastSearchTime(now.toLocaleString());
-      
-      if (results.length === 0) {
+      try {
+        const results = await findEmails(filters);
+        setSearchResults(results);
+        
+        const now = new Date();
+        setLastSearchTime(now.toLocaleString());
+        
+        if (results.length === 0) {
+          toast({
+            title: "No results",
+            description: "No leads found. Make sure universities have domain information.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Search Complete",
+            description: `Found ${results.length} potential leads`,
+          });
+        }
+      } catch (searchError: any) {
+        console.error("Search error:", searchError);
+        setError(searchError.message || "An error occurred during the search");
         toast({
-          title: "No results",
-          description: "No leads found. Make sure universities have domain information.",
+          title: "API Error",
+          description: searchError.message || "Failed to perform search. Check the server logs for details.",
           variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Search Complete",
-          description: `Found ${results.length} potential leads`,
         });
       }
     } catch (error: any) {
@@ -212,6 +230,14 @@ export const LeadGeneratorTab = () => {
     });
   };
 
+  const refreshData = async () => {
+    await fetchUniversities();
+    toast({
+      title: "Data Refreshed",
+      description: "University data has been refreshed from the database.",
+    });
+  };
+
   const defaultUniversities = universities.filter(u => u.is_default);
   const defaultsWithoutDomains = defaultUniversities.filter(u => !u.domain);
   
@@ -224,6 +250,21 @@ export const LeadGeneratorTab = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Lead Generator</h2>
+      
+      {connectionError && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Connection Error</AlertTitle>
+          <AlertDescription>
+            {connectionError}
+            <div className="mt-2">
+              <Button size="sm" variant="outline" onClick={refreshData}>
+                Retry Connection
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-1 space-y-4 border rounded-md p-4">
@@ -310,11 +351,16 @@ export const LeadGeneratorTab = () => {
             <h4 className="text-sm font-medium mb-2">Database Status</h4>
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Database className="h-3 w-3" />
-              <span>Total Universities: {universities.length}</span>
+              <span>Total Universities: {universityCount}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
               <Database className="h-3 w-3" />
-              <span>Default Universities: {defaultUniversities.length}</span>
+              <span>Default Universities: {defaultUniversityCount}</span>
+            </div>
+            <div className="mt-2">
+              <Button size="sm" variant="outline" onClick={refreshData} className="w-full text-xs">
+                Refresh Data
+              </Button>
             </div>
           </div>
         </div>
