@@ -26,41 +26,56 @@ export const useAuthActions = ({
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       console.log("Fetching user profile for:", userId);
-      const { data, error } = await supabase
+      
+      // Get the profile data
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
         
-      if (error) {
-        console.error('Error fetching user profile:', error);
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
         setLoading(false);
         return;
       }
       
-      if (data) {
-        console.log("User profile found:", data);
+      // Check if user has admin role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin');
+      
+      if (roleError) {
+        console.error('Error checking admin role:', roleError);
+      }
+      
+      const isAdmin = roleData && roleData.length > 0;
+      
+      if (profileData) {
+        console.log("User profile found:", profileData, "Is admin:", isAdmin);
         // Transform database fields to match our UserProfile interface
         const userProfile: UserProfile = {
-          id: data.id,
-          firstName: data.first_name || '',
-          lastName: data.last_name || '',
-          email: data.email || '',
-          linkedIn: data.linked_in,
-          institution: data.institution,
-          location: data.location,
-          role: data.role,
-          bio: data.bio,
-          about: data.about,
-          approved: data.approved,
-          createdAt: new Date(data.created_at || new Date()),
-          avatar: data.avatar,
-          isAdmin: data.role === 'admin',
-          twitterHandle: data.twitter_handle,
-          expertise: data.expertise,
-          activityStatus: data.activity_status,
-          lastLoginDate: data.last_login_date ? new Date(data.last_login_date) : undefined,
-          status: data.status
+          id: profileData.id,
+          firstName: profileData.first_name || '',
+          lastName: profileData.last_name || '',
+          email: profileData.email || '',
+          linkedIn: profileData.linked_in,
+          institution: profileData.institution,
+          location: profileData.location,
+          role: profileData.role,
+          bio: profileData.bio,
+          about: profileData.about,
+          approved: profileData.approved,
+          createdAt: new Date(profileData.created_at || new Date()),
+          avatar: profileData.avatar,
+          isAdmin: isAdmin || profileData.role === 'admin', // Support both new and legacy role systems
+          twitterHandle: profileData.twitter_handle,
+          expertise: profileData.expertise,
+          activityStatus: profileData.activity_status,
+          lastLoginDate: profileData.last_login_date ? new Date(profileData.last_login_date) : undefined,
+          status: profileData.status
         };
         setUser(userProfile);
       }

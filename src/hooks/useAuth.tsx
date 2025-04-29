@@ -13,6 +13,7 @@ interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isApproved: boolean;
   sendMagicLink: (email: string) => Promise<void>;
   register: (userData: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
@@ -97,6 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchUserProfile, setLoading, setSession, setUser]);
 
   const isAdmin = user?.isAdmin || false;
+  const isApproved = user?.approved || false;
   const isAuthenticated = !!user;
 
   return (
@@ -105,6 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated,
         isAdmin,
+        isApproved,
         sendMagicLink,
         register,
         logout,

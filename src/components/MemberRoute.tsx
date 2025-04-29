@@ -3,17 +3,11 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
 
-interface ProtectedRouteProps {
-  requireAdmin?: boolean;
-}
-
-const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+const MemberRoute = () => {
+  const { isAuthenticated, isApproved, loading } = useAuth();
   const location = useLocation();
-  
-  const isAdminRoute = location.pathname.startsWith(PATHS.ADMIN);
 
-  console.log("ProtectedRoute - Auth state:", { isAuthenticated, isAdmin, loading, isAdminRoute });
+  console.log("MemberRoute - Auth state:", { isAuthenticated, isApproved, loading });
 
   // Show loading state
   if (loading) {
@@ -33,15 +27,15 @@ const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
     return <Navigate to={PATHS.LOGIN} state={{ from: location }} replace />;
   }
 
-  // For admin routes, check if user has admin privileges
-  if (isAdminRoute && !isAdmin) {
-    console.log("User doesn't have admin privileges, redirecting to home");
-    return <Navigate to={PATHS.HOME} replace />;
+  // Redirect to pending approval page if not approved
+  if (!isApproved) {
+    console.log("User not approved, redirecting to pending approval");
+    return <Navigate to={PATHS.PENDING} state={{ from: location }} replace />;
   }
 
   // Render the protected outlet
-  console.log("User authenticated, rendering protected content");
+  console.log("User authenticated and approved, rendering protected content");
   return <Outlet />;
 };
 
-export default ProtectedRoute;
+export default MemberRoute;
