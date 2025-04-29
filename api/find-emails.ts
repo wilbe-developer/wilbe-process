@@ -7,18 +7,18 @@ import { XMLParser } from 'fast-xml-parser';
 import axios from 'axios';
 import util from 'util';
 
-// Create Supabase client - Use the Vercel environment variables without fallbacks
-// Note: Vercel uses VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as shown in the environment variables
+// Create Supabase client with Vercel environment variables
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // This bypasses RLS
 
-// Log the environment variables for debugging (without exposing full values)
+// Log environment variables check (without exposing full values)
 console.log('Environment variables check:', { 
   NODE_ENV: process.env.NODE_ENV,
   SUPABASE_URL_SET: !!SUPABASE_URL,
   SUPABASE_ANON_KEY_SET: !!SUPABASE_ANON_KEY,
-  USING_URL_PREFIX: SUPABASE_URL ? SUPABASE_URL.substring(0, 20) + '...' : 'URL is missing',
-  USING_KEY_PREFIX: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.substring(0, 10) + '...' : 'Key is missing'
+  SERVICE_ROLE_KEY_SET: !!SERVICE_ROLE_KEY,
+  USING_URL_PREFIX: SUPABASE_URL ? SUPABASE_URL.substring(0, 20) + '...' : 'URL is missing'
 });
 
 // Check if environment variables are properly set
@@ -28,14 +28,24 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 // Create Supabase client with improved error handling
+// Use service role key to bypass RLS when available, otherwise use anon key
 let supabase;
 try {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Supabase connection credentials are missing. Check environment variables.');
+  if (!SUPABASE_URL) {
+    throw new Error('Supabase URL is missing. Check environment variables.');
   }
   
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('Supabase client created successfully');
+  // Create client with service role key if available (bypasses RLS), otherwise use anon key
+  const key = SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error('Neither service role key nor anon key is available.');
+  }
+  
+  supabase = createClient(SUPABASE_URL, key);
+  console.log('Supabase client created successfully', {
+    usingServiceRole: !!SERVICE_ROLE_KEY,
+    bypassingRLS: !!SERVICE_ROLE_KEY
+  });
 } catch (error) {
   console.error('Failed to create Supabase client:', error);
   // Continue execution - we'll handle the error when we try to use the client
@@ -359,7 +369,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         // First, verify we can connect to Supabase by doing a simple query
         if (!supabase) {
-          throw new Error('Supabase client is not initialized. Check environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+          throw new Error('Supabase client is not initialized. Check environment variables.');
         }
 
         // Test if universities table exists with a simple count query
@@ -374,6 +384,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         
         console.log(`Table exists with approximately ${count} rows`);
+        
+        // Log the authentication context to help debug RLS issues
+        console.log('Auth context:', {
+          usingServiceRole: !!SERVICE_ROLE_KEY,
+          bypassingRLS: !!SERVICE_ROLE_KEY
+        });
         
         // Get the default universities
         const { data, error } = await supabase
@@ -397,6 +413,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (!allError && allUniversities) {
             console.log(`Total universities in database: ${allUniversities.length}`);
             console.log(`Universities with is_default=true: ${allUniversities.filter(u => u.is_default).length}`);
+            
+            // Log the first few universities to help with debugging
+            if (allUniversities.length > 0) {
+              console.log('Sample universities:', allUniversities.slice(0, 3));
+            }
           }
           
           // Return empty results instead of throwing an error

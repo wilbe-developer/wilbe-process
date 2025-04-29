@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Info, Database, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, Info, Database, AlertCircle, RefreshCw, ShieldAlert } from "lucide-react";
 import { findEmails, getUniversities } from "@/services/universityService";
 import { MultiSelect } from "./MultiSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 interface University {
   id: string;
@@ -31,17 +32,37 @@ export const LeadGeneratorTab = () => {
   const [selectedUniversities, setSelectedUniversities] = useState<string[]>([]);
   const [searchResults, setSearchResults] = useState<LeadResult[]>([]);
   const [lastSearchTime, setLastSearchTime] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMissingDomains, setHasMissingDomains] = useState(false);
   const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
   const [universityCount, setUniversityCount] = useState(0);
   const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
-  const resultsPerPage = 5;
+  resultsPerPage = 5;
   const { toast } = useToast();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        setAuthError(`Authentication error: ${error.message}`);
+        console.error("Auth error:", error);
+      } else if (!data.session) {
+        setAuthError("Not authenticated. Sign in to access university data.");
+        console.warn("No active session found");
+      } else {
+        setAuthError(null);
+        console.log("Authenticated as:", data.session.user.email);
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     fetchUniversities();
@@ -52,7 +73,17 @@ export const LeadGeneratorTab = () => {
       setLoading(true);
       setConnectionError(null);
       setError(null);
+      
+      // Verify authentication before fetching
+      const { data: authData } = await supabase.auth.getSession();
+      if (!authData.session) {
+        setAuthError("Not authenticated. Sign in to access university data.");
+        setLoading(false);
+        return;
+      }
+      
       const data = await getUniversities();
+      console.log("Universities fetched:", data);
       setUniversities(data);
       setUniversityCount(data.length);
       
@@ -75,7 +106,14 @@ export const LeadGeneratorTab = () => {
       }
     } catch (error: any) {
       console.error("Error fetching universities:", error);
-      setConnectionError("Failed to connect to the database. Please check your connection and try again.");
+      
+      // Check for RLS policy violations
+      if (error.message && (error.message.includes("policy") || error.message.includes("permission"))) {
+        setAuthError(`Permission error: ${error.message}. You may need to sign in to access this data.`);
+      } else {
+        setConnectionError("Failed to connect to the database. Please check your connection and try again.");
+      }
+      
       toast({
         title: "Connection Error",
         description: error.message || "Failed to load universities",
@@ -273,6 +311,22 @@ export const LeadGeneratorTab = () => {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Lead Generator</h2>
+      
+      {authError && (
+        <Alert variant="destructive">
+          <ShieldAlert className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            {authError}
+            <div className="mt-2">
+              <Button size="sm" variant="outline" onClick={refreshData} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Retry
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {connectionError && (
         <Alert variant="destructive">

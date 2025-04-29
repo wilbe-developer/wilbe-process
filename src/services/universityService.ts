@@ -10,6 +10,7 @@ export async function getUniversities() {
   
   if (error) {
     console.error("Error fetching universities:", error);
+    console.log("Auth status:", supabase.auth);
     throw error;
   }
   
@@ -29,18 +30,24 @@ export async function updateUniversity(id: string, fields: { name?: string; is_d
 }
 
 export async function addUniversity(name: string, domain?: string) {
-  const { error } = await supabase
+  console.log("Adding university:", { name, domain });
+  
+  const { data, error } = await supabase
     .from('universities')
     .insert({ 
       name, 
       is_default: false,
       domain: domain || null
-    });
+    })
+    .select();
   
   if (error) {
     console.error("Error adding university:", error);
     throw error;
   }
+  
+  console.log("University added:", data);
+  return data;
 }
 
 export async function deleteUniversity(id: string) {
