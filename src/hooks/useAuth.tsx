@@ -97,6 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [fetchUserProfile, setLoading, setSession, setUser]);
 
+  // Using the roles from the user_roles table now
   const isAdmin = user?.isAdmin || false;
   const isApproved = user?.approved || false;
   const isAuthenticated = !!user;

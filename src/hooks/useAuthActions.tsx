@@ -40,21 +40,27 @@ export const useAuthActions = ({
         return;
       }
       
-      // Check if user has admin role
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin');
+      // Check if user has admin role using our new function
+      const { data: isAdminData, error: isAdminError } = await supabase
+        .rpc('is_admin', { user_id: userId });
       
-      if (roleError) {
-        console.error('Error checking admin role:', roleError);
+      if (isAdminError) {
+        console.error('Error checking admin role:', isAdminError);
       }
       
-      const isAdmin = roleData && roleData.length > 0;
+      // Check if user is approved using our new function
+      const { data: isApprovedData, error: isApprovedError } = await supabase
+        .rpc('is_approved', { user_id: userId });
+      
+      if (isApprovedError) {
+        console.error('Error checking approval status:', isApprovedError);
+      }
+      
+      const isAdmin = isAdminData || false;
+      const isApproved = isApprovedData || profileData?.approved || false;
       
       if (profileData) {
-        console.log("User profile found:", profileData, "Is admin:", isAdmin);
+        console.log("User profile found:", profileData, "Is admin:", isAdmin, "Is approved:", isApproved);
         // Transform database fields to match our UserProfile interface
         const userProfile: UserProfile = {
           id: profileData.id,
@@ -67,10 +73,10 @@ export const useAuthActions = ({
           role: profileData.role,
           bio: profileData.bio,
           about: profileData.about,
-          approved: profileData.approved,
+          approved: isApproved,
           createdAt: new Date(profileData.created_at || new Date()),
           avatar: profileData.avatar,
-          isAdmin: isAdmin || profileData.role === 'admin', // Support both new and legacy role systems
+          isAdmin: isAdmin,
           twitterHandle: profileData.twitter_handle,
           expertise: profileData.expertise,
           activityStatus: profileData.activity_status,
