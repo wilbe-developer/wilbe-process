@@ -92,7 +92,8 @@ export const LeadGeneratorTab = () => {
         toast({
           title: "Warning",
           description: `${missingDomains} universities are missing domain information and will be skipped.`,
-          variant: "warning",
+          // Fix the variant type to be compatible with toast
+          variant: "destructive",
         });
       }
       
@@ -112,7 +113,8 @@ export const LeadGeneratorTab = () => {
         toast({
           title: "No results",
           description: "No leads found. Make sure universities have domain information.",
-          variant: "warning",
+          // Fix the variant type to be compatible with toast
+          variant: "destructive",
         });
       } else {
         toast({
@@ -166,10 +168,10 @@ export const LeadGeneratorTab = () => {
           </div>
           
           {hasMissingDomains && (
-            <Alert variant="warning" className="mt-2">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Warning</AlertTitle>
-              <AlertDescription>
+            <Alert variant="default" className="mt-2 bg-amber-50 border-amber-200">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800">Warning</AlertTitle>
+              <AlertDescription className="text-amber-700">
                 Some universities are missing domain information. They will be skipped during the search.
               </AlertDescription>
             </Alert>

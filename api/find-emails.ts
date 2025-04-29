@@ -1,11 +1,17 @@
-import { supabase } from "@/integrations/supabase/client";
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
 import dns from 'dns';
 import nodemailer from 'nodemailer';
 import * as cheerio from 'cheerio';
 import { XMLParser } from 'fast-xml-parser';
 import axios from 'axios';
 import util from 'util';
+
+// Create Supabase client directly instead of importing
+const SUPABASE_URL = "https://iatercfyoclqxmohyyke.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdGVyY2Z5b2NscXhtb2h5eWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3ODczNTIsImV4cCI6MjA1OTM2MzM1Mn0.wnFk1m4e6l123D2QK6GRAnOONRkZXL1eEAwyXOxTBPE";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Convert DNS resolve to Promise-based
 const dnsResolveMx = util.promisify(dns.resolveMx);
@@ -531,7 +537,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Return the results
     console.log(`Returning ${allResults.length} leads`);
     return res.status(200).json(allResults);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in find-emails API:', error);
     
     await logMetric({
