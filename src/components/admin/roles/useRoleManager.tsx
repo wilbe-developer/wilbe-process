@@ -28,9 +28,13 @@ export const useRoleManager = () => {
       const counts = await fetchRoleCounts();
       setRoleCounts(counts);
       
-      // Fetch users based on the current filter and page
+      // Special handling for admin filter which needs a different approach
       try {
-        const { data: fetchedUsers, count, userRoleMap } = await fetchUsersByRole(filter, currentPage, pageSize);
+        let fetchedUsers, count, userRoleMap;
+        
+        // Fetch users based on the current filter and page
+        ({ data: fetchedUsers, count, userRoleMap } = await fetchUsersByRole(filter, currentPage, pageSize));
+        
         setTotalUsers(count);
         
         // Update user roles state

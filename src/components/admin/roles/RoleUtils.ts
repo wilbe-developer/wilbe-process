@@ -32,47 +32,97 @@ export const fetchUsersByRole = async (role: UserRole | 'all', page = 1, pageSiz
     // Get IDs of all fetched profiles to get their roles
     const profileIds = profiles.map(profile => profile.id);
     
-    // Next, fetch user roles separately
-    let rolesQuery = supabase.from('user_roles')
+    // Next, fetch user roles separately for these specific profiles
+    let { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
       .select('user_id, role')
       .in('user_id', profileIds);
-      
-    // If specific role is requested (not 'all'), filter for that role
-    if (role !== 'all') {
-      rolesQuery = rolesQuery.eq('role', role);
-    }
-    
-    const { data: userRoles, error: rolesError } = await rolesQuery;
     
     if (rolesError) throw rolesError;
     
-    // If filtering by role other than 'all', we need to filter profiles
-    // that match the specified role
-    let filteredProfiles = profiles;
-    if (role !== 'all') {
-      // Get user IDs that have the specified role
-      const userIdsWithRole = userRoles.map(ur => ur.user_id);
-      // Filter profiles to only include those with the specified role
-      filteredProfiles = profiles.filter(profile => userIdsWithRole.includes(profile.id));
-    }
-    
-    console.log(`Fetched ${filteredProfiles.length} profiles with role: ${role}. Total: ${count || 0}`);
-    
     // Create a map of user_id to roles for easier access
     const userRoleMap: Record<string, UserRole[]> = {};
-    userRoles.forEach(ur => {
+    userRoles?.forEach(ur => {
       if (!userRoleMap[ur.user_id]) {
         userRoleMap[ur.user_id] = [];
       }
       userRoleMap[ur.user_id].push(ur.role as UserRole);
     });
     
-    // If we're filtering by role, we'll need to adjust the count
-    const adjustedCount = role !== 'all' ? filteredProfiles.length : count;
+    // If we're filtering by role other than 'all', fetch additional profiles
+    // specifically with this role (to solve the admin visibility issue)
+    let filteredProfiles = profiles;
+    
+    if (role !== 'all') {
+      // Special handling for role-specific filtering
+      // First get all the user IDs that have this specific role
+      const { data: usersWithRole, error: roleFilterError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', role)
+        .range(from, to);
+        
+      if (roleFilterError) throw roleFilterError;
+      
+      if (usersWithRole && usersWithRole.length > 0) {
+        // Get user IDs from the role-specific query
+        const userIdsWithRole = usersWithRole.map(ur => ur.user_id);
+        
+        // Fetch profiles for those specific users
+        const { data: roleFilteredProfiles, error: filteredProfilesError } = await supabase
+          .from('profiles')
+          .select('*')
+          .in('id', userIdsWithRole)
+          .order('created_at', { ascending: false });
+          
+        if (filteredProfilesError) throw filteredProfilesError;
+        
+        if (roleFilteredProfiles && roleFilteredProfiles.length > 0) {
+          filteredProfiles = roleFilteredProfiles;
+          
+          // Update the user IDs list to get roles for the new profiles
+          const newProfileIds = roleFilteredProfiles.map(profile => profile.id);
+          
+          // Fetch roles for these specific profiles
+          const { data: addlUserRoles, error: addlRolesError } = await supabase
+            .from('user_roles')
+            .select('user_id, role')
+            .in('user_id', newProfileIds);
+            
+          if (addlRolesError) throw addlRolesError;
+          
+          // Add to the role map
+          addlUserRoles?.forEach(ur => {
+            if (!userRoleMap[ur.user_id]) {
+              userRoleMap[ur.user_id] = [];
+            }
+            userRoleMap[ur.user_id].push(ur.role as UserRole);
+          });
+        }
+      }
+      
+      // Get the count of users with this specific role for accurate pagination
+      const { count: roleCount, error: roleCountError } = await supabase
+        .from('user_roles')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('role', role);
+        
+      if (roleCountError) throw roleCountError;
+      
+      console.log(`Fetched ${filteredProfiles.length} profiles with role: ${role}. Total: ${roleCount || 0}`);
+      
+      return { 
+        data: filteredProfiles, 
+        count: roleCount || 0,
+        userRoleMap
+      };
+    }
+    
+    console.log(`Fetched ${filteredProfiles.length} profiles with role: ${role}. Total: ${count || 0}`);
     
     return { 
       data: filteredProfiles, 
-      count: adjustedCount || 0,
+      count: count || 0,
       userRoleMap
     };
   } catch (error) {
