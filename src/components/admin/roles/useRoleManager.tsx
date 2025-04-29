@@ -1,8 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { UserProfile, UserRole } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchUsersByRole, fetchUserRoles, fetchRoleCounts, mapProfilesToUserProfiles } from "./RoleUtils";
 
 export const useRoleManager = () => {
   const { toast } = useToast();
@@ -10,130 +11,82 @@ export const useRoleManager = () => {
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<Record<string, UserRole[]>>({});
   const [filter, setFilter] = useState<UserRole | 'all'>('all');
-  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [roleCounts, setRoleCounts] = useState<Record<UserRole | 'all', number>>({
+    'all': 0,
+    'admin': 0,
+    'user': 0
+  });
+  const pageSize = 10;
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Fetch all profiles
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*');
+      // Get role counts for filter indicators
+      const counts = await fetchRoleCounts();
+      setRoleCounts(counts);
+      console.log("Role counts:", counts);
       
-      if (profileError) throw profileError;
+      // Fetch users based on the current filter and page
+      const { data: fetchedUsers, count } = await fetchUsersByRole(filter, currentPage, pageSize);
+      setTotalUsers(count);
       
-      console.log(`Fetched ${profileData?.length || 0} user profiles`);
+      // Build a role map for these users
+      const userRoleMap: Record<string, UserRole[]> = {};
       
-      if (profileData) {
-        // Transform profiles to UserProfile format
-        const userProfiles = profileData.map(profile => ({
-          id: profile.id,
-          firstName: profile.first_name || '',
-          lastName: profile.last_name || '',
-          email: profile.email || '',
-          linkedIn: profile.linked_in,
-          institution: profile.institution,
-          location: profile.location,
-          role: profile.role,
-          bio: profile.bio,
-          approved: false, // We'll get this from roles
-          createdAt: new Date(profile.created_at || Date.now()),
-          avatar: profile.avatar
-        }));
-        
-        // Fetch roles for all users
-        const { data: rolesData, error: rolesError } = await supabase
-          .from('user_roles')
-          .select('user_id, role');
-        
-        if (rolesError) throw rolesError;
-        
-        console.log(`Fetched ${rolesData?.length || 0} user role entries`);
-        console.log('Role data sample:', rolesData?.slice(0, 5));
-        
-        // Create a map of user_id -> roles array
-        const roleMap: Record<string, UserRole[]> = {};
-        
-        if (rolesData) {
-          rolesData.forEach(row => {
-            if (!roleMap[row.user_id]) {
-              roleMap[row.user_id] = [];
-            }
-            // Ensure the role is one of the valid enum values
-            const role = row.role as UserRole;
-            roleMap[row.user_id].push(role);
-          });
-        }
-        
-        console.log('Full role map:', roleMap);
-        
-        // Update state with role information
-        setUserRoles(roleMap);
-        
-        // Update user profiles with role information
-        const enhancedProfiles = userProfiles.map(profile => ({
-          ...profile,
-          approved: roleMap[profile.id]?.includes("user") || false,
-          isAdmin: roleMap[profile.id]?.includes("admin") || false
-        }));
-        
-        console.log('Enhanced profiles with roles:', enhancedProfiles.slice(0, 5));
-        console.log(`Admin count: ${enhancedProfiles.filter(p => p.isAdmin).length}`);
-        
-        setUsers(enhancedProfiles);
-        // Initially set filtered users to all users
-        applyFilter(enhancedProfiles, filter, roleMap);
+      // This is a more efficient way to get all roles for the fetched users in one go
+      const userIds = fetchedUsers.map(user => user.id);
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+      
+      if (rolesError) throw rolesError;
+      
+      console.log(`Fetched ${rolesData?.length || 0} roles for ${userIds.length} users`);
+      
+      // Process role data
+      if (rolesData) {
+        rolesData.forEach(row => {
+          if (!userRoleMap[row.user_id]) {
+            userRoleMap[row.user_id] = [];
+          }
+          userRoleMap[row.user_id].push(row.role as UserRole);
+        });
       }
+      
+      // Update state with role information
+      setUserRoles(userRoleMap);
+      
+      // Map to UserProfile format with role information
+      const enhancedProfiles = mapProfilesToUserProfiles(fetchedUsers, userRoleMap);
+      
+      console.log(`Successfully processed ${enhancedProfiles.length} user profiles`);
+      console.log(`Admin count in current page: ${enhancedProfiles.filter(p => p.isAdmin).length}`);
+      
+      setUsers(enhancedProfiles);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch users",
+        description: "Failed to fetch users. Please try again.",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const applyFilter = (userList: UserProfile[], filterValue: UserRole | 'all', roleMapData?: Record<string, UserRole[]>) => {
-    // Use the provided roleMap or fall back to the state
-    const roleMapToUse = roleMapData || userRoles;
-    
-    if (filterValue === 'all') {
-      console.log(`Filter "all" applied - showing all ${userList.length} users`);
-      setFilteredUsers(userList);
-      return;
-    }
-    
-    console.log(`Filtering by role: ${filterValue}`);
-    
-    // Log all users who have the admin role in roleMap
-    if (filterValue === 'admin') {
-      const adminUserIds = Object.entries(roleMapToUse)
-        .filter(([_, roles]) => roles.includes('admin'))
-        .map(([userId]) => userId);
-      console.log(`Users with admin role in roleMap (${adminUserIds.length}):`, adminUserIds);
-    }
-    
-    const filtered = userList.filter(user => {
-      const userRoleList = roleMapToUse[user.id] || [];
-      const hasRole = userRoleList.includes(filterValue as UserRole);
-      if (filterValue === 'admin' && hasRole) {
-        console.log(`User ${user.id} (${user.firstName} ${user.lastName}) has admin role`);
-      }
-      return hasRole;
-    });
-    
-    console.log(`Filter "${filterValue}" applied - showing ${filtered.length} users`);
-    setFilteredUsers(filtered);
-  };
+  }, [filter, currentPage, toast]);
 
   const handleFilterChange = (newFilter: UserRole | 'all') => {
     console.log(`Changing filter from ${filter} to ${newFilter}`);
     setFilter(newFilter);
-    applyFilter(users, newFilter);
+    setCurrentPage(1); // Reset to first page when changing filters
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleRoleToggle = async (userId: string, role: UserRole, hasRole: boolean) => {
@@ -173,13 +126,17 @@ export const useRoleManager = () => {
         });
       }
       
-      // Refresh roles
+      // Refresh users
       fetchUsers();
+      
+      // Also update role counts
+      const counts = await fetchRoleCounts();
+      setRoleCounts(counts);
     } catch (error) {
       console.error("Error updating role:", error);
       toast({
         title: "Error",
-        description: "Failed to update role",
+        description: "Failed to update role. Please try again.",
         variant: "destructive"
       });
     }
@@ -187,16 +144,19 @@ export const useRoleManager = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return {
     users,
-    filteredUsers,
     loading,
     userRoles,
     filter,
     handleRoleToggle,
     handleFilterChange,
-    fetchUsers
+    fetchUsers,
+    currentPage,
+    totalPages: Math.ceil(totalUsers / pageSize),
+    handlePageChange,
+    roleCounts
   };
 };
