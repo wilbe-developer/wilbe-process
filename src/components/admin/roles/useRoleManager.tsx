@@ -23,6 +23,8 @@ export const useRoleManager = () => {
       
       if (profileError) throw profileError;
       
+      console.log(`Fetched ${profileData?.length || 0} user profiles`);
+      
       if (profileData) {
         // Transform profiles to UserProfile format
         const userProfiles = profileData.map(profile => ({
@@ -47,6 +49,9 @@ export const useRoleManager = () => {
         
         if (rolesError) throw rolesError;
         
+        console.log(`Fetched ${rolesData?.length || 0} user role entries`);
+        console.log('Role data sample:', rolesData?.slice(0, 5));
+        
         // Create a map of user_id -> roles array
         const roleMap: Record<string, UserRole[]> = {};
         
@@ -61,6 +66,8 @@ export const useRoleManager = () => {
           });
         }
         
+        console.log('Full role map:', roleMap);
+        
         // Update state with role information
         setUserRoles(roleMap);
         
@@ -71,9 +78,12 @@ export const useRoleManager = () => {
           isAdmin: roleMap[profile.id]?.includes("admin") || false
         }));
         
+        console.log('Enhanced profiles with roles:', enhancedProfiles.slice(0, 5));
+        console.log(`Admin count: ${enhancedProfiles.filter(p => p.isAdmin).length}`);
+        
         setUsers(enhancedProfiles);
         // Initially set filtered users to all users
-        applyFilter(enhancedProfiles, filter);
+        applyFilter(enhancedProfiles, filter, roleMap);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -87,21 +97,41 @@ export const useRoleManager = () => {
     }
   };
 
-  const applyFilter = (userList: UserProfile[], filterValue: UserRole | 'all') => {
+  const applyFilter = (userList: UserProfile[], filterValue: UserRole | 'all', roleMapData?: Record<string, UserRole[]>) => {
+    // Use the provided roleMap or fall back to the state
+    const roleMapToUse = roleMapData || userRoles;
+    
     if (filterValue === 'all') {
+      console.log(`Filter "all" applied - showing all ${userList.length} users`);
       setFilteredUsers(userList);
       return;
     }
     
+    console.log(`Filtering by role: ${filterValue}`);
+    
+    // Log all users who have the admin role in roleMap
+    if (filterValue === 'admin') {
+      const adminUserIds = Object.entries(roleMapToUse)
+        .filter(([_, roles]) => roles.includes('admin'))
+        .map(([userId]) => userId);
+      console.log(`Users with admin role in roleMap (${adminUserIds.length}):`, adminUserIds);
+    }
+    
     const filtered = userList.filter(user => {
-      const userRoleList = userRoles[user.id] || [];
-      return userRoleList.includes(filterValue as UserRole);
+      const userRoleList = roleMapToUse[user.id] || [];
+      const hasRole = userRoleList.includes(filterValue as UserRole);
+      if (filterValue === 'admin' && hasRole) {
+        console.log(`User ${user.id} (${user.firstName} ${user.lastName}) has admin role`);
+      }
+      return hasRole;
     });
     
+    console.log(`Filter "${filterValue}" applied - showing ${filtered.length} users`);
     setFilteredUsers(filtered);
   };
 
   const handleFilterChange = (newFilter: UserRole | 'all') => {
+    console.log(`Changing filter from ${filter} to ${newFilter}`);
     setFilter(newFilter);
     applyFilter(users, newFilter);
   };
