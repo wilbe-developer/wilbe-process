@@ -8,7 +8,11 @@ interface UserRoleFilterProps {
   roleCounts?: Record<UserRole | 'all', number>;
 }
 
-const UserRoleFilter = ({ filter, onFilterChange, roleCounts = {} }: UserRoleFilterProps) => {
+const UserRoleFilter = ({ 
+  filter, 
+  onFilterChange, 
+  roleCounts = { 'all': 0, 'admin': 0, 'user': 0 } 
+}: UserRoleFilterProps) => {
   return (
     <div className="mb-4">
       <label className="text-sm font-medium text-gray-700 mb-1 block">Filter by role</label>
