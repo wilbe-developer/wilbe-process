@@ -61,6 +61,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // If signed in, fetch user profile
         if (newSession?.user) {
+          console.log("User signed in, fetching profile for:", newSession.user.id);
+          // Use setTimeout to avoid potential Supabase client deadlock
           setTimeout(() => {
             fetchUserProfile(newSession.user.id);
           }, 0);
@@ -80,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (existingSession?.user) {
           setSession(existingSession);
+          console.log("Found existing session, fetching profile for:", existingSession.user.id);
           await fetchUserProfile(existingSession.user.id);
         } else {
           setLoading(false);
@@ -98,9 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [fetchUserProfile, setLoading, setSession, setUser]);
 
   // Using the roles from the user_roles table now
-  const isAdmin = user?.isAdmin || false;
-  const isApproved = user?.approved || false;
+  const isAdmin = !!user?.isAdmin;
+  const isApproved = !!user?.approved;
   const isAuthenticated = !!user;
+
+  console.log("Auth provider state:", { isAuthenticated, isAdmin, isApproved, loading });
 
   return (
     <AuthContext.Provider

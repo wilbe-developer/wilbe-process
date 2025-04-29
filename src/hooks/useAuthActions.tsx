@@ -58,7 +58,9 @@ export const useAuthActions = ({
       }
       
       const isAdmin = isAdminData || false;
-      const isApproved = isApprovedData || false; // No longer falling back to profile.approved
+      const isApproved = isApprovedData || false;
+      
+      console.log("Role check results:", { isAdmin, isApproved });
       
       if (profileData) {
         console.log("User profile found:", profileData, "Is admin:", isAdmin, "Is approved:", isApproved);

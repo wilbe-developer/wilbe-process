@@ -13,7 +13,7 @@ const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
   
   const isAdminRoute = location.pathname.startsWith(PATHS.ADMIN);
 
-  console.log("ProtectedRoute - Auth state:", { isAuthenticated, isAdmin, loading, isAdminRoute });
+  console.log("ProtectedRoute - Auth state:", { isAuthenticated, isAdmin, loading, isAdminRoute, pathname: location.pathname });
 
   // Show loading state
   if (loading) {
