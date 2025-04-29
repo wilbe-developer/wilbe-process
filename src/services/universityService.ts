@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { PATHS } from "@/lib/constants";
 
 export async function getUniversities() {
   const { data, error } = await supabase
@@ -59,8 +60,9 @@ export async function findEmails(filters: {
   selectedUniversities?: string[];
 }) {
   try {
-    // For local development, return example data
-    if (process.env.NODE_ENV === 'development' && !process.env.VERCEL) {
+    // For local development without API, return example data
+    if (process.env.NODE_ENV === 'development' && !process.env.VERCEL && window.location.hostname === 'localhost') {
+      console.log("Using example data for local development");
       return [
         { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
         { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' },
@@ -68,7 +70,7 @@ export async function findEmails(filters: {
       ];
     }
 
-    // Call the Vercel API route for production
+    // Construct query parameters
     const queryParams = new URLSearchParams({
       useCustom: filters.useCustomUniversities.toString()
     });
@@ -77,14 +79,21 @@ export async function findEmails(filters: {
       queryParams.append('universities', JSON.stringify(filters.selectedUniversities));
     }
 
-    const response = await fetch(`/api/find-emails?${queryParams.toString()}`);
+    const apiUrl = `/api/find-emails?${queryParams.toString()}`;
+    console.log(`Calling API endpoint: ${apiUrl}`);
+    console.log('API query params:', Object.fromEntries(queryParams.entries()));
+
+    const response = await fetch(apiUrl);
     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'Error fetching email leads');
+      console.error("API error response:", errorData);
+      throw new Error(errorData.error || `Error fetching email leads: ${response.status} ${response.statusText}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    console.log(`API returned ${data.length} leads`);
+    return data;
   } catch (error) {
     console.error("Error finding emails:", error);
     throw error;
