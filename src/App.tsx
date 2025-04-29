@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +36,7 @@ import NewThreadPage from "@/pages/NewThreadPage";
 import ThreadPage from "@/pages/ThreadPage";
 import SprintWaitlistPage from "@/pages/SprintWaitlistPage";
 import SprintReferralPage from "@/pages/SprintReferralPage";
+import LeadGeneratorPage from "@/pages/LeadGeneratorPage";
 
 // Auth Route component
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -109,6 +111,7 @@ const App = () => (
                 {/* Admin routes - we'll keep these with regular ProtectedRoute but add additional checks */}
                 <Route element={<ProtectedRoute />}>
                   <Route path={PATHS.ADMIN} element={<AdminPage />} />
+                  <Route path="/lead-generator" element={<LeadGeneratorPage />} />
                 </Route>
               </Route>
 
