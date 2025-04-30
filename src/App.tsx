@@ -108,8 +108,8 @@ const App = () => (
                   <Route path={PATHS.ASK} element={<div className="py-12 text-center"><h1 className="text-2xl font-bold mb-4">Ask & Invite</h1><p>This feature is coming soon.</p></div>} />
                 </Route>
                 
-                {/* Admin routes - we'll keep these with regular ProtectedRoute but add additional checks */}
-                <Route element={<ProtectedRoute />}>
+                {/* Admin routes with admin check */}
+                <Route element={<ProtectedRoute requireAdmin={true} />}>
                   <Route path={PATHS.ADMIN} element={<AdminPage />} />
                   <Route path="/lead-generator" element={<LeadGeneratorPage />} />
                 </Route>

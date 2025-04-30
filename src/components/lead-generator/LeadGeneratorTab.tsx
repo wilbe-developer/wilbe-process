@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -65,19 +64,27 @@ export const LeadGeneratorTab = () => {
     { value: "C162324750", label: "Neuroscience" }
   ];
 
+  // Add error recovery state
+  const [isRecovering, setIsRecovering] = useState(false);
+
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        setAuthError(`Authentication error: ${error.message}`);
-        console.error("Auth error:", error);
-      } else if (!data.session) {
-        setAuthError("Not authenticated. Sign in to access university data.");
-        console.warn("No active session found");
-      } else {
-        setAuthError(null);
-        console.log("Authenticated as:", data.session.user.email);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          setAuthError(`Authentication error: ${error.message}`);
+          console.error("Auth error:", error);
+        } else if (!data.session) {
+          setAuthError("Not authenticated. Sign in to access university data.");
+          console.warn("No active session found");
+        } else {
+          setAuthError(null);
+          console.log("Authenticated as:", data.session.user.email);
+        }
+      } catch (err) {
+        console.error("Failed to check authentication:", err);
+        setAuthError("Failed to verify authentication status. Please refresh the page.");
       }
     };
     
@@ -275,7 +282,7 @@ export const LeadGeneratorTab = () => {
         if (result.data?.length === 0 && !result.error) {
           toast({
             title: "No results",
-            description: "No leads found. Make sure universities have domain information.",
+            description: "No leads found. Make sure universities have domain information set.",
             variant: "destructive",
           });
         } else if (result.data?.length > 0) {
@@ -313,11 +320,37 @@ export const LeadGeneratorTab = () => {
   };
 
   const refreshData = async () => {
-    await fetchUniversities();
-    toast({
-      title: "Data Refreshed",
-      description: "University data has been refreshed from the database.",
-    });
+    try {
+      setIsRecovering(true);
+      // Clear all error states
+      setAuthError(null);
+      setConnectionError(null);
+      setError(null);
+      setApiError(null);
+      
+      // Re-verify authentication
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        // We need to redirect to login
+        window.location.href = PATHS.LOGIN;
+        return;
+      }
+      
+      await fetchUniversities();
+      toast({
+        title: "Data Refreshed",
+        description: "University data has been refreshed from the database.",
+      });
+    } catch (error: any) {
+      console.error("Error refreshing data:", error);
+      toast({
+        title: "Refresh Failed",
+        description: error.message || "Failed to refresh data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRecovering(false);
+    }
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -345,9 +378,24 @@ export const LeadGeneratorTab = () => {
           <AlertDescription>
             {authError}
             <div className="mt-2">
-              <Button size="sm" variant="outline" onClick={refreshData} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Retry
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={refreshData} 
+                className="gap-2"
+                disabled={isRecovering}
+              >
+                {isRecovering ? (
+                  <>
+                    <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+                    Checking...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Retry
+                  </>
+                )}
               </Button>
             </div>
           </AlertDescription>

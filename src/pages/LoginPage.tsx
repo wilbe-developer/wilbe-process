@@ -20,6 +20,7 @@ const LoginPage = () => {
       // Check if there's a redirect path stored
       const redirectPath = sessionStorage.getItem("redirectAfterLogin") || PATHS.HOME;
       sessionStorage.removeItem("redirectAfterLogin"); // Clean up
+      console.log("User authenticated, redirecting to:", redirectPath);
       navigate(redirectPath);
     }
   }, [isAuthenticated, navigate]);

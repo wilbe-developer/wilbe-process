@@ -80,6 +80,16 @@ export async function findEmails(filters: {
   topicId?: string;
 }) {
   try {
+    // Verify authentication before making API calls
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) {
+      console.error("Not authenticated for email search");
+      return {
+        data: [],
+        error: "Authentication required. Please sign in to use this feature."
+      };
+    }
+
     // For local development without API, return example data
     if (process.env.NODE_ENV === 'development' && !process.env.VERCEL && window.location.hostname === 'localhost') {
       console.log("Using example data for local development");
@@ -111,15 +121,27 @@ export async function findEmails(filters: {
     console.log('API query params:', Object.fromEntries(queryParams.entries()));
 
     const response = await fetch(apiUrl);
-    const data = await response.json();
-    
     if (!response.ok) {
-      console.error("API error response:", data);
+      const errorText = await response.text();
+      console.error(`API error (${response.status}):`, errorText);
+      
+      let errorMessage;
+      try {
+        // Try to parse as JSON
+        const errorJson = JSON.parse(errorText);
+        errorMessage = errorJson.error || `Error: ${response.status} ${response.statusText}`;
+      } catch {
+        // If not JSON, use as is
+        errorMessage = `Error: ${response.status} ${response.statusText}`;
+      }
+      
       return {
         data: [],
-        error: data.error || `Error: ${response.status} ${response.statusText}`
+        error: errorMessage
       };
     }
+    
+    const data = await response.json();
     
     // Check if the API returned an error with data
     if (data.error) {

@@ -11,9 +11,16 @@ const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
   const location = useLocation();
   
-  const isAdminRoute = location.pathname.startsWith(PATHS.ADMIN);
+  const isAdminRoute = location.pathname.startsWith(PATHS.ADMIN) || 
+                        location.pathname.includes("lead-generator");
 
-  console.log("ProtectedRoute - Auth state:", { isAuthenticated, isAdmin, loading, isAdminRoute, pathname: location.pathname });
+  console.log("ProtectedRoute - Auth state:", { 
+    isAuthenticated, 
+    isAdmin, 
+    loading, 
+    isAdminRoute, 
+    pathname: location.pathname 
+  });
 
   // Show loading state
   if (loading) {
@@ -30,6 +37,8 @@ const ProtectedRoute = ({ requireAdmin = false }: ProtectedRouteProps) => {
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     console.log("User not authenticated, redirecting to login");
+    // Store the current path for redirect after login
+    sessionStorage.setItem("redirectAfterLogin", location.pathname);
     return <Navigate to={PATHS.LOGIN} state={{ from: location }} replace />;
   }
 
