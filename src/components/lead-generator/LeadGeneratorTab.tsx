@@ -57,6 +57,20 @@ const LeadGeneratorTab = () => {
     };
   }, []);
 
+  // Add additional logging for debugging
+  useEffect(() => {
+    console.log("LeadGeneratorTab current state:", {
+      topicId,
+      topicOptions,
+      selectedUniversities,
+      useCustomUniversities,
+      loading,
+      error,
+      apiError,
+      authError
+    });
+  }, [topicId, topicOptions, selectedUniversities, useCustomUniversities, loading, error, apiError, authError]);
+
   // Error fallback to ensure we always show something
   if (renderError) {
     return (

@@ -40,6 +40,12 @@ export const ResultsDisplay = ({
     (page - 1) * resultsPerPage,
     page * resultsPerPage
   );
+  
+  // Get the topic label for display
+  const getTopicLabel = (id: string) => {
+    const topic = topicOptions.find(t => t.value === id);
+    return topic ? topic.label : id;
+  };
 
   return (
     <div className="md:col-span-3 space-y-4">
@@ -66,9 +72,9 @@ export const ResultsDisplay = ({
       {lastSearchTime && (
         <div className="text-sm text-gray-500">
           Results from: {lastSearchTime}
-          {topicId && (
+          {topicId && topicId !== "no-filter" && (
             <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              Topic filter: {topicOptions.find(t => t.value === topicId)?.label || topicId}
+              Topic filter: {getTopicLabel(topicId)}
             </span>
           )}
         </div>

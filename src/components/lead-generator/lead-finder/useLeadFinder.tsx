@@ -22,7 +22,7 @@ export const useLeadFinder = () => {
   const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
   const [universityCount, setUniversityCount] = useState(0);
   const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
-  const [topicId, setTopicId] = useState<string>("");
+  const [topicId, setTopicId] = useState<string>("no-filter");
   const [isRecovering, setIsRecovering] = useState(false);
   const [hookInitialized, setHookInitialized] = useState(false);
   const { toast } = useToast();
@@ -30,7 +30,7 @@ export const useLeadFinder = () => {
   const resultsPerPage = 5;
   
   const topicOptions: TopicOption[] = [
-    { value: "", label: "No Topic Filter" },
+    { value: "no-filter", label: "No Topic Filter" },
     { value: "C166413987", label: "Biology" },
     { value: "C86803240", label: "Computer Science" },
     { value: "C185592680", label: "Chemistry" },
@@ -241,7 +241,7 @@ export const useLeadFinder = () => {
       const filters: LeadSearchFilters = {
         useCustomUniversities,
         selectedUniversities: useCustomUniversities ? selectedUniversities : undefined,
-        topicId: topicId || undefined,
+        topicId: topicId !== "no-filter" ? topicId : undefined,
       };
       
       console.log("Running search with filters:", filters);

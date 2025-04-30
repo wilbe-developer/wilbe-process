@@ -47,6 +47,9 @@ export const SearchFilters = ({
 }: SearchFiltersProps) => {
   const defaultUniversities = universities.filter(u => u.is_default);
   const defaultsWithoutDomains = defaultUniversities.filter(u => !u.domain);
+  
+  console.log("SearchFilters rendering with topicId:", topicId);
+  console.log("Topic options:", topicOptions);
 
   return (
     <div className="md:col-span-1 space-y-4 border rounded-md p-4">
