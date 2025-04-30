@@ -126,7 +126,8 @@ export const UniversityManagement = () => {
         console.log(`Updating ROR for ${university.name}: ${openalex_ror}`);
         
         // Update in database
-        await updateUniversity(university.id, { openalex_ror });
+        const result = await updateUniversity(university.id, { openalex_ror });
+        console.log("Update result:", result);
         
         // Update in local state
         setUniversities(
@@ -234,13 +235,16 @@ export const UniversityManagement = () => {
                     <TableCell>
                       <Input
                         value={university.domain || ""}
-                        onChange={(e) => handleUpdateDomain(university, e.target.value)}
+                        onChange={(e) => {
+                          const updated = { ...university, domain: e.target.value };
+                          setUniversities(
+                            universities.map((u) => (u.id === university.id ? updated : u))
+                          );
+                        }}
                         placeholder="e.g., university.edu"
                         className="max-w-xs"
                         onBlur={(e) => {
-                          if (e.target.value !== university.domain) {
-                            handleUpdateDomain(university, e.target.value);
-                          }
+                          handleUpdateDomain(university, e.target.value);
                         }}
                       />
                     </TableCell>

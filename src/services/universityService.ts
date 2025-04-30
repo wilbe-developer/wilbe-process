@@ -23,15 +23,21 @@ export async function updateUniversity(id: string, fields: {
   domain?: string;
   openalex_ror?: string;
 }) {
-  const { error } = await supabase
+  console.log(`Updating university ${id} with fields:`, fields);
+  
+  const { data, error } = await supabase
     .from('universities')
     .update(fields)
-    .eq('id', id);
+    .eq('id', id)
+    .select();
   
   if (error) {
     console.error("Error updating university:", error);
     throw error;
   }
+  
+  console.log("University updated successfully:", data);
+  return data;
 }
 
 export async function addUniversity(name: string, domain?: string, openalex_ror?: string) {
