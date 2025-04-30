@@ -13,12 +13,14 @@ interface University {
   name: string;
   is_default: boolean;
   domain?: string;
+  openalex_ror?: string;
 }
 
 export const UniversityManagement = () => {
   const [universities, setUniversities] = useState<University[]>([]);
   const [newUniversityName, setNewUniversityName] = useState("");
   const [newUniversityDomain, setNewUniversityDomain] = useState("");
+  const [newUniversityROR, setNewUniversityROR] = useState("");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -53,9 +55,10 @@ export const UniversityManagement = () => {
     }
 
     try {
-      await addUniversity(newUniversityName, newUniversityDomain);
+      await addUniversity(newUniversityName, newUniversityDomain, newUniversityROR);
       setNewUniversityName("");
       setNewUniversityDomain("");
+      setNewUniversityROR("");
       toast({
         title: "Success",
         description: "University added successfully",
@@ -116,6 +119,27 @@ export const UniversityManagement = () => {
     }
   };
 
+  const handleUpdateROR = async (university: University, openalex_ror: string) => {
+    try {
+      await updateUniversity(university.id, { openalex_ror });
+      setUniversities(
+        universities.map((u) =>
+          u.id === university.id ? { ...u, openalex_ror } : u
+        )
+      );
+      toast({
+        title: "Success",
+        description: "University OpenAlex ROR updated",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update university OpenAlex ROR",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteUniversity = async (id: string) => {
     try {
       await deleteUniversity(id);
@@ -156,6 +180,15 @@ export const UniversityManagement = () => {
             onChange={(e) => setNewUniversityDomain(e.target.value)}
           />
         </div>
+        <div className="flex-1">
+          <label htmlFor="universityROR" className="text-sm font-medium mb-1 block">OpenAlex ROR</label>
+          <Input
+            id="universityROR"
+            placeholder="ROR identifier"
+            value={newUniversityROR}
+            onChange={(e) => setNewUniversityROR(e.target.value)}
+          />
+        </div>
         <div className="flex items-end">
           <Button onClick={handleAddUniversity} className="w-full md:w-auto whitespace-nowrap">Add University</Button>
         </div>
@@ -172,6 +205,7 @@ export const UniversityManagement = () => {
               <TableRow>
                 <TableHead>University Name</TableHead>
                 <TableHead>Domain</TableHead>
+                <TableHead>OpenAlex ROR</TableHead>
                 <TableHead className="w-[120px] text-center">Default</TableHead>
                 <TableHead className="w-[100px] text-center">Actions</TableHead>
               </TableRow>
@@ -179,7 +213,7 @@ export const UniversityManagement = () => {
             <TableBody>
               {universities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-4">
+                  <TableCell colSpan={5} className="text-center py-4">
                     No universities found
                   </TableCell>
                 </TableRow>
@@ -196,6 +230,24 @@ export const UniversityManagement = () => {
                         onBlur={(e) => {
                           if (e.target.value !== university.domain) {
                             handleUpdateDomain(university, e.target.value);
+                          }
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        value={university.openalex_ror || ""}
+                        onChange={(e) => {
+                          const updated = { ...university, openalex_ror: e.target.value };
+                          setUniversities(
+                            universities.map((u) => (u.id === university.id ? updated : u))
+                          );
+                        }}
+                        placeholder="OpenAlex ROR ID"
+                        className="max-w-xs"
+                        onBlur={(e) => {
+                          if (e.target.value !== university.openalex_ror) {
+                            handleUpdateROR(university, e.target.value);
                           }
                         }}
                       />

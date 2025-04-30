@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -10,12 +11,15 @@ import { MultiSelect } from "./MultiSelect";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface University {
   id: string;
   name: string;
   is_default: boolean;
   domain?: string;
+  openalex_ror?: string;
 }
 
 interface LeadResult {
@@ -23,6 +27,9 @@ interface LeadResult {
   institution: string;
   email: string;
   verified: string;
+  orcid?: string;
+  last_verified_at?: string;
+  last_failed_at?: string;
 }
 
 export const LeadGeneratorTab = () => {
@@ -41,8 +48,22 @@ export const LeadGeneratorTab = () => {
   const [isCheckingDefaults, setIsCheckingDefaults] = useState(false);
   const [universityCount, setUniversityCount] = useState(0);
   const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
+  const [topicId, setTopicId] = useState<string>("");
   const resultsPerPage = 5;
   const { toast } = useToast();
+
+  const topicOptions = [
+    { value: "", label: "No Topic Filter" },
+    { value: "C166413987", label: "Biology" },
+    { value: "C86803240", label: "Computer Science" },
+    { value: "C185592680", label: "Chemistry" },
+    { value: "C127313418", label: "Physics" },
+    { value: "C71924100", label: "Medicine" },
+    { value: "C144133560", label: "Mathematics" },
+    { value: "C121332964", label: "Psychology" },
+    { value: "C39432304", label: "Environmental Science" },
+    { value: "C162324750", label: "Neuroscience" }
+  ];
 
   // Check authentication status
   useEffect(() => {
@@ -222,6 +243,7 @@ export const LeadGeneratorTab = () => {
       const filters = {
         useCustomUniversities,
         selectedUniversities: useCustomUniversities ? selectedUniversities : undefined,
+        topicId: topicId || undefined,
       };
       
       console.log("Running search with filters:", filters);
@@ -296,6 +318,11 @@ export const LeadGeneratorTab = () => {
       title: "Data Refreshed",
       description: "University data has been refreshed from the database.",
     });
+  };
+
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleString();
   };
 
   const defaultUniversities = universities.filter(u => u.is_default);
@@ -391,6 +418,29 @@ export const LeadGeneratorTab = () => {
             </div>
           )}
           
+          <div className="space-y-2">
+            <label htmlFor="topicSelect" className="text-sm font-medium mb-1 block">
+              OpenAlex Topic Filter
+            </label>
+            <Select value={topicId} onValueChange={setTopicId}>
+              <SelectTrigger id="topicSelect">
+                <SelectValue placeholder="Select a research topic" />
+              </SelectTrigger>
+              <SelectContent>
+                {topicOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="mt-1">
+              <p className="text-xs text-gray-500">
+                Filter researchers by OpenAlex topic ID
+              </p>
+            </div>
+          </div>
+          
           <div className="pt-2">
             <Button 
               onClick={handleRunSearch} 
@@ -467,24 +517,32 @@ export const LeadGeneratorTab = () => {
           {lastSearchTime && (
             <div className="text-sm text-gray-500">
               Results from: {lastSearchTime}
+              {topicId && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  Topic filter: {topicOptions.find(t => t.value === topicId)?.label || topicId}
+                </span>
+              )}
             </div>
           )}
           
-          <div className="border rounded-md">
+          <div className="border rounded-md overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Institution</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>ORCID</TableHead>
                   <TableHead>Verified</TableHead>
+                  <TableHead>Last Verified</TableHead>
+                  <TableHead>Last Failed</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedResults.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       {loading ? (
                         <div className="flex justify-center">
                           <div className="animate-spin h-6 w-6 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -512,12 +570,32 @@ export const LeadGeneratorTab = () => {
                         </a>
                       </TableCell>
                       <TableCell>
+                        {result.orcid ? (
+                          <a 
+                            href={`https://orcid.org/${result.orcid}`}
+                            target="_blank"
+                            rel="noopener noreferrer" 
+                            className="text-blue-600 hover:underline"
+                          >
+                            {result.orcid}
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Badge 
                           variant={result.verified === "Yes" ? "default" : 
                                  result.verified === "Maybe" ? "outline" : "secondary"}
                         >
                           {result.verified}
                         </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {formatDate(result.last_verified_at)}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {formatDate(result.last_failed_at)}
                       </TableCell>
                       <TableCell>
                         <Button

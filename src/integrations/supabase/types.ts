@@ -53,6 +53,8 @@ export type Database = {
           domain: string
           good_pattern: string | null
           is_catchall: boolean | null
+          last_failed_at: string | null
+          last_verified_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -60,6 +62,8 @@ export type Database = {
           domain: string
           good_pattern?: string | null
           is_catchall?: boolean | null
+          last_failed_at?: string | null
+          last_verified_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -67,6 +71,8 @@ export type Database = {
           domain?: string
           good_pattern?: string | null
           is_catchall?: boolean | null
+          last_failed_at?: string | null
+          last_verified_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -538,6 +544,7 @@ export type Database = {
           id: string
           is_default: boolean
           name: string
+          openalex_ror: string | null
         }
         Insert: {
           created_at?: string | null
@@ -545,6 +552,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           name: string
+          openalex_ror?: string | null
         }
         Update: {
           created_at?: string | null
@@ -552,6 +560,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           name?: string
+          openalex_ror?: string | null
         }
         Relationships: []
       }

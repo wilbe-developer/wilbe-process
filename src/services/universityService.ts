@@ -5,7 +5,7 @@ import { PATHS } from "@/lib/constants";
 export async function getUniversities() {
   const { data, error } = await supabase
     .from('universities')
-    .select('id, name, is_default, domain')
+    .select('id, name, is_default, domain, openalex_ror')
     .order('name');
   
   if (error) {
@@ -17,7 +17,12 @@ export async function getUniversities() {
   return data || [];
 }
 
-export async function updateUniversity(id: string, fields: { name?: string; is_default?: boolean; domain?: string }) {
+export async function updateUniversity(id: string, fields: { 
+  name?: string; 
+  is_default?: boolean; 
+  domain?: string;
+  openalex_ror?: string;
+}) {
   const { error } = await supabase
     .from('universities')
     .update(fields)
@@ -29,15 +34,16 @@ export async function updateUniversity(id: string, fields: { name?: string; is_d
   }
 }
 
-export async function addUniversity(name: string, domain?: string) {
-  console.log("Adding university:", { name, domain });
+export async function addUniversity(name: string, domain?: string, openalex_ror?: string) {
+  console.log("Adding university:", { name, domain, openalex_ror });
   
   const { data, error } = await supabase
     .from('universities')
     .insert({ 
       name, 
       is_default: false,
-      domain: domain || null
+      domain: domain || null,
+      openalex_ror: openalex_ror || null
     })
     .select();
   
@@ -65,6 +71,7 @@ export async function deleteUniversity(id: string) {
 export async function findEmails(filters: { 
   useCustomUniversities: boolean;
   selectedUniversities?: string[];
+  topicId?: string;
 }) {
   try {
     // For local development without API, return example data
@@ -72,9 +79,9 @@ export async function findEmails(filters: {
       console.log("Using example data for local development");
       return {
         data: [
-          { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes' },
-          { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No' },
-          { name: 'Cara Li', institution: 'University of Oxford', email: 'cara.li@ox.ac.uk', verified: 'Yes' },
+          { name: 'Alice Smith', institution: 'MIT', email: 'alice.smith@mit.edu', verified: 'Yes', orcid: '0000-0001-2345-6789', last_verified_at: '2025-04-28T12:00:00Z', last_failed_at: null },
+          { name: 'Bob Chen', institution: 'Stanford University', email: 'bob.chen@stanford.edu', verified: 'No', orcid: '0000-0002-3456-7890', last_verified_at: null, last_failed_at: '2025-04-27T10:30:00Z' },
+          { name: 'Cara Li', institution: 'University of Oxford', email: 'cara.li@ox.ac.uk', verified: 'Yes', orcid: '0000-0003-4567-8901', last_verified_at: '2025-04-29T09:15:00Z', last_failed_at: null },
         ],
         error: null
       };
@@ -87,6 +94,10 @@ export async function findEmails(filters: {
 
     if (filters.useCustomUniversities && filters.selectedUniversities) {
       queryParams.append('universities', JSON.stringify(filters.selectedUniversities));
+    }
+
+    if (filters.topicId) {
+      queryParams.append('topicId', filters.topicId);
     }
 
     const apiUrl = `/api/find-emails?${queryParams.toString()}`;

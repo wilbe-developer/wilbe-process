@@ -1,3 +1,4 @@
+
 // File: pages/api/find-emails.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient }            from '@supabase/supabase-js';
@@ -51,12 +52,34 @@ async function verifyEmailWithRailway(email:string,domain:string):Promise<boolea
     const t0 = Date.now();
     const { data } = await axios.post(`${RAILWAY_BASE}/verify`, { email, domain });
     console.log(`[verifyRailway] ${email}@${domain} → ok=${data.ok} (${Date.now()-t0}ms)`);
+    
+    // Update the email_domains table with verification timestamp
+    if (data.ok) {
+      await supabase
+        .from('email_domains')
+        .update({ last_verified_at: new Date().toISOString() })
+        .eq('domain', domain);
+    } else {
+      await supabase
+        .from('email_domains')
+        .update({ last_failed_at: new Date().toISOString() })
+        .eq('domain', domain);
+    }
+    
     return data.ok === true;
   } catch (e) {
     console.warn('[verifyRailway] error, default false', e.message);
+    
+    // Update the failure timestamp
+    await supabase
+      .from('email_domains')
+      .update({ last_failed_at: new Date().toISOString() })
+      .eq('domain', domain);
+      
     return false;
   }
 }
+
 async function testCatchallWithRailway(domain:string):Promise<boolean> {
   try {
     const t0 = Date.now();
@@ -89,10 +112,19 @@ function generateEmailCandidates(firstName:string, lastName:string, domain:strin
   return patterns;
 }
 
-async function getAuthorsFromArXiv(univ:string, maxResults=3) {
-  console.log(`[arXiv] start fetch for ${univ}`);
+async function getAuthorsFromArXiv(univ:string, maxResults=3, topicId?:string) {
+  console.log(`[arXiv] start fetch for ${univ}${topicId ? ' with topic ' + topicId : ''}`);
   try {
-    const q    = encodeURIComponent(`affiliation:${univ}`);
+    // Base query for university affiliation
+    let q = encodeURIComponent(`affiliation:${univ}`);
+    
+    // Add topic filter if provided
+    if (topicId) {
+      // This is a simplified approach - in a real implementation, 
+      // you might want to use the OpenAlex API to translate the topic ID to a search term
+      q = encodeURIComponent(`affiliation:${univ} AND cat:${topicId}`);
+    }
+    
     const url  = `http://export.arxiv.org/api/query?search_query=${q}&start=0&max_results=${maxResults}`;
     const t0   = Date.now();
     const res  = await axios.get(url, { timeout: 10_000 });
@@ -103,7 +135,11 @@ async function getAuthorsFromArXiv(univ:string, maxResults=3) {
     console.log(`[arXiv] parsed ${entries.length} entries for ${univ}`);
     return entries.map((e:any) => {
       const auth = Array.isArray(e.author) ? e.author[0] : e.author;
-      return { name: auth?.name||'Unknown', affiliation: univ };
+      return { 
+        name: auth?.name || 'Unknown', 
+        affiliation: univ,
+        orcid: auth?.orcid || null  // Simulated ORCID - in reality, you'd query OpenAlex or ORCID API
+      };
     });
   } catch (e) {
     console.error('[arXiv] error:', e.message);
@@ -135,7 +171,7 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
     const t0 = Date.now();
     const { data, error } = await supabase
       .from('universities')
-      .select('id,name,domain')
+      .select('id,name,domain,openalex_ror')
       .eq('is_default', true);
     console.log(`[handler] loaded defaults in ${Date.now()-t0}ms:`, data);
     if (error || !data) {
@@ -143,6 +179,12 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
       return res.status(500).json({ error:'Failed loading defaults', details:error?.message });
     }
     unis = data;
+  }
+
+  // Get the topic ID if provided
+  const topicId = req.query.topicId as string;
+  if (topicId) {
+    console.log(`[handler] Using topic filter: ${topicId}`);
   }
 
   console.log('[handler] starting main loop over', unis.length, 'unis');
@@ -155,21 +197,30 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
     const tCache = Date.now();
     let { data: domData } = await supabase
       .from('email_domains')
-      .select('is_catchall,good_pattern')
+      .select('is_catchall,good_pattern,last_verified_at,last_failed_at')
       .eq('domain', domain)
       .maybeSingle();
     console.log(`[cache] domData for ${domain} after ${Date.now()-tCache}ms:`, domData);
 
     let isCatchall  = domData?.is_catchall||false;
     let goodPattern = domData?.good_pattern||null;
+    let lastVerifiedAt = domData?.last_verified_at;
+    let lastFailedAt = domData?.last_failed_at;
+    
     if (!domData) {
       console.log(`[cache] no entry for ${domain}, testing catch-all…`);
       isCatchall = await testCatchallWithRailway(domain);
       console.log(`[cache] catch-all result:`, isCatchall);
-      await supabase.from('email_domains').insert({ domain, is_catchall:isCatchall, good_pattern:null });
+      await supabase.from('email_domains').insert({ 
+        domain, 
+        is_catchall: isCatchall, 
+        good_pattern: null,
+        last_verified_at: isCatchall ? new Date().toISOString() : null,
+        last_failed_at: null
+      });
     }
 
-    const authors = await getAuthorsFromArXiv(uni.name, 3);
+    const authors = await getAuthorsFromArXiv(uni.name, 3, topicId);
     console.log(`[loop] authors for ${uni.name}:`, authors);
 
     for (const a of authors) {
@@ -215,8 +266,33 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
       }
 
       if (foundEmail && !(await checkLeadExistsInAttio(foundEmail))) {
-        console.log('[result] adding lead:', { name, domain, foundEmail, verified: isCatchall?'Maybe':'Yes' });
-        results.push({ name, institution:uni.name, email:foundEmail, verified:isCatchall?'Maybe':'Yes' });
+        // Get the latest domain data for timestamps
+        const { data: latestDomData } = await supabase
+          .from('email_domains')
+          .select('last_verified_at,last_failed_at')
+          .eq('domain', domain)
+          .maybeSingle();
+        
+        console.log('[result] adding lead:', { 
+          name, 
+          domain, 
+          foundEmail, 
+          verified: isCatchall?'Maybe':'Yes', 
+          orcid: a.orcid || null,
+          last_verified_at: latestDomData?.last_verified_at || null,
+          last_failed_at: latestDomData?.last_failed_at || null
+        });
+        
+        results.push({ 
+          name, 
+          institution: uni.name, 
+          email: foundEmail, 
+          verified: isCatchall?'Maybe':'Yes',
+          orcid: a.orcid || null,
+          last_verified_at: latestDomData?.last_verified_at || null,
+          last_failed_at: latestDomData?.last_failed_at || null
+        });
+        
         if (results.length >= 10) {
           console.log('[loop] reached 10 results, breaking');
           break;
