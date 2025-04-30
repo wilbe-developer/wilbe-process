@@ -121,17 +121,27 @@ export const UniversityManagement = () => {
 
   const handleUpdateROR = async (university: University, openalex_ror: string) => {
     try {
-      await updateUniversity(university.id, { openalex_ror });
-      setUniversities(
-        universities.map((u) =>
-          u.id === university.id ? { ...u, openalex_ror } : u
-        )
-      );
-      toast({
-        title: "Success",
-        description: "University OpenAlex ROR updated",
-      });
+      // Check if the value has changed
+      if (university.openalex_ror !== openalex_ror) {
+        console.log(`Updating ROR for ${university.name}: ${openalex_ror}`);
+        
+        // Update in database
+        await updateUniversity(university.id, { openalex_ror });
+        
+        // Update in local state
+        setUniversities(
+          universities.map((u) =>
+            u.id === university.id ? { ...u, openalex_ror } : u
+          )
+        );
+        
+        toast({
+          title: "Success",
+          description: "University OpenAlex ROR updated",
+        });
+      }
     } catch (error) {
+      console.error("Failed to update ROR:", error);
       toast({
         title: "Error",
         description: "Failed to update university OpenAlex ROR",
@@ -246,9 +256,7 @@ export const UniversityManagement = () => {
                         placeholder="OpenAlex ROR ID"
                         className="max-w-xs"
                         onBlur={(e) => {
-                          if (e.target.value !== university.openalex_ror) {
-                            handleUpdateROR(university, e.target.value);
-                          }
+                          handleUpdateROR(university, e.target.value);
                         }}
                       />
                     </TableCell>
