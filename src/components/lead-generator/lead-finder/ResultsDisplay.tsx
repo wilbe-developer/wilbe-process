@@ -167,7 +167,7 @@ export const ResultsDisplay = ({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious 
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage(Math.max(1, page - 1))}
                 className={page === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
@@ -185,7 +185,7 @@ export const ResultsDisplay = ({
             
             <PaginationItem>
               <PaginationNext 
-                onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                onClick={() => setPage(Math.min(pageCount, page + 1))}
                 className={page === pageCount ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
