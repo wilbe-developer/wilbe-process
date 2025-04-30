@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { findEmails, getUniversities } from "@/services/universityService";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ export const useLeadFinder = () => {
   const [defaultUniversityCount, setDefaultUniversityCount] = useState(0);
   const [topicId, setTopicId] = useState<string>("");
   const [isRecovering, setIsRecovering] = useState(false);
+  const [hookInitialized, setHookInitialized] = useState(false);
   const { toast } = useToast();
   
   const resultsPerPage = 5;
@@ -41,10 +42,19 @@ export const useLeadFinder = () => {
     { value: "C162324750", label: "Neuroscience" }
   ];
 
+  useEffect(() => {
+    console.log("useLeadFinder hook initialized");
+    setHookInitialized(true);
+    return () => {
+      console.log("useLeadFinder hook cleaned up");
+    };
+  }, []);
+
   // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Checking authentication status");
         const { data, error } = await supabase.auth.getSession();
         if (error) {
           setAuthError(`Authentication error: ${error.message}`);
@@ -65,12 +75,9 @@ export const useLeadFinder = () => {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    fetchUniversities();
-  }, []);
-
-  const fetchUniversities = async () => {
+  const fetchUniversities = useCallback(async () => {
     try {
+      console.log("Fetching universities...");
       setLoading(true);
       setConnectionError(null);
       setError(null);
@@ -80,13 +87,14 @@ export const useLeadFinder = () => {
       if (!authData.session) {
         setAuthError("Not authenticated. Sign in to access university data.");
         setLoading(false);
+        console.warn("No active session during fetchUniversities");
         return;
       }
       
       const data = await getUniversities();
       console.log("Universities fetched:", data);
-      setUniversities(data);
-      setUniversityCount(data.length);
+      setUniversities(data || []);
+      setUniversityCount(data?.length || 0);
       
       // Check if default universities are missing domains
       const defaultUnis = data.filter(u => u.is_default);
@@ -122,11 +130,18 @@ export const useLeadFinder = () => {
       });
     } finally {
       setLoading(false);
+      console.log("Completed university fetch");
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    if (useCustomUniversities) {
+    if (hookInitialized) {
+      fetchUniversities();
+    }
+  }, [fetchUniversities, hookInitialized]);
+
+  useEffect(() => {
+    if (useCustomUniversities && universities.length > 0) {
       // Check if selected universities are missing domains
       const missingDomains = universities
         .filter(u => selectedUniversities.includes(u.id) && !u.domain)
@@ -139,6 +154,7 @@ export const useLeadFinder = () => {
   const checkForDefaultUniversities = async () => {
     setIsCheckingDefaults(true);
     try {
+      console.log("Checking for default universities");
       // Check if there are any universities set as default
       const defaultUniversities = universities.filter(u => u.is_default);
       
@@ -172,6 +188,7 @@ export const useLeadFinder = () => {
 
   const handleRunSearch = async () => {
     try {
+      console.log("Running search...");
       // Reset state for new search
       setError(null);
       setApiError(null);
@@ -275,6 +292,7 @@ export const useLeadFinder = () => {
         });
       }
     } catch (error: any) {
+      console.error("Error in handleRunSearch:", error);
       setError(error.message || "An error occurred during the search");
       toast({
         title: "Error",
@@ -283,10 +301,12 @@ export const useLeadFinder = () => {
       });
     } finally {
       setLoading(false);
+      console.log("Search operation completed");
     }
   };
 
   const handleInviteToSprint = (email: string) => {
+    console.log(`Inviting ${email} to sprint`);
     toast({
       title: "Invite Sent",
       description: `Invitation sent to ${email}`,
@@ -295,6 +315,7 @@ export const useLeadFinder = () => {
 
   const refreshData = async () => {
     try {
+      console.log("Refreshing data...");
       setIsRecovering(true);
       // Clear all error states
       setAuthError(null);
@@ -305,6 +326,7 @@ export const useLeadFinder = () => {
       // Re-verify authentication
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
+        console.warn("No active session during refreshData, redirecting to login");
         // We need to redirect to login
         window.location.href = PATHS.LOGIN;
         return;
@@ -324,6 +346,7 @@ export const useLeadFinder = () => {
       });
     } finally {
       setIsRecovering(false);
+      console.log("Data refresh completed");
     }
   };
 

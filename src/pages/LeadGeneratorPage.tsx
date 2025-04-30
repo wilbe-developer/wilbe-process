@@ -8,27 +8,51 @@ import UniversityManagement from "@/components/lead-generator/UniversityManageme
 import LeadGeneratorTab from "@/components/lead-generator/LeadGeneratorTab";
 import { useAuth } from "@/hooks/useAuth";
 import { PATHS } from "@/lib/constants";
+import { useToast } from "@/components/ui/use-toast";
 
 const LeadGeneratorPage = () => {
   const [activeTab, setActiveTab] = useState("universities");
   const [error, setError] = useState<string | null>(null);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
   const { isAuthenticated, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Debug mounting
+  useEffect(() => {
+    console.log("LeadGeneratorPage mounted");
+    return () => console.log("LeadGeneratorPage unmounted");
+  }, []);
 
   useEffect(() => {
     // Redirect if not authenticated or not admin
-    if (!loading && (!isAuthenticated || !isAdmin)) {
-      console.log("LeadGeneratorPage: Redirecting to login. Auth status:", { isAuthenticated, isAdmin, loading });
-      navigate(PATHS.LOGIN);
+    if (!loading) {
+      console.log("LeadGeneratorPage: Auth status:", { isAuthenticated, isAdmin, loading });
+      
+      if (!isAuthenticated) {
+        console.log("LeadGeneratorPage: Redirecting to login. Not authenticated.");
+        navigate(PATHS.LOGIN);
+      } else if (!isAdmin) {
+        console.log("LeadGeneratorPage: Redirecting to home. Not admin.");
+        toast({
+          title: "Access Denied",
+          description: "You need admin privileges to access this page.",
+          variant: "destructive",
+        });
+        navigate(PATHS.HOME);
+      } else {
+        setIsPageLoaded(true);
+      }
     }
-  }, [isAuthenticated, isAdmin, loading, navigate]);
+  }, [isAuthenticated, isAdmin, loading, navigate, toast]);
 
   const handleTabChange = (value: string) => {
     try {
+      console.log(`Changing tab to: ${value}`);
       setActiveTab(value);
       // Clear any previous errors when changing tabs
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error changing tabs:", err);
       setError("An error occurred while changing tabs. Please try again.");
     }
@@ -84,7 +108,13 @@ const LeadGeneratorPage = () => {
         </TabsContent>
 
         <TabsContent value="generator">
-          <LeadGeneratorTab />
+          {isPageLoaded ? (
+            <LeadGeneratorTab />
+          ) : (
+            <div className="py-12 flex justify-center">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
