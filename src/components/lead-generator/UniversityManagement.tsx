@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -121,26 +120,23 @@ export const UniversityManagement = () => {
 
   const handleUpdateROR = async (university: University, openalex_ror: string) => {
     try {
-      // Check if the value has changed
-      if (university.openalex_ror !== openalex_ror) {
-        console.log(`Updating ROR for ${university.name}: ${openalex_ror}`);
-        
-        // Update in database
-        const result = await updateUniversity(university.id, { openalex_ror });
-        console.log("Update result:", result);
-        
-        // Update in local state
-        setUniversities(
-          universities.map((u) =>
-            u.id === university.id ? { ...u, openalex_ror } : u
-          )
-        );
-        
-        toast({
-          title: "Success",
-          description: "University OpenAlex ROR updated",
-        });
-      }
+      console.log(`Attempting to update ROR for ${university.name} from "${university.openalex_ror}" to "${openalex_ror}"`);
+      
+      // Update in database
+      const result = await updateUniversity(university.id, { openalex_ror });
+      console.log("Update result:", result);
+      
+      // Update in local state
+      setUniversities(
+        universities.map((u) =>
+          u.id === university.id ? { ...u, openalex_ror } : u
+        )
+      );
+      
+      toast({
+        title: "Success",
+        description: "University OpenAlex ROR updated",
+      });
     } catch (error) {
       console.error("Failed to update ROR:", error);
       toast({
