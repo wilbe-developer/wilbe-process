@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient }                       from '@supabase/supabase-js';
-import axios                                   from 'axios';
+import { createClient }            from '@supabase/supabase-js';
+import axios                        from 'axios';
 
 // ─── Supabase setup ────────────────────────────────────────────────────────────
 const SUPABASE_URL       = process.env.VITE_SUPABASE_URL!;
@@ -146,12 +146,9 @@ async function getAuthorsFromOpenAlex(rorId: string, topicId?: string, perPage =
     const t0 = Date.now();
     const res = await axios.get(url);
     console.log(`[OpenAlex] fetched ${res.data.results.length} authors in ${Date.now()-t0}ms`);
-    return res.data.results.map((a:any)=>({
-      name: a.display_name,
-      orcid: a.orcid,
-      works_count: a.works_count,
-      h_index: a.summary_stats.h_index
-    }));
+    return res.data.results.map((a:any)=>(
+      { name: a.display_name, orcid: a.orcid, works_count: a.works_count, h_index: a.summary_stats.h_index }
+    ));
   } catch (e:any) {
     console.error('[OpenAlex] error:', e.message);
     await logMetric({ eventType:'openalex_error', errorMessage:e.message });
@@ -167,7 +164,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error:'Method not allowed' });
   }
 
-  // load defaults
   console.log('[handler] loading universities…');
   const { data: unis, error: uniErr } = await supabase
     .from('universities')
@@ -184,12 +180,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const results: any[] = [];
 
-  uniLoop:
+uniLoop:
   for (const uni of unis) {
     const { name: uniName, domain, openalex_ror: rorId } = uni;
     console.log(`[handler] university: ${uniName} (${domain})`);
 
-    // fetch domain cache + cool-off timestamp
     let { data: domData } = await supabase
       .from('email_domains')
       .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
@@ -198,41 +193,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!domData) {
       const isCatchall = await testCatchallWithRailway(domain);
-      domData = {
-        is_catchall:    isCatchall,
-        good_pattern:   null,
-        last_verified_at: isCatchall ? new Date().toISOString() : null,
-        last_failed_at: !isCatchall ? new Date().toISOString() : null,
-        next_probe_at:  null
-      };
-      await supabase.from('email_domains').insert({
-        domain,
-        is_catchall:    domData.is_catchall,
-        good_pattern:   domData.good_pattern,
-        last_verified_at: domData.last_verified_at,
-        last_failed_at: domData.last_failed_at,
-        next_probe_at:  domData.next_probe_at
-      });
+      domData = { is_catchall:isCatchall, good_pattern:null, last_verified_at:isCatchall?new Date().toISOString():null, last_failed_at:!isCatchall?new Date().toISOString():null, next_probe_at:null };
+      await supabase.from('email_domains').insert({ domain, ...domData });
       console.log(`[handler] initialized cache for ${domain}`);
     }
 
-    // skip if still in cool-off
     if (domData.next_probe_at && new Date(domData.next_probe_at) > new Date()) {
       console.log(`[handler] skipping ${domain}, cool-off until ${domData.next_probe_at}`);
       continue;
     }
 
-    // pull authors
     const authors = await getAuthorsFromOpenAlex(rorId, topicId, 5);
     console.log(`[loop] authors for ${uniName}:`, authors.map(a=>a.name));
 
-    // per-author
     for (const a of authors) {
       console.log(`[handler] processing author: ${a.name}`);
       if (!a.name.includes(' ')) continue;
       const [firstName, ...rest] = a.name.split(' ');
       const lastName = rest[rest.length-1];
-      if (firstName.length < 2 || lastName.length < 2) continue;
+      if (firstName.length<2||lastName.length<2) continue;
 
       let emailToUse: string|null = null;
       let verifiedFlag: 'Yes'|'Maybe' = 'Yes';
@@ -241,94 +220,65 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const hit = await lookupWithSerper(a.name, domain);
       if (hit) {
         const [local, foundDom] = hit.split('@');
+
+        // check foundDom cool-off, if so skip this author entirely
+        const { data: foundDomData } = await supabase
+          .from('email_domains')
+          .select('next_probe_at')
+          .eq('domain', foundDom)
+          .maybeSingle();
+        if (foundDomData?.next_probe_at && new Date(foundDomData.next_probe_at)>new Date()) {
+          console.warn(`[handler] skipping ${foundDom}, cool-off until ${foundDomData.next_probe_at}`);
+          continue; // no fallback
+        }
+
         console.log(`[verify] calling verifyEmailWithRailway(local="${local}", domain="${foundDom}")`);
         const vr = await verifyEmailWithRailway(local, foundDom);
         console.log('[verifyResult]', vr);
-
-        await logMetric({
-          eventType:    'smtp_verification',
-          domain:       foundDom,
-          patternTried: local,
-          smtpSuccess:  vr.ok,
-          latencyMs:    vr.latencyMs,
-          errorMessage: vr.error,
-          reason:       vr.reason
-        });
+        await logMetric({ eventType:'smtp_verification', domain:foundDom, patternTried:local, smtpSuccess:vr.ok, latencyMs:vr.latencyMs, errorMessage:vr.error, reason:vr.reason });
 
         if (vr.ok) {
           emailToUse   = hit;
           verifiedFlag = 'Yes';
         } else if (!vr.rejected) {
-          // GREY-LIST: set cool-off and skip rest of this domain
-          console.warn(`[verify] grey-list on ${domain}—cooling off`);
-          await supabase
-            .from('email_domains')
-            .update({ next_probe_at: new Date(Date.now()+COOL_OFF_MS).toISOString() })
-            .eq('domain', domain);
-          break uniLoop;
+          console.warn(`[verify] grey-list on ${foundDom}—cooling off`);
+          await supabase.from('email_domains')
+            .update({ next_probe_at:new Date(Date.now()+COOL_OFF_MS).toISOString() })
+            .eq('domain', foundDom);
+          continue; // skip fallback
         }
-        // else hard-reject → just continue guessing
       }
 
       // 2) fallback to guessing
-      if (!emailToUse) {
-        const candidates = generateEmailCandidates(firstName, lastName, domain, domData.good_pattern);
-        for (const c of candidates) {
-          const [local] = c.split('@');
-          console.log(`[verify] trying candidate: ${c}`);
-          const vr2 = await verifyEmailWithRailway(local, domain);
-          console.log('[verifyResult]', vr2);
+      for (const c of generateEmailCandidates(firstName, lastName, domain, domData.good_pattern)) {
+        const [local] = c.split('@');
+        console.log(`[verify] trying candidate: ${c}`);
+        const vr2 = await verifyEmailWithRailway(local, domain);
+        console.log('[verifyResult]', vr2);
+        await logMetric({ eventType:'smtp_verification', domain, patternTried:local, smtpSuccess:vr2.ok, latencyMs:vr2.latencyMs, errorMessage:vr2.error, reason:vr2.reason });
 
-          await logMetric({
-            eventType:    'smtp_verification',
-            domain,
-            patternTried: local,
-            smtpSuccess:  vr2.ok,
-            latencyMs:    vr2.latencyMs,
-            errorMessage: vr2.error,
-            reason:       vr2.reason
-          });
-
-          if (vr2.ok) {
-            emailToUse   = c;
-            verifiedFlag = 'Yes';
-            if (!domData.good_pattern) {
-              await supabase
-                .from('email_domains')
-                .update({ good_pattern: local })
-                .eq('domain', domain);
-              console.log(`[cache] cached new good_pattern for ${domain}: ${local}`);
-            }
-            break;
-          } else if (!vr2.rejected) {
-            // GREY-LIST on guess → cool-off + skip domain
-            console.warn(`[verify] grey-list on ${domain}—cooling off`);
-            await supabase
-              .from('email_domains')
-              .update({ next_probe_at: new Date(Date.now()+COOL_OFF_MS).toISOString() })
-              .eq('domain', domain);
-            break uniLoop;
+        if (vr2.ok) {
+          emailToUse   = c;
+          verifiedFlag = 'Yes';
+          if (!domData.good_pattern) {
+            await supabase.from('email_domains').update({ good_pattern:local }).eq('domain', domain);
+            console.log(`[cache] cached new good_pattern for ${domain}: ${local}`);
           }
-          // else hard reject → try next pattern
+          break;
+        } else if (!vr2.rejected) {
+          console.warn(`[verify] grey-list on ${domain}—cooling off`);
+          await supabase.from('email_domains')
+            .update({ next_probe_at:new Date(Date.now()+COOL_OFF_MS).toISOString() })
+            .eq('domain', domain);
+          break uniLoop;
         }
       }
 
       // 3) record result
       if (emailToUse) {
-        console.log('[result] adding lead:', { name:a.name, institution:uniName, email:emailToUse, verified:isCatchall?'Maybe':verifiedFlag });
-        results.push({
-          name:            a.name,
-          institution:     uniName,
-          email:           emailToUse,
-          verified:        domData.is_catchall ? 'Maybe' : verifiedFlag,
-          orcid:           a.orcid,
-          last_verified_at:domData.last_verified_at,
-          last_failed_at:  domData.last_failed_at
-        });
-        if (results.length >= 10) {
-          console.log('[loop] reached 10 results, breaking');
-          break uniLoop;
-        }
+        console.log('[result] adding lead:', { name:a.name, institution:uniName, email:emailToUse, verified:domData.is_catchall?'Maybe':verifiedFlag });
+        results.push({ name:a.name, institution:uniName, email:emailToUse, verified:domData.is_catchall?'Maybe':verifiedFlag, orcid:a.orcid, last_verified_at:domData.last_verified_at, last_failed_at:domData.last_failed_at });
+        if (results.length>=10) { console.log('[loop] reached 10 results, breaking'); break uniLoop; }
       }
     }
   }
