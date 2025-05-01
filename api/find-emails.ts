@@ -197,7 +197,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   for (const uni of unis) {
     console.log(`[handler] university: ${uni.name} (${uni.domain})`);
 
-    // ─── catch-all cache & cool-off ───────────────────────────────────────────────
+    // ─── catch-all cache & cool-off for primary domain ────────────────────────────
     let { data: domData } = await supabase
       .from('email_domains')
       .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
@@ -247,15 +247,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (hit) {
         const [local, foundDom] = hit.split('@');
 
-        // check foundDom cool-off
-        const { data: foundDomData } = await supabase
+        // ─── ensure cache row exists for foundDom ────────────────────────────────
+        let { data: foundDomData } = await supabase
           .from('email_domains')
-          .select('next_probe_at')
+          .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
           .eq('domain', foundDom)
           .maybeSingle();
 
+        if (!foundDomData) {
+          console.log(`[handler] no cache for ${foundDom}, testing catch-all…`);
+          const isCA = await testCatchallWithRailway(foundDom);
+          foundDomData = {
+            is_catchall:      isCA,
+            good_pattern:     null,
+            last_verified_at: isCA  ? new Date().toISOString() : null,
+            last_failed_at:   !isCA ? new Date().toISOString() : null,
+            next_probe_at:    null
+          };
+          await supabase
+            .from('email_domains')
+            .insert({ domain: foundDom, ...foundDomData });
+          console.log(`[handler] initialized cache for ${foundDom}:`, foundDomData);
+        }
+
+        // ─── cool-off check for that found domain ───────────────────────────────
         if (
-          foundDomData?.next_probe_at &&
+          foundDomData.next_probe_at &&
           new Date(foundDomData.next_probe_at) > new Date()
         ) {
           console.warn(
