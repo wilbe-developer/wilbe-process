@@ -10,7 +10,7 @@ const supabase           = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABA
 
 // ─── Serper.dev API Key & Railway microservice URL ────────────────────────────
 const SERPER_API_KEY = process.env.SERPER_API_KEY!;
-const RAILWAY_BASE   = process.env.RAILWAY_BASE!;  // e.g. "https://email-verifier-production.up.railway.app"
+const RAILWAY_BASE   = process.env.RAILWAY_BASE!;  // e.g. "https://email-verifier-production.up.railway.app" or something else
 
 // ─── Helpers & constants ───────────────────────────────────────────────────────
 const EMAIL_PATTERNS = [
