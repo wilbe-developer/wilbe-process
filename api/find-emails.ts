@@ -3,10 +3,10 @@ import { createClient }                       from '@supabase/supabase-js';
 import axios                                   from 'axios';
 
 // ─── Supabase setup ────────────────────────────────────────────────────────────
-const SUPABASE_URL       = process.env.VITE_SUPABASE_URL!;
-const SUPABASE_ANON_KEY  = process.env.VITE_SUPABASE_ANON_KEY!;
-const SERVICE_ROLE_KEY   = process.env.SERVICE_ROLE_KEY;
-const supabase           = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABASE_ANON_KEY);
+const SUPABASE_URL      = process.env.VITE_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY!;
+const SERVICE_ROLE_KEY  = process.env.SERVICE_ROLE_KEY;
+const supabase          = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABASE_ANON_KEY);
 
 // ─── Serper.dev API Key & Railway microservice URL ────────────────────────────
 const SERPER_API_KEY = process.env.SERPER_API_KEY!;
@@ -26,8 +26,8 @@ const EMAIL_PATTERNS = [
 
 // ─── Logging metrics ────────────────────────────────────────────────────────────
 async function logMetric(params: {
-  eventType:  string;
-  domain?:    string;
+  eventType:     string;
+  domain?:       string;
   patternTried?: string;
   smtpSuccess?:  boolean;
   latencyMs?:    number;
@@ -52,34 +52,20 @@ async function logMetric(params: {
 }
 
 // ─── Railway HTTP wrappers ─────────────────────────────────────────────────────
+// ONLY calls the microservice—and logs all its raw traffic—no catch-all here.
 async function verifyEmailWithRailway(local: string, domain: string) {
   const t0 = Date.now();
-
-  // 1) MX lookup → catch-all tester
-  let mxFound: boolean;
-  try {
-    mxFound = await testCatchallWithRailway(domain);
-  } catch {
-    mxFound = false;
-  }
-  // log MX lookup
-  try {
-    await supabase
-      .from('metrics')
-      .insert({ event_type:'mx_lookup', domain, mx_found:mxFound });
-  } catch (e) {
-    console.error('[logMetric mx_lookup] failed:', e);
-  }
-
-  // 2) real verify
+  console.log(`[verifyEmailWithRailway] calling microservice /verify for ${local}@${domain}`);
   try {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
       { email:`${local}@${domain}`, domain },
       { timeout:10000 }
     );
+    console.log(`[verifyEmailWithRailway] microservice response for ${local}@${domain}:`, data);
     return { ...data, latencyMs: Date.now() - t0 };
   } catch (e: any) {
+    console.error(`[verifyEmailWithRailway] network_error for ${local}@${domain}:`, e.message);
     return {
       ok: false,
       rejected: false,
@@ -110,14 +96,8 @@ function generateEmailCandidates(
   domain:    string,
   goodPattern?: string
 ): string[] {
-  firstName = firstName.toLowerCase()
-                       .normalize("NFD")
-                       .replace(/[\u0300-\u036f]/g,'')
-                       .trim();
-  lastName  = lastName .toLowerCase()
-                       .normalize("NFD")
-                       .replace(/[\u0300-\u036f]/g,'')
-                       .trim();
+  firstName = firstName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
+  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
 
   const patterns = goodPattern
     ? [ goodPattern
@@ -148,9 +128,7 @@ async function lookupWithSerper(name: string, domain: string): Promise<string|nu
       { q: `${name} ${domain} email` },
       { headers:{ 'X-API-KEY':SERPER_API_KEY } }
     );
-    const txt = (data.organic||[])
-      .map((o:any) => `${o.title} ${o.snippet}`)
-      .join(' ');
+    const txt = (data.organic||[]).map((o:any)=>`${o.title} ${o.snippet}`).join(' ');
     const found = txt.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/)?.[0] || null;
     console.log(`[Serper] found email: ${found}`);
     return found;
@@ -166,24 +144,19 @@ async function getAuthorsFromOpenAlex(
   topicId?:string,
   perPage = 5
 ) {
-  console.log(
-    `[OpenAlex] start fetch for ROR=${rorId}${topicId?` topic=${topicId}`:''}`
-  );
+  console.log(`[OpenAlex] start fetch for ROR=${rorId}${topicId?` topic=${topicId}`:''}`);
   try {
     const filters = [`last_known_institutions.ror:${rorId}`];
     if (topicId) filters.push(`topics.id:${topicId}`);
     filters.push(`works_count:<50`, `summary_stats.h_index:<15`, `summary_stats.2yr_mean_citedness:>1`);
-
     const url = `https://api.openalex.org/authors`
               + `?filter=${filters.join(',')}`
               + `&select=display_name,orcid,last_known_institutions,works_count,summary_stats`
               + `&per_page=${perPage}`;
-
     const t0  = Date.now();
     const res = await axios.get(url);
     console.log(`[OpenAlex] fetched ${res.data.results.length} authors in ${Date.now()-t0}ms`);
-
-    return res.data.results.map((a:any) => ({
+    return res.data.results.map((a:any)=>({
       name:        a.display_name,
       orcid:       a.orcid,
       works_count: a.works_count,
@@ -197,10 +170,7 @@ async function getAuthorsFromOpenAlex(
 }
 
 // ─── API handler ───────────────────────────────────────────────────────────────
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.time('[total]');
   if (req.method !== 'GET') {
     console.log('[handler] wrong method:', req.method);
@@ -212,13 +182,12 @@ export default async function handler(
     .from('universities')
     .select('id,name,domain,openalex_ror')
     .eq('is_default', true);
-
   if (uniErr || !unis) {
     console.error('[handler] supabase error:', uniErr);
     return res.status(500).json({ error:'Failed loading universities' });
   }
-
   console.log(`[handler] loaded ${unis.length} defaults`);
+
   const topicId = (req.query.topicId as string) || undefined;
   console.log('[handler] topic filter:', topicId);
 
@@ -228,7 +197,7 @@ export default async function handler(
   for (const uni of unis) {
     console.log(`[handler] university: ${uni.name} (${uni.domain})`);
 
-    // fetch/create the cache row
+    // ─── catch-all cache & cool-off ───────────────────────────────────────────────
     let { data: domData } = await supabase
       .from('email_domains')
       .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
@@ -251,10 +220,7 @@ export default async function handler(
       console.log(`[handler] initialized cache for ${uni.domain}:`, domData);
     }
 
-    // alias locally (so nothing ever reads the old DOM directly)
     const isCatchall = domData.is_catchall;
-
-    // skip while in cool-off
     if (domData.next_probe_at && new Date(domData.next_probe_at) > new Date()) {
       console.log(
         `[handler] skipping ${uni.domain}, cool-off until ${domData.next_probe_at}`
@@ -262,15 +228,10 @@ export default async function handler(
       continue;
     }
 
-    // pull authors
-    const authors = await getAuthorsFromOpenAlex(
-      uni.openalex_ror,
-      topicId,
-      5
-    );
+    // ─── pull authors & per-author loop ──────────────────────────────────────────
+    const authors = await getAuthorsFromOpenAlex(uni.openalex_ror, topicId, 5);
     console.log(`[loop] authors for ${uni.name}:`, authors.map(a => a.name));
 
-    // per-author
     for (const a of authors) {
       console.log(`[handler] processing author: ${a.name}`);
       if (!a.name.includes(' ')) continue;
@@ -281,12 +242,12 @@ export default async function handler(
       let emailToUse: string | null = null;
       let verifiedFlag: 'Yes' | 'Maybe' = 'Yes';
 
-      // Serper lookup
+      // 1) Serper lookup
       const hit = await lookupWithSerper(a.name, uni.domain);
       if (hit) {
         const [local, foundDom] = hit.split('@');
 
-        // check if *that* domain is cooling off
+        // check foundDom cool-off
         const { data: foundDomData } = await supabase
           .from('email_domains')
           .select('next_probe_at')
@@ -300,7 +261,7 @@ export default async function handler(
           console.warn(
             `[handler] skipping ${foundDom}, cool-off until ${foundDomData.next_probe_at}`
           );
-          continue; // no fallback
+          continue;
         }
 
         console.log(
@@ -322,25 +283,23 @@ export default async function handler(
           emailToUse   = hit;
           verifiedFlag = 'Yes';
         } else if (!vr.rejected) {
-          console.warn(`[verify] grey-list on ${foundDom}—cooling off`);
+          console.warn(`[verify] grey-list on ${foundDom}—cool-off`);
           await supabase
             .from('email_domains')
             .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
             .eq('domain', foundDom);
-          continue; // skip fallback
+          continue;
         }
       }
 
-      // fallback → guessing on original
+      // 2) fallback → guessing on original domain
       if (!emailToUse) {
-        const candidates = generateEmailCandidates(
+        for (const c of generateEmailCandidates(
           firstName,
           lastName,
           uni.domain,
           domData.good_pattern
-        );
-
-        for (const c of candidates) {
+        )) {
           const [local] = c.split('@');
           console.log(`[verify] trying candidate: ${c}`);
           const vr2 = await verifyEmailWithRailway(local, uni.domain);
@@ -370,7 +329,7 @@ export default async function handler(
             break;
           } else if (!vr2.rejected) {
             console.warn(
-              `[verify] grey-list on ${uni.domain}—cooling off`
+              `[verify] grey-list on ${uni.domain}—cool-off`
             );
             await supabase
               .from('email_domains')
@@ -381,13 +340,13 @@ export default async function handler(
         }
       }
 
-      // record result
+      // 3) record result
       if (emailToUse) {
         console.log('[result] adding lead:', {
-          name:         a.name,
-          institution:  uni.name,
-          email:        emailToUse,
-          verified:     isCatchall ? 'Maybe' : verifiedFlag
+          name:        a.name,
+          institution: uni.name,
+          email:       emailToUse,
+          verified:    isCatchall ? 'Maybe' : verifiedFlag
         });
 
         results.push({
@@ -400,7 +359,6 @@ export default async function handler(
           last_failed_at:   domData.last_failed_at
         });
 
-        // ←── **NEW**: break out entirely as soon as we hit 10
         if (results.length >= 10) {
           console.log('[handler] reached 10 results, breaking out');
           break uniLoop;
