@@ -31,20 +31,41 @@ async function logMetric(params: {
   errorMessage?: string;
   reason?: string;
 }) {
-  await supabase.from('metrics').insert({
-    event_type:   params.eventType,
-    domain:       params.domain,
-    pattern_tried:params.patternTried,
-    smtp_success: params.smtpSuccess,
-    latency_ms:   params.latencyMs,
-    error_message:params.errorMessage,
-    error_reason: params.reason,
-  }).catch(e => console.error('[logMetric] failed:', e));
+  try {
+    await supabase.from('metrics').insert({
+      event_type:    params.eventType,
+      domain:        params.domain,
+      pattern_tried: params.patternTried,
+      smtp_success:  params.smtpSuccess,
+      latency_ms:    params.latencyMs,
+      error_message: params.errorMessage,
+      error_reason:  params.reason,
+    });
+  } catch (e) {
+    console.error('[logMetric] failed:', e);
+  }
 }
 
 // ─── Railway HTTP wrappers ─────────────────────────────────────────────────────
 async function verifyEmailWithRailway(local: string, domain: string) {
   const t0 = Date.now();
+  // 1) call the DNS-based catch-all tester instead of raw MX lookup
+  let mxFound: boolean;
+  try {
+    // First, probe catch-all (which internally does the DNS MX lookup)
+    // we only care about the boolean result here for logging
+    mxFound = await testCatchallWithRailway(domain);
+  } catch {
+    mxFound = false;
+  }
+  // log that MX lookup result immediately
+  await supabase.from('metrics').insert({
+    event_type: 'mx_lookup',
+    domain,
+    mx_found:   mxFound
+  }).catch(e => console.error('[logMetric mx_lookup] failed:', e));
+
+  // 2) now run the real verify call
   try {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
@@ -54,19 +75,6 @@ async function verifyEmailWithRailway(local: string, domain: string) {
     return { ...data, latencyMs: Date.now() - t0 };
   } catch (e: any) {
     return { ok: false, rejected: false, reason: 'network_error', error: e.message, latencyMs: Date.now() - t0 };
-  }
-}
-
-async function testCatchallWithRailway(domain: string) {
-  try {
-    const { data } = await axios.post(
-      `${RAILWAY_BASE}/test-catchall`,
-      { domain },
-      { timeout: 10000 }
-    );
-    return data.ok === true;
-  } catch {
-    return false;
   }
 }
 
