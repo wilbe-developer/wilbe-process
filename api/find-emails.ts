@@ -59,11 +59,18 @@ async function verifyEmailWithRailway(local: string, domain: string) {
     mxFound = false;
   }
   // log that MX lookup result immediately
-  await supabase.from('metrics').insert({
-    event_type: 'mx_lookup',
-    domain,
-    mx_found:   mxFound
-  }).catch(e => console.error('[logMetric mx_lookup] failed:', e));
+  // right after you compute `mxFound` in verifyEmailWithRailway…
+  try {
+    await supabase
+      .from('metrics')
+      .insert({
+        event_type: 'mx_lookup',
+        domain,
+        mx_found: mxFound
+      });
+  } catch (e) {
+    console.error('[logMetric mx_lookup] failed:', e);
+  }
 
   // 2) now run the real verify call
   try {
