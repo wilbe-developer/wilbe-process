@@ -60,7 +60,7 @@ async function verifyEmailWithRailway(local: string, domain: string) {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
       { email:`${local}@${domain}`, domain },
-      { timeout:10000 }
+      { timeout:20000 }
     );
     console.log(`[verifyEmailWithRailway] microservice response for ${local}@${domain}:`, data);
     return { ...data, latencyMs: Date.now() - t0 };
@@ -81,7 +81,7 @@ async function testCatchallWithRailway(domain: string) {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/test-catchall`,
       { domain },
-      { timeout:10000 }
+      { timeout:20000 }
     );
     return data.ok === true;
   } catch {
