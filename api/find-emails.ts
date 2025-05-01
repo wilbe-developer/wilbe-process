@@ -60,7 +60,7 @@ async function verifyEmailWithRailway(local: string, domain: string) {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
       { email:`${local}@${domain}`, domain },
-      { timeout:20000 }
+      { timeout:25000 }
     );
     console.log(`[verifyEmailWithRailway] microservice response for ${local}@${domain}:`, data);
     return { ...data, latencyMs: Date.now() - t0 };
@@ -81,7 +81,7 @@ async function testCatchallWithRailway(domain: string) {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/test-catchall`,
       { domain },
-      { timeout:20000 }
+      { timeout:25000 }
     );
     return data.ok === true;
   } catch {
@@ -376,7 +376,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           last_failed_at:   domData.last_failed_at
         });
 
-        if (results.length >= 3) {
+        if (results.length >= 1) {
           console.log('[handler] reached 10 results, breaking out');
           break uniLoop;
         }
