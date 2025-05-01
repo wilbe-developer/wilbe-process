@@ -376,7 +376,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           last_failed_at:   domData.last_failed_at
         });
 
-        if (results.length >= 10) {
+        if (results.length >= 3) {
           console.log('[handler] reached 10 results, breaking out');
           break uniLoop;
         }
