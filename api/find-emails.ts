@@ -50,20 +50,10 @@ async function logMetric(params: {
 }
 
 // ─── Railway HTTP wrappers ─────────────────────────────────────────────────────
+// **Removed** the catch-all test & mx_lookup logging from here.
+// Catch-all is only tested once below, when initializing the cache.
 async function verifyEmailWithRailway(local: string, domain: string) {
   const t0 = Date.now();
-  let mxFound: boolean;
-  try {
-    mxFound = await testCatchallWithRailway(domain);
-  } catch {
-    mxFound = false;
-  }
-  try {
-    await supabase.from('metrics').insert({ event_type:'mx_lookup', domain, mx_found:mxFound });
-  } catch (e) {
-    console.error('[logMetric mx_lookup] failed:', e);
-  }
-
   try {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
@@ -185,6 +175,7 @@ uniLoop:
     const { name: uniName, domain, openalex_ror: rorId } = uni;
     console.log(`[handler] university: ${uniName} (${domain})`);
 
+    // ─── catch-all cache & cool-off ───────────────────────────────────────────────
     let { data: domData } = await supabase
       .from('email_domains')
       .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
@@ -193,7 +184,13 @@ uniLoop:
 
     if (!domData) {
       const isCatchall = await testCatchallWithRailway(domain);
-      domData = { is_catchall:isCatchall, good_pattern:null, last_verified_at:isCatchall?new Date().toISOString():null, last_failed_at:!isCatchall?new Date().toISOString():null, next_probe_at:null };
+      domData = {
+        is_catchall:     isCatchall,
+        good_pattern:    null,
+        last_verified_at: isCatchall ? new Date().toISOString() : null,
+        last_failed_at:   !isCatchall  ? new Date().toISOString() : null,
+        next_probe_at:   null
+      };
       await supabase.from('email_domains').insert({ domain, ...domData });
       console.log(`[handler] initialized cache for ${domain}`);
     }
@@ -203,15 +200,16 @@ uniLoop:
       continue;
     }
 
+    // ─── pull authors & per-author loop ─────────────────────────────────────────
     const authors = await getAuthorsFromOpenAlex(rorId, topicId, 5);
     console.log(`[loop] authors for ${uniName}:`, authors.map(a=>a.name));
 
     for (const a of authors) {
       console.log(`[handler] processing author: ${a.name}`);
       if (!a.name.includes(' ')) continue;
-      const [firstName, ...rest] = a.name.split(' ');
+      const [firstName, …rest] = a.name.split(' ');
       const lastName = rest[rest.length-1];
-      if (firstName.length<2||lastName.length<2) continue;
+      if (firstName.length < 2 || lastName.length < 2) continue;
 
       let emailToUse: string|null = null;
       let verifiedFlag: 'Yes'|'Maybe' = 'Yes';
@@ -221,21 +219,29 @@ uniLoop:
       if (hit) {
         const [local, foundDom] = hit.split('@');
 
-        // check foundDom cool-off, if so skip this author entirely
-        const { data: foundDomData } = await supabase
+        // if *that* domain is cooling off, skip entirely
+        const { data: fDom } = await supabase
           .from('email_domains')
           .select('next_probe_at')
           .eq('domain', foundDom)
           .maybeSingle();
-        if (foundDomData?.next_probe_at && new Date(foundDomData.next_probe_at)>new Date()) {
-          console.warn(`[handler] skipping ${foundDom}, cool-off until ${foundDomData.next_probe_at}`);
+        if (fDom?.next_probe_at && new Date(fDom.next_probe_at) > new Date()) {
+          console.warn(`[handler] skipping ${foundDom}, cool-off until ${fDom.next_probe_at}`);
           continue; // no fallback
         }
 
         console.log(`[verify] calling verifyEmailWithRailway(local="${local}", domain="${foundDom}")`);
         const vr = await verifyEmailWithRailway(local, foundDom);
         console.log('[verifyResult]', vr);
-        await logMetric({ eventType:'smtp_verification', domain:foundDom, patternTried:local, smtpSuccess:vr.ok, latencyMs:vr.latencyMs, errorMessage:vr.error, reason:vr.reason });
+        await logMetric({
+          eventType:    'smtp_verification',
+          domain:       foundDom,
+          patternTried: local,
+          smtpSuccess:  vr.ok,
+          latencyMs:    vr.latencyMs,
+          errorMessage: vr.error,
+          reason:       vr.reason
+        });
 
         if (vr.ok) {
           emailToUse   = hit;
@@ -243,32 +249,42 @@ uniLoop:
         } else if (!vr.rejected) {
           console.warn(`[verify] grey-list on ${foundDom}—cooling off`);
           await supabase.from('email_domains')
-            .update({ next_probe_at:new Date(Date.now()+COOL_OFF_MS).toISOString() })
+            .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
             .eq('domain', foundDom);
-          continue; // skip fallback
+          continue;  // skip fallback
         }
       }
 
-      // 2) fallback to guessing
+      // 2) fallback → guessing on the *original* domain
       for (const c of generateEmailCandidates(firstName, lastName, domain, domData.good_pattern)) {
         const [local] = c.split('@');
         console.log(`[verify] trying candidate: ${c}`);
         const vr2 = await verifyEmailWithRailway(local, domain);
         console.log('[verifyResult]', vr2);
-        await logMetric({ eventType:'smtp_verification', domain, patternTried:local, smtpSuccess:vr2.ok, latencyMs:vr2.latencyMs, errorMessage:vr2.error, reason:vr2.reason });
+        await logMetric({
+          eventType:    'smtp_verification',
+          domain,
+          patternTried: local,
+          smtpSuccess:  vr2.ok,
+          latencyMs:    vr2.latencyMs,
+          errorMessage: vr2.error,
+          reason:       vr2.reason
+        });
 
         if (vr2.ok) {
           emailToUse   = c;
           verifiedFlag = 'Yes';
           if (!domData.good_pattern) {
-            await supabase.from('email_domains').update({ good_pattern:local }).eq('domain', domain);
+            await supabase.from('email_domains')
+              .update({ good_pattern: local })
+              .eq('domain', domain);
             console.log(`[cache] cached new good_pattern for ${domain}: ${local}`);
           }
           break;
         } else if (!vr2.rejected) {
           console.warn(`[verify] grey-list on ${domain}—cooling off`);
           await supabase.from('email_domains')
-            .update({ next_probe_at:new Date(Date.now()+COOL_OFF_MS).toISOString() })
+            .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
             .eq('domain', domain);
           break uniLoop;
         }
@@ -276,9 +292,25 @@ uniLoop:
 
       // 3) record result
       if (emailToUse) {
-        console.log('[result] adding lead:', { name:a.name, institution:uniName, email:emailToUse, verified:domData.is_catchall?'Maybe':verifiedFlag });
-        results.push({ name:a.name, institution:uniName, email:emailToUse, verified:domData.is_catchall?'Maybe':verifiedFlag, orcid:a.orcid, last_verified_at:domData.last_verified_at, last_failed_at:domData.last_failed_at });
-        if (results.length>=10) { console.log('[loop] reached 10 results, breaking'); break uniLoop; }
+        console.log('[result] adding lead:', {
+          name:        a.name,
+          institution: uniName,
+          email:       emailToUse,
+          verified:    domData.is_catchall ? 'Maybe' : verifiedFlag
+        });
+        results.push({
+          name:            a.name,
+          institution:     uniName,
+          email:           emailToUse,
+          verified:        domData.is_catchall ? 'Maybe' : verifiedFlag,
+          orcid:           a.orcid,
+          last_verified_at: domData.last_verified_at,
+          last_failed_at:   domData.last_failed_at
+        });
+        if (results.length >= 10) {
+          console.log('[loop] reached 10 results, breaking');
+          break uniLoop;
+        }
       }
     }
   }
