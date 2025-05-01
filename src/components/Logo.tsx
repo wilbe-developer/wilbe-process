@@ -9,7 +9,7 @@ interface LogoProps {
 
 const Logo = ({ className = "", style }: LogoProps) => {
   return (
-    <Link to="/" className={`flex items-center gap-2 ${className}`}>
+    <Link to="https://www.wilbe.com" className={`flex items-center gap-2 ${className}`}>
       <WilbeLogo
         className="h-6"
         style={style || {
