@@ -48,15 +48,14 @@ async function logMetric(params: {
 }
 
 // ─── Railway SMTP “tickle” + timestamping ──────────────────────────────────────
-async function verifyEmailWithRailway(email:string, domain:string):Promise<boolean> {
+async function verifyEmailWithRailway(email: string, domain: string): Promise<boolean> {
   const t0 = Date.now();
   let ok = false;
   try {
-    // note: email here is the full address already
     const { data } = await axios.post(`${RAILWAY_BASE}/verify`, { email, domain });
     ok = data.ok === true;
     console.log(`[verifyRailway] ${email} → ok=${ok} (${Date.now()-t0}ms)`);
-  } catch (e) {
+  } catch (e: any) {
     console.warn('[verifyRailway] error, default false', e.message);
   }
 
@@ -70,20 +69,20 @@ async function verifyEmailWithRailway(email:string, domain:string):Promise<boole
   return ok;
 }
 
-async function testCatchallWithRailway(domain:string):Promise<boolean> {
+async function testCatchallWithRailway(domain: string): Promise<boolean> {
   try {
     const t0 = Date.now();
     const { data } = await axios.post(`${RAILWAY_BASE}/test-catchall`, { domain });
     console.log(`[catchallRailway] ${domain} → ok=${data.ok} (${Date.now()-t0}ms)`);
     return data.ok === true;
-  } catch (e) {
+  } catch (e: any) {
     console.warn('[catchallRailway] error, default false', e.message);
     return false;
   }
 }
 
 // ─── Candidate pattern generator ──────────────────────────────────────────────
-function generateEmailCandidates(firstName:string, lastName:string, domain:string, goodPattern?:string):string[] {
+function generateEmailCandidates(firstName: string, lastName: string, domain: string, goodPattern?: string): string[] {
   firstName = firstName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
   lastName  = lastName .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
   const patterns = goodPattern
@@ -106,7 +105,7 @@ function generateEmailCandidates(firstName:string, lastName:string, domain:strin
 }
 
 // ─── Serper.dev lookup of “<name> <domain> email” ───────────────────────────────
-async function lookupWithSerper(name:string, domain:string):Promise<string|null> {
+async function lookupWithSerper(name: string, domain: string): Promise<string|null> {
   try {
     const body = JSON.stringify({ q: `${name} ${domain} email` });
     const { data } = await axios.post(
@@ -121,19 +120,19 @@ async function lookupWithSerper(name:string, domain:string):Promise<string|null>
     );
     // collect title+snippet from organic results
     const txt = (data.organic||[])
-      .map((o:any) => `${o.title} ${o.snippet}`)
+      .map((o: any) => `${o.title} ${o.snippet}`)
       .join(' ');
     const re = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
     const m = txt.match(re);
     return m ? m[0] : null;
-  } catch (e) {
+  } catch (e: any) {
     console.warn('[Serper] error:', e.message);
     return null;
   }
 }
 
 // ─── OpenAlex author fetch ──────────────────────────────────────────────────────
-async function getAuthorsFromOpenAlex(rorId:string, topicId?:string, perPage=5) {
+async function getAuthorsFromOpenAlex(rorId: string, topicId?: string, perPage = 5) {
   try {
     const filters = [`last_known_institutions.ror:${rorId}`];
     if (topicId)    filters.push(`topics.id:${topicId}`);
@@ -147,13 +146,13 @@ async function getAuthorsFromOpenAlex(rorId:string, topicId?:string, perPage=5) 
     const t0 = Date.now();
     const { data } = await axios.get(url);
     console.log(`[OpenAlex] fetched ${data.results.length} authors in ${Date.now()-t0}ms`);
-    return data.results.map((a:any) => ({
+    return data.results.map((a: any) => ({
       name:        a.display_name,
       orcid:       a.orcid,
       works_count: a.works_count,
       h_index:     a.summary_stats.h_index
     }));
-  } catch (e) {
+  } catch (e: any) {
     console.error('[OpenAlex] error:', e.message);
     await logMetric({ eventType:'openalex_error', errorMessage:(e as Error).message });
     return [];
@@ -161,7 +160,7 @@ async function getAuthorsFromOpenAlex(rorId:string, topicId?:string, perPage=5) 
 }
 
 // ─── API handler ───────────────────────────────────────────────────────────────
-export default async function handler(req:VercelRequest, res:VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.time('[total]');
   if (req.method !== 'GET') {
     return res.status(405).json({ error:'Method not allowed' });
@@ -180,7 +179,7 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
   const topicId = req.query.topicId as string | undefined;
   console.log('[handler] topic filter:', topicId);
 
-  const results:any[] = [];
+  const results: any[] = [];
   for (const uni of unis) {
     const { domain, openalex_ror: rorId } = uni;
     if (!domain || !rorId) continue;
@@ -214,25 +213,30 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
       const lastName = rest[rest.length-1];
       if (firstName.length<2||lastName.length<2) continue;
 
-      let found: string | null = null;
+      let emailToUse: string | null = null;
 
       // 4) try Serper first
-      found = await lookupWithSerper(a.name, domain);
-      if (found) {
-        console.log('[Serper] found email:', found);
-        if (!await verifyEmailWithRailway(found, domain)) {
-          found = null;
+      const hit = await lookupWithSerper(a.name, domain);
+      if (hit) {
+        console.log('[Serper] found email:', hit);
+        const [local, foundDomain] = hit.split('@');
+        const ok = await verifyEmailWithRailway(local, foundDomain);
+
+        if (ok) {
+          emailToUse = hit;
+        } else {
+          console.warn('[verifyRailway] refused—but accepting Serper hit on trust:', hit);
+          emailToUse = hit;
         }
       }
 
       // 5) fallback to guessing
-      if (!found) {
+      if (!emailToUse) {
         const candidates = generateEmailCandidates(firstName, lastName, domain, goodPattern);
         for (const c of candidates) {
           console.log('[verify] trying', c);
-          if (await verifyEmailWithRailway(c, domain)) {
-            found = c;
-            // cache new pattern
+          if (await verifyEmailWithRailway(c.split('@')[0], domain)) {
+            emailToUse = c;
             if (!goodPattern) {
               await supabase
                 .from('email_domains')
@@ -250,11 +254,11 @@ export default async function handler(req:VercelRequest, res:VercelResponse) {
       }
 
       // 6) record success
-      if (found) {
+      if (emailToUse) {
         results.push({
           name:             a.name,
           institution:      uni.name,
-          email:            found,
+          email:            emailToUse,
           verified:         isCatchall ? 'Maybe' : 'Yes',
           orcid:            a.orcid,
           last_verified_at: domData.last_verified_at,
