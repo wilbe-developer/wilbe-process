@@ -221,6 +221,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     console.log(`[cache] domData for ${domain}:`, domData);
 
+    const isCatchall  = domData.is_catchall;
+    const goodPattern = domData.good_pattern;
+    
     // fetch authors
     const authors = await getAuthorsFromOpenAlex(rorId, topicId, 5);
     console.log(`[loop] authors for ${uni.name}:`, authors.map(a=>a.name));
@@ -308,13 +311,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           name: a.name,
           institution: uni.name,
           email: emailToUse,
-          verified: isCatchall? 'Maybe': verifiedFlag
+          verified: isCatchall               ? 'Maybe' : verifiedFlag
         });
         results.push({
           name:            a.name,
           institution:     uni.name,
           email:           emailToUse,
-          verified:        domData.is_catchall? 'Maybe': verifiedFlag,
+          verified:        isCatchall               ? 'Maybe' : verifiedFlag,
           orcid:           a.orcid,
           last_verified_at:domData.last_verified_at,
           last_failed_at:  domData.last_failed_at
