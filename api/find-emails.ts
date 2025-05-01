@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient }            from '@supabase/supabase-js';
-import axios                        from 'axios';
+import { createClient }                       from '@supabase/supabase-js';
+import axios                                   from 'axios';
 
 // ─── Supabase setup ────────────────────────────────────────────────────────────
 const SUPABASE_URL       = process.env.VITE_SUPABASE_URL!;
 const SUPABASE_ANON_KEY  = process.env.VITE_SUPABASE_ANON_KEY!;
-const SERVICE_ROLE_KEY   = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SERVICE_ROLE_KEY   = process.env.SERVICE_ROLE_KEY;
 const supabase           = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABASE_ANON_KEY);
 
 // ─── Serper.dev API Key & Railway microservice URL ────────────────────────────
@@ -26,43 +26,67 @@ const EMAIL_PATTERNS = [
 
 // ─── Logging metrics ────────────────────────────────────────────────────────────
 async function logMetric(params: {
-  eventType: string;
-  domain?: string;
+  eventType:  string;
+  domain?:    string;
   patternTried?: string;
-  smtpSuccess?: boolean;
-  latencyMs?: number;
+  smtpSuccess?:  boolean;
+  latencyMs?:    number;
   errorMessage?: string;
-  reason?: string;
+  reason?:       string;
 }) {
   try {
-    await supabase.from('metrics').insert({
-      event_type:    params.eventType,
-      domain:        params.domain,
-      pattern_tried: params.patternTried,
-      smtp_success:  params.smtpSuccess,
-      latency_ms:    params.latencyMs,
-      error_message: params.errorMessage,
-      error_reason:  params.reason,
-    });
+    await supabase
+      .from('metrics')
+      .insert({
+        event_type:    params.eventType,
+        domain:        params.domain,
+        pattern_tried: params.patternTried,
+        smtp_success:  params.smtpSuccess,
+        latency_ms:    params.latencyMs,
+        error_message: params.errorMessage,
+        error_reason:  params.reason,
+      });
   } catch (e) {
     console.error('[logMetric] failed:', e);
   }
 }
 
 // ─── Railway HTTP wrappers ─────────────────────────────────────────────────────
-// **Removed** the catch-all test & mx_lookup logging from here.
-// Catch-all is only tested once below, when initializing the cache.
 async function verifyEmailWithRailway(local: string, domain: string) {
   const t0 = Date.now();
+
+  // 1) MX lookup → catch-all tester
+  let mxFound: boolean;
+  try {
+    mxFound = await testCatchallWithRailway(domain);
+  } catch {
+    mxFound = false;
+  }
+  // log MX lookup
+  try {
+    await supabase
+      .from('metrics')
+      .insert({ event_type:'mx_lookup', domain, mx_found:mxFound });
+  } catch (e) {
+    console.error('[logMetric mx_lookup] failed:', e);
+  }
+
+  // 2) real verify
   try {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/verify`,
       { email:`${local}@${domain}`, domain },
-      { timeout: 10000 }
+      { timeout:10000 }
     );
     return { ...data, latencyMs: Date.now() - t0 };
   } catch (e: any) {
-    return { ok:false, rejected:false, reason:'network_error', error:e.message, latencyMs: Date.now() - t0 };
+    return {
+      ok: false,
+      rejected: false,
+      reason: 'network_error',
+      error: e.message,
+      latencyMs: Date.now() - t0
+    };
   }
 }
 
@@ -71,7 +95,7 @@ async function testCatchallWithRailway(domain: string) {
     const { data } = await axios.post(
       `${RAILWAY_BASE}/test-catchall`,
       { domain },
-      { timeout: 10000 }
+      { timeout:10000 }
     );
     return data.ok === true;
   } catch {
@@ -80,9 +104,20 @@ async function testCatchallWithRailway(domain: string) {
 }
 
 // ─── Candidate pattern generator ──────────────────────────────────────────────
-function generateEmailCandidates(firstName: string, lastName: string, domain: string, goodPattern?: string): string[] {
-  firstName = firstName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
-  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
+function generateEmailCandidates(
+  firstName: string,
+  lastName:  string,
+  domain:    string,
+  goodPattern?: string
+): string[] {
+  firstName = firstName.toLowerCase()
+                       .normalize("NFD")
+                       .replace(/[\u0300-\u036f]/g,'')
+                       .trim();
+  lastName  = lastName .toLowerCase()
+                       .normalize("NFD")
+                       .replace(/[\u0300-\u036f]/g,'')
+                       .trim();
 
   const patterns = goodPattern
     ? [ goodPattern
@@ -99,6 +134,7 @@ function generateEmailCandidates(firstName: string, lastName: string, domain: st
          .replace('{lastInitial}',  lastName.charAt(0))
          .replace('{domain}',       domain)
       );
+
   console.log(`[candidates] for ${firstName} ${lastName}@${domain}:`, patterns);
   return patterns;
 }
@@ -112,7 +148,9 @@ async function lookupWithSerper(name: string, domain: string): Promise<string|nu
       { q: `${name} ${domain} email` },
       { headers:{ 'X-API-KEY':SERPER_API_KEY } }
     );
-    const txt = (data.organic||[]).map((o:any)=>`${o.title} ${o.snippet}`).join(' ');
+    const txt = (data.organic||[])
+      .map((o:any) => `${o.title} ${o.snippet}`)
+      .join(' ');
     const found = txt.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/)?.[0] || null;
     console.log(`[Serper] found email: ${found}`);
     return found;
@@ -123,22 +161,34 @@ async function lookupWithSerper(name: string, domain: string): Promise<string|nu
 }
 
 // ─── OpenAlex author fetch ──────────────────────────────────────────────────────
-async function getAuthorsFromOpenAlex(rorId: string, topicId?: string, perPage = 5) {
-  console.log(`[OpenAlex] start fetch for ROR=${rorId}${topicId?` topic=${topicId}`:''}`);
+async function getAuthorsFromOpenAlex(
+  rorId:   string,
+  topicId?:string,
+  perPage = 5
+) {
+  console.log(
+    `[OpenAlex] start fetch for ROR=${rorId}${topicId?` topic=${topicId}`:''}`
+  );
   try {
     const filters = [`last_known_institutions.ror:${rorId}`];
     if (topicId) filters.push(`topics.id:${topicId}`);
     filters.push(`works_count:<50`, `summary_stats.h_index:<15`, `summary_stats.2yr_mean_citedness:>1`);
+
     const url = `https://api.openalex.org/authors`
               + `?filter=${filters.join(',')}`
               + `&select=display_name,orcid,last_known_institutions,works_count,summary_stats`
               + `&per_page=${perPage}`;
-    const t0 = Date.now();
+
+    const t0  = Date.now();
     const res = await axios.get(url);
     console.log(`[OpenAlex] fetched ${res.data.results.length} authors in ${Date.now()-t0}ms`);
-    return res.data.results.map((a:any)=>(
-      { name: a.display_name, orcid: a.orcid, works_count: a.works_count, h_index: a.summary_stats.h_index }
-    ));
+
+    return res.data.results.map((a:any) => ({
+      name:        a.display_name,
+      orcid:       a.orcid,
+      works_count: a.works_count,
+      h_index:     a.summary_stats.h_index
+    }));
   } catch (e:any) {
     console.error('[OpenAlex] error:', e.message);
     await logMetric({ eventType:'openalex_error', errorMessage:e.message });
@@ -147,7 +197,10 @@ async function getAuthorsFromOpenAlex(rorId: string, topicId?: string, perPage =
 }
 
 // ─── API handler ───────────────────────────────────────────────────────────────
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   console.time('[total]');
   if (req.method !== 'GET') {
     console.log('[handler] wrong method:', req.method);
@@ -159,78 +212,100 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .from('universities')
     .select('id,name,domain,openalex_ror')
     .eq('is_default', true);
+
   if (uniErr || !unis) {
     console.error('[handler] supabase error:', uniErr);
     return res.status(500).json({ error:'Failed loading universities' });
   }
-  console.log(`[handler] loaded ${unis.length} defaults`);
 
+  console.log(`[handler] loaded ${unis.length} defaults`);
   const topicId = (req.query.topicId as string) || undefined;
   console.log('[handler] topic filter:', topicId);
 
   const results: any[] = [];
 
-uniLoop:
+  uniLoop:
   for (const uni of unis) {
-    const { name: uniName, domain, openalex_ror: rorId } = uni;
-    console.log(`[handler] university: ${uniName} (${domain})`);
+    console.log(`[handler] university: ${uni.name} (${uni.domain})`);
 
-    // ─── catch-all cache & cool-off ───────────────────────────────────────────────
+    // fetch/create the cache row
     let { data: domData } = await supabase
       .from('email_domains')
       .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
-      .eq('domain', domain)
+      .eq('domain', uni.domain)
       .maybeSingle();
 
     if (!domData) {
-      const isCatchall = await testCatchallWithRailway(domain);
+      console.log(`[handler] no cache for ${uni.domain}, testing catch-all…`);
+      const isCatchall = await testCatchallWithRailway(uni.domain);
       domData = {
-        is_catchall:     isCatchall,
-        good_pattern:    null,
-        last_verified_at: isCatchall ? new Date().toISOString() : null,
-        last_failed_at:   !isCatchall  ? new Date().toISOString() : null,
-        next_probe_at:   null
+        is_catchall:      isCatchall,
+        good_pattern:     null,
+        last_verified_at: isCatchall  ? new Date().toISOString() : null,
+        last_failed_at:   !isCatchall ? new Date().toISOString() : null,
+        next_probe_at:    null
       };
-      await supabase.from('email_domains').insert({ domain, ...domData });
-      console.log(`[handler] initialized cache for ${domain}`);
+      await supabase
+        .from('email_domains')
+        .insert({ domain: uni.domain, ...domData });
+      console.log(`[handler] initialized cache for ${uni.domain}:`, domData);
     }
 
+    // alias locally (so nothing ever reads the old DOM directly)
+    const isCatchall = domData.is_catchall;
+
+    // skip while in cool-off
     if (domData.next_probe_at && new Date(domData.next_probe_at) > new Date()) {
-      console.log(`[handler] skipping ${domain}, cool-off until ${domData.next_probe_at}`);
+      console.log(
+        `[handler] skipping ${uni.domain}, cool-off until ${domData.next_probe_at}`
+      );
       continue;
     }
 
-    // ─── pull authors & per-author loop ─────────────────────────────────────────
-    const authors = await getAuthorsFromOpenAlex(rorId, topicId, 5);
-    console.log(`[loop] authors for ${uniName}:`, authors.map(a=>a.name));
+    // pull authors
+    const authors = await getAuthorsFromOpenAlex(
+      uni.openalex_ror,
+      topicId,
+      5
+    );
+    console.log(`[loop] authors for ${uni.name}:`, authors.map(a => a.name));
 
+    // per-author
     for (const a of authors) {
       console.log(`[handler] processing author: ${a.name}`);
       if (!a.name.includes(' ')) continue;
-      const [firstName, …rest] = a.name.split(' ');
-      const lastName = rest[rest.length-1];
+      const [firstName, ...rest] = a.name.split(' ');
+      const lastName = rest[rest.length - 1];
       if (firstName.length < 2 || lastName.length < 2) continue;
 
-      let emailToUse: string|null = null;
-      let verifiedFlag: 'Yes'|'Maybe' = 'Yes';
+      let emailToUse: string | null = null;
+      let verifiedFlag: 'Yes' | 'Maybe' = 'Yes';
 
-      // 1) Serper lookup
-      const hit = await lookupWithSerper(a.name, domain);
+      // Serper lookup
+      const hit = await lookupWithSerper(a.name, uni.domain);
       if (hit) {
         const [local, foundDom] = hit.split('@');
 
-        // if *that* domain is cooling off, skip entirely
-        const { data: fDom } = await supabase
+        // check if *that* domain is cooling off
+        const { data: foundDomData } = await supabase
           .from('email_domains')
           .select('next_probe_at')
           .eq('domain', foundDom)
           .maybeSingle();
-        if (fDom?.next_probe_at && new Date(fDom.next_probe_at) > new Date()) {
-          console.warn(`[handler] skipping ${foundDom}, cool-off until ${fDom.next_probe_at}`);
+
+        if (
+          foundDomData?.next_probe_at &&
+          new Date(foundDomData.next_probe_at) > new Date()
+        ) {
+          console.warn(
+            `[handler] skipping ${foundDom}, cool-off until ${foundDomData.next_probe_at}`
+          );
           continue; // no fallback
         }
 
-        console.log(`[verify] calling verifyEmailWithRailway(local="${local}", domain="${foundDom}")`);
+        console.log(
+          `[verify] calling verifyEmailWithRailway(local="${local}", domain="${foundDom}")`
+        );
         const vr = await verifyEmailWithRailway(local, foundDom);
         console.log('[verifyResult]', vr);
         await logMetric({
@@ -248,67 +323,86 @@ uniLoop:
           verifiedFlag = 'Yes';
         } else if (!vr.rejected) {
           console.warn(`[verify] grey-list on ${foundDom}—cooling off`);
-          await supabase.from('email_domains')
+          await supabase
+            .from('email_domains')
             .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
             .eq('domain', foundDom);
-          continue;  // skip fallback
+          continue; // skip fallback
         }
       }
 
-      // 2) fallback → guessing on the *original* domain
-      for (const c of generateEmailCandidates(firstName, lastName, domain, domData.good_pattern)) {
-        const [local] = c.split('@');
-        console.log(`[verify] trying candidate: ${c}`);
-        const vr2 = await verifyEmailWithRailway(local, domain);
-        console.log('[verifyResult]', vr2);
-        await logMetric({
-          eventType:    'smtp_verification',
-          domain,
-          patternTried: local,
-          smtpSuccess:  vr2.ok,
-          latencyMs:    vr2.latencyMs,
-          errorMessage: vr2.error,
-          reason:       vr2.reason
-        });
+      // fallback → guessing on original
+      if (!emailToUse) {
+        const candidates = generateEmailCandidates(
+          firstName,
+          lastName,
+          uni.domain,
+          domData.good_pattern
+        );
 
-        if (vr2.ok) {
-          emailToUse   = c;
-          verifiedFlag = 'Yes';
-          if (!domData.good_pattern) {
-            await supabase.from('email_domains')
-              .update({ good_pattern: local })
-              .eq('domain', domain);
-            console.log(`[cache] cached new good_pattern for ${domain}: ${local}`);
+        for (const c of candidates) {
+          const [local] = c.split('@');
+          console.log(`[verify] trying candidate: ${c}`);
+          const vr2 = await verifyEmailWithRailway(local, uni.domain);
+          console.log('[verifyResult]', vr2);
+          await logMetric({
+            eventType:    'smtp_verification',
+            domain:       uni.domain,
+            patternTried: local,
+            smtpSuccess:  vr2.ok,
+            latencyMs:    vr2.latencyMs,
+            errorMessage: vr2.error,
+            reason:       vr2.reason
+          });
+
+          if (vr2.ok) {
+            emailToUse   = c;
+            verifiedFlag = 'Yes';
+            if (!domData.good_pattern) {
+              await supabase
+                .from('email_domains')
+                .update({ good_pattern: local })
+                .eq('domain', uni.domain);
+              console.log(
+                `[cache] cached new good_pattern for ${uni.domain}: ${local}`
+              );
+            }
+            break;
+          } else if (!vr2.rejected) {
+            console.warn(
+              `[verify] grey-list on ${uni.domain}—cooling off`
+            );
+            await supabase
+              .from('email_domains')
+              .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
+              .eq('domain', uni.domain);
+            break uniLoop;
           }
-          break;
-        } else if (!vr2.rejected) {
-          console.warn(`[verify] grey-list on ${domain}—cooling off`);
-          await supabase.from('email_domains')
-            .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
-            .eq('domain', domain);
-          break uniLoop;
         }
       }
 
-      // 3) record result
+      // record result
       if (emailToUse) {
         console.log('[result] adding lead:', {
-          name:        a.name,
-          institution: uniName,
-          email:       emailToUse,
-          verified:    domData.is_catchall ? 'Maybe' : verifiedFlag
+          name:         a.name,
+          institution:  uni.name,
+          email:        emailToUse,
+          verified:     isCatchall ? 'Maybe' : verifiedFlag
         });
+
         results.push({
           name:            a.name,
-          institution:     uniName,
+          institution:     uni.name,
           email:           emailToUse,
-          verified:        domData.is_catchall ? 'Maybe' : verifiedFlag,
+          verified:        isCatchall ? 'Maybe' : verifiedFlag,
           orcid:           a.orcid,
           last_verified_at: domData.last_verified_at,
           last_failed_at:   domData.last_failed_at
         });
+
+        // ←── **NEW**: break out entirely as soon as we hit 10
         if (results.length >= 10) {
-          console.log('[loop] reached 10 results, breaking');
+          console.log('[handler] reached 10 results, breaking out');
           break uniLoop;
         }
       }
