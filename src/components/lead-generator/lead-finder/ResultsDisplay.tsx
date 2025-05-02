@@ -47,6 +47,20 @@ export const ResultsDisplay = ({
     return topic ? topic.label : id;
   };
 
+  // Helper to determine badge variant based on verification status
+  const getBadgeVariant = (verified: string) => {
+    switch (verified) {
+      case "ok":
+        return "default";
+      case "risky":
+        return "outline";
+      case "invalid":
+        return "destructive";
+      default:
+        return "secondary";
+    }
+  };
+
   return (
     <div className="md:col-span-3 space-y-4">
       {error && (
@@ -89,6 +103,7 @@ export const ResultsDisplay = ({
               <TableHead>Email</TableHead>
               <TableHead>ORCID</TableHead>
               <TableHead>Verified</TableHead>
+              <TableHead>Reason</TableHead>
               <TableHead>Last Verified</TableHead>
               <TableHead>Last Failed</TableHead>
               <TableHead>Actions</TableHead>
@@ -97,7 +112,7 @@ export const ResultsDisplay = ({
           <TableBody>
             {paginatedResults.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8">
+                <TableCell colSpan={9} className="text-center py-8">
                   {loading ? (
                     <div className="flex justify-center">
                       <div className="animate-spin h-6 w-6 border-4 border-primary border-t-transparent rounded-full"></div>
@@ -140,11 +155,13 @@ export const ResultsDisplay = ({
                   </TableCell>
                   <TableCell>
                     <Badge 
-                      variant={result.verified === "Yes" ? "default" : 
-                             result.verified === "Maybe" ? "outline" : "secondary"}
+                      variant={getBadgeVariant(result.verified)}
                     >
                       {result.verified}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {result.reason || "N/A"}
                   </TableCell>
                   <TableCell className="text-xs">
                     {formatDate(result.last_verified_at)}

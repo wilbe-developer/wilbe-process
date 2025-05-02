@@ -12,6 +12,7 @@ export interface LeadResult {
   institution: string;
   email: string;
   verified: string;
+  reason?: string;
   orcid?: string;
   last_verified_at?: string;
   last_failed_at?: string;

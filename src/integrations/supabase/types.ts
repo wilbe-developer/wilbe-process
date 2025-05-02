@@ -55,6 +55,7 @@ export type Database = {
           is_catchall: boolean | null
           last_failed_at: string | null
           last_verified_at: string | null
+          next_probe_at: string | null
           updated_at: string | null
         }
         Insert: {
@@ -64,6 +65,7 @@ export type Database = {
           is_catchall?: boolean | null
           last_failed_at?: string | null
           last_verified_at?: string | null
+          next_probe_at?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -73,6 +75,7 @@ export type Database = {
           is_catchall?: boolean | null
           last_failed_at?: string | null
           last_verified_at?: string | null
+          next_probe_at?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -127,11 +130,12 @@ export type Database = {
           created_at: string | null
           domain: string | null
           error_message: string | null
+          error_reason: string | null
           event_type: string
           id: string
           is_catchall: boolean | null
           latency_ms: number | null
-          mx_found: boolean | null
+          mx_found: boolean
           pattern_tried: string | null
           smtp_success: boolean | null
         }
@@ -139,11 +143,12 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           error_message?: string | null
+          error_reason?: string | null
           event_type: string
           id?: string
           is_catchall?: boolean | null
           latency_ms?: number | null
-          mx_found?: boolean | null
+          mx_found?: boolean
           pattern_tried?: string | null
           smtp_success?: boolean | null
         }
@@ -151,11 +156,12 @@ export type Database = {
           created_at?: string | null
           domain?: string | null
           error_message?: string | null
+          error_reason?: string | null
           event_type?: string
           id?: string
           is_catchall?: boolean | null
           latency_ms?: number | null
-          mx_found?: boolean | null
+          mx_found?: boolean
           pattern_tried?: string | null
           smtp_success?: boolean | null
         }
