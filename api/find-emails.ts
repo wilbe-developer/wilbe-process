@@ -2,20 +2,20 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient }                       from '@supabase/supabase-js';
 import axios                                   from 'axios';
 
-// ─── Supabase setup ────────────────────────────────────────────────────────────
+// ─── Supabase setup ──────────────────────────────────────────────────────
 const SUPABASE_URL      = process.env.VITE_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY!;
 const SERVICE_ROLE_KEY  = process.env.SERVICE_ROLE_KEY;
 const supabase          = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABASE_ANON_KEY);
 
-// ─── Serper.dev API Key & Railway microservice URL ────────────────────────────
-const SERPER_API_KEY = process.env.SERPER_API_KEY!;
-const RAILWAY_BASE   = process.env.RAILWAY_BASE!;
+// ─── External API Keys ──────────────────────────────────────────
+const SERPER_API_KEY     = process.env.SERPER_API_KEY!;
+const TRUELIST_API_KEY   = process.env.TRUELIST_API_KEY!;
 
-// ─── Cool-off after grey-list ───────────────────────────────────────────────────
+// ─── Cool-off after grey-list ──────────────────────────────────────────
 const COOL_OFF_MS = 5 * 60 * 1000; // 5 minutes
 
-// ─── Helpers & constants ───────────────────────────────────────────────────────
+// ─── Helpers & constants ─────────────────────────────────────────
 const EMAIL_PATTERNS = [
   '{firstName}.{lastName}@{domain}',
   '{firstName}{lastName}@{domain}',
@@ -24,7 +24,7 @@ const EMAIL_PATTERNS = [
   '{firstName}@{domain}',
 ];
 
-// ─── Logging metrics ────────────────────────────────────────────────────────────
+// ─── Logging metrics ─────────────────────────────────────────
 async function logMetric(params: {
   eventType:     string;
   domain?:       string;
@@ -51,21 +51,43 @@ async function logMetric(params: {
   }
 }
 
-// ─── Railway HTTP wrappers ─────────────────────────────────────────────────────
-// ONLY calls the microservice—and logs all its raw traffic—no catch-all here.
-async function verifyEmailWithRailway(local: string, domain: string) {
+// ─── Truelist Email Verification ────────────────────────────────────────
+async function verifyEmailWithTruelist(email: string) {
   const t0 = Date.now();
-  console.log(`[verifyEmailWithRailway] calling microservice /verify for ${local}@${domain}`);
   try {
     const { data } = await axios.post(
-      `${RAILWAY_BASE}/verify`,
-      { email:`${local}@${domain}`, domain },
-      { timeout:25000 }
+      'https://api.truelist.io/api/v1/verify_inline',
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${TRUELIST_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        params: { email },
+        timeout: 10000
+      }
     );
-    console.log(`[verifyEmailWithRailway] microservice response for ${local}@${domain}:`, data);
-    return { ...data, latencyMs: Date.now() - t0 };
+    const result = data.emails[0];
+
+    // Cache catch-all signal to email_domains
+    if (result.email_sub_state === 'accept_all') {
+      await supabase
+        .from('email_domains')
+        .upsert({
+          domain: result.domain,
+          is_catchall: true
+        }, { onConflict: 'domain' });
+    }
+
+    return {
+      ok: result.email_state === 'ok',
+      risky: result.email_state === 'risky',
+      state: result.email_state,
+      reason: result.email_sub_state,
+      latencyMs: Date.now() - t0
+    };
   } catch (e: any) {
-    console.error(`[verifyEmailWithRailway] network_error for ${local}@${domain}:`, e.message);
+    console.error('[verifyEmailWithTruelist] error:', e.message);
     return {
       ok: false,
       rejected: false,
@@ -76,20 +98,7 @@ async function verifyEmailWithRailway(local: string, domain: string) {
   }
 }
 
-async function testCatchallWithRailway(domain: string) {
-  try {
-    const { data } = await axios.post(
-      `${RAILWAY_BASE}/test-catchall`,
-      { domain },
-      { timeout:25000 }
-    );
-    return data.ok === true;
-  } catch {
-    return false;
-  }
-}
-
-// ─── Candidate pattern generator ──────────────────────────────────────────────
+// ─── Candidate pattern generator ─────────────────────────────────────────
 function generateEmailCandidates(
   firstName: string,
   lastName:  string,
@@ -119,7 +128,7 @@ function generateEmailCandidates(
   return patterns;
 }
 
-// ─── Serper.dev lookup ──────────────────────────────────────────────────────────
+// ─── Serper.dev lookup ────────────────────────────────────────
 async function lookupWithSerper(name: string, domain: string): Promise<string|null> {
   console.log(`[search] Serper query: "${name} ${domain} email"`);
   try {
@@ -138,7 +147,7 @@ async function lookupWithSerper(name: string, domain: string): Promise<string|nu
   }
 }
 
-// ─── OpenAlex author fetch ──────────────────────────────────────────────────────
+// ─── OpenAlex author fetch ────────────────────────────────────────
 async function getAuthorsFromOpenAlex(
   rorId:   string,
   topicId?:string,
@@ -169,7 +178,7 @@ async function getAuthorsFromOpenAlex(
   }
 }
 
-// ─── API handler ───────────────────────────────────────────────────────────────
+// ─── API handler ────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.time('[total]');
   if (req.method !== 'GET') {
@@ -197,38 +206,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   for (const uni of unis) {
     console.log(`[handler] university: ${uni.name} (${uni.domain})`);
 
-    // ─── catch-all cache & cool-off for primary domain ────────────────────────────
-    let { data: domData } = await supabase
-      .from('email_domains')
-      .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
-      .eq('domain', uni.domain)
-      .maybeSingle();
-
-    if (!domData) {
-      console.log(`[handler] no cache for ${uni.domain}, testing catch-all…`);
-      const isCatchall = await testCatchallWithRailway(uni.domain);
-      domData = {
-        is_catchall:      isCatchall,
-        good_pattern:     null,
-        last_verified_at: isCatchall  ? new Date().toISOString() : null,
-        last_failed_at:   !isCatchall ? new Date().toISOString() : null,
-        next_probe_at:    null
-      };
-      await supabase
-        .from('email_domains')
-        .insert({ domain: uni.domain, ...domData });
-      console.log(`[handler] initialized cache for ${uni.domain}:`, domData);
-    }
-
-    const isCatchall = domData.is_catchall;
-    if (domData.next_probe_at && new Date(domData.next_probe_at) > new Date()) {
-      console.log(
-        `[handler] skipping ${uni.domain}, cool-off until ${domData.next_probe_at}`
-      );
-      continue;
-    }
-
-    // ─── pull authors & per-author loop ──────────────────────────────────────────
     const authors = await getAuthorsFromOpenAlex(uni.openalex_ror, topicId, 5);
     console.log(`[loop] authors for ${uni.name}:`, authors.map(a => a.name));
 
@@ -239,146 +216,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lastName = rest[rest.length - 1];
       if (firstName.length < 2 || lastName.length < 2) continue;
 
-      let emailToUse: string | null = null;
-      let verifiedFlag: 'Yes' | 'Maybe' = 'Yes';
-
-      // 1) Serper lookup
-      const hit = await lookupWithSerper(a.name, uni.domain);
-      if (hit) {
-        const [local, foundDom] = hit.split('@');
-
-        // ─── ensure cache row exists for foundDom ────────────────────────────────
-        let { data: foundDomData } = await supabase
-          .from('email_domains')
-          .select('is_catchall,good_pattern,last_verified_at,last_failed_at,next_probe_at')
-          .eq('domain', foundDom)
-          .maybeSingle();
-
-        if (!foundDomData) {
-          console.log(`[handler] no cache for ${foundDom}, testing catch-all…`);
-          const isCA = await testCatchallWithRailway(foundDom);
-          foundDomData = {
-            is_catchall:      isCA,
-            good_pattern:     null,
-            last_verified_at: isCA  ? new Date().toISOString() : null,
-            last_failed_at:   !isCA ? new Date().toISOString() : null,
-            next_probe_at:    null
-          };
-          await supabase
-            .from('email_domains')
-            .insert({ domain: foundDom, ...foundDomData });
-          console.log(`[handler] initialized cache for ${foundDom}:`, foundDomData);
-        }
-
-        // ─── cool-off check for that found domain ───────────────────────────────
-        if (
-          foundDomData.next_probe_at &&
-          new Date(foundDomData.next_probe_at) > new Date()
-        ) {
-          console.warn(
-            `[handler] skipping ${foundDom}, cool-off until ${foundDomData.next_probe_at}`
-          );
-          continue;
-        }
-
-        console.log(
-          `[verify] calling verifyEmailWithRailway(local="${local}", domain="${foundDom}")`
-        );
-        const vr = await verifyEmailWithRailway(local, foundDom);
+      for (const candidate of generateEmailCandidates(firstName, lastName, uni.domain)) {
+        console.log(`[verify] trying candidate: ${candidate}`);
+        const vr = await verifyEmailWithTruelist(candidate);
         console.log('[verifyResult]', vr);
         await logMetric({
           eventType:    'smtp_verification',
-          domain:       foundDom,
-          patternTried: local,
+          domain:       uni.domain,
+          patternTried: candidate.split('@')[0],
           smtpSuccess:  vr.ok,
           latencyMs:    vr.latencyMs,
           errorMessage: vr.error,
           reason:       vr.reason
         });
 
-        if (vr.ok) {
-          emailToUse   = hit;
-          verifiedFlag = 'Yes';
-        } else if (!vr.rejected) {
-          console.warn(`[verify] grey-list on ${foundDom}—cool-off`);
-          await supabase
-            .from('email_domains')
-            .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
-            .eq('domain', foundDom);
-          continue;
-        }
-      }
-
-      // 2) fallback → guessing on original domain
-      if (!emailToUse) {
-        for (const c of generateEmailCandidates(
-          firstName,
-          lastName,
-          uni.domain,
-          domData.good_pattern
-        )) {
-          const [local] = c.split('@');
-          console.log(`[verify] trying candidate: ${c}`);
-          const vr2 = await verifyEmailWithRailway(local, uni.domain);
-          console.log('[verifyResult]', vr2);
-          await logMetric({
-            eventType:    'smtp_verification',
-            domain:       uni.domain,
-            patternTried: local,
-            smtpSuccess:  vr2.ok,
-            latencyMs:    vr2.latencyMs,
-            errorMessage: vr2.error,
-            reason:       vr2.reason
+        if (vr.ok || vr.risky) {
+          results.push({
+            name:         a.name,
+            institution:  uni.name,
+            email:        candidate,
+            verified:     vr.state,
+            reason:       vr.reason,
+            orcid:        a.orcid,
+            last_verified_at: null,
+            last_failed_at:   null
           });
-
-          if (vr2.ok) {
-            emailToUse   = c;
-            verifiedFlag = 'Yes';
-            if (!domData.good_pattern) {
-              await supabase
-                .from('email_domains')
-                .update({ good_pattern: local })
-                .eq('domain', uni.domain);
-              console.log(
-                `[cache] cached new good_pattern for ${uni.domain}: ${local}`
-              );
-            }
-            break;
-          } else if (!vr2.rejected) {
-            console.warn(
-              `[verify] grey-list on ${uni.domain}—cool-off`
-            );
-            await supabase
-              .from('email_domains')
-              .update({ next_probe_at: new Date(Date.now() + COOL_OFF_MS).toISOString() })
-              .eq('domain', uni.domain);
-            break uniLoop;
-          }
-        }
-      }
-
-      // 3) record result
-      if (emailToUse) {
-        console.log('[result] adding lead:', {
-          name:        a.name,
-          institution: uni.name,
-          email:       emailToUse,
-          verified:    isCatchall ? 'Maybe' : verifiedFlag
-        });
-
-        results.push({
-          name:            a.name,
-          institution:     uni.name,
-          email:           emailToUse,
-          verified:        isCatchall ? 'Maybe' : verifiedFlag,
-          orcid:           a.orcid,
-          last_verified_at: domData.last_verified_at,
-          last_failed_at:   domData.last_failed_at
-        });
-
-        if (results.length >= 1) {
-          console.log('[handler] reached 10 results, breaking out');
-          break uniLoop;
+          if (results.length >= 3) break uniLoop;
+          break;
         }
       }
     }
