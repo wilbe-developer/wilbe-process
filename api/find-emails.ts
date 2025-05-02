@@ -60,22 +60,23 @@ async function verifyEmailWithTruelist(email: string) {
           'Content-Type': 'application/json'
         },
         params: { email },
-        timeout: 15000
+        timeout: 10000
       }
     );
     const result = data.emails[0];
 
-    // cache catch-all if detected
-    if (result.email_sub_state === 'accept_all') {
-      await supabase
-        .from('email_domains')
-        .upsert({ domain: result.domain, is_catchall: true }, { onConflict: 'domain' });
-    }
+    // cache catch-all flag for every domain tested
+    await supabase
+      .from('email_domains')
+      .upsert(
+        { domain: result.domain, is_catchall: result.email_sub_state === 'accept_all' },
+        { onConflict: 'domain' }
+      );
 
     return {
-      ok:    result.email_state === 'ok',
-      state: result.email_state,
-      reason: result.email_sub_state,
+      ok:       result.email_state === 'ok',
+      state:    result.email_state,
+      reason:   result.email_sub_state,
       latencyMs: Date.now() - t0
     };
   } catch (e: any) {
@@ -218,18 +219,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         if (vr.ok || vr.state === 'risky') {
           results.push({
-            name:         a.name,
-            institution:  uni.name,
-            email:        hit,
-            email_state:  vr.state,
+            name:            a.name,
+            institution:     uni.name,
+            email:           hit,
+            email_state:     vr.state,
             email_sub_state: vr.reason,
-            orcid:        a.orcid,
+            orcid:           a.orcid,
             last_verified_at: null,
             last_failed_at:   null
           });
           if (results.length >= 3) break uniLoop;
         }
         await new Promise(r => setTimeout(r, 10000));
+        continue; // skip fallback if serper hit
       }
 
       // 2) fallback → guessing
@@ -247,12 +249,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         if (vr.ok || vr.state === 'risky') {
           results.push({
-            name:         a.name,
-            institution:  uni.name,
-            email:        candidate,
-            email_state:  vr.state,
+            name:            a.name,
+            institution:     uni.name,
+            email:           candidate,
+            email_state:     vr.state,
             email_sub_state: vr.reason,
-            orcid:        a.orcid,
+            orcid:           a.orcid,
             last_verified_at: null,
             last_failed_at:   null
           });
