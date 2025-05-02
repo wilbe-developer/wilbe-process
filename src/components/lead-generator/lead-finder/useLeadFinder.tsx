@@ -31,15 +31,11 @@ export const useLeadFinder = () => {
   
   const topicOptions: TopicOption[] = [
     { value: "no-filter", label: "No Topic Filter" },
-    { value: "C166413987", label: "Biology" },
-    { value: "C86803240", label: "Computer Science" },
-    { value: "C185592680", label: "Chemistry" },
-    { value: "C127313418", label: "Physics" },
-    { value: "C71924100", label: "Medicine" },
-    { value: "C144133560", label: "Mathematics" },
-    { value: "C121332964", label: "Psychology" },
-    { value: "C39432304", label: "Environmental Science" },
-    { value: "C162324750", label: "Neuroscience" }
+    { value: "t10346", label: "Magnetic Confinement Fusion Research" },
+    { value: "t11949", label: "Nuclear Physics and Applications" },
+    { value: "t12611", label: "Neural Networks and Reservoir Computing" },
+    { value: "t10878", label: "CRISPR and Genetic Engineering" },
+    { value: "t11523", label: "Nanomaterials and Printing Technologies" },
   ];
 
   useEffect(() => {
