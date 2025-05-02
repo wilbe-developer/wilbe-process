@@ -258,7 +258,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             last_verified_at: new Date().toISOString(),
             last_failed_at:   null
           });
-          if (results.length >= 3) break uniLoop;
+          if (results.length >= 6) break uniLoop;
           break;
         }
         await new Promise(r => setTimeout(r, 10000));
