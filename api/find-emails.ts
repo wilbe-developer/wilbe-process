@@ -222,10 +222,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name:            a.name,
             institution:     uni.name,
             email:           hit,
-            email_state:     vr.state,
-            email_sub_state: vr.reason,
+            verified:        vr.state,
+            reason:          vr.reason,
             orcid:           a.orcid,
-            last_verified_at: null,
+            last_verified_at: new Date().toISOString(),
             last_failed_at:   null
           });
           if (results.length >= 3) break uniLoop;
@@ -252,10 +252,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name:            a.name,
             institution:     uni.name,
             email:           candidate,
-            email_state:     vr.state,
-            email_sub_state: vr.reason,
+            verified:        vr.state,
+            reason:          vr.reason,
             orcid:           a.orcid,
-            last_verified_at: null,
+            last_verified_at: new Date().toISOString(),
             last_failed_at:   null
           });
           if (results.length >= 3) break uniLoop;
