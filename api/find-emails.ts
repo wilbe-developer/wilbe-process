@@ -2,20 +2,16 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient }                       from '@supabase/supabase-js';
 import axios                                   from 'axios';
 
-// ─── Supabase setup ──────────────────────────────────────────────────────
+// ─── Supabase setup ────────────────────────────────────────────────────────────
 const SUPABASE_URL      = process.env.VITE_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY!;
-const SERVICE_ROLE_KEY  = process.env.SERVICE_ROLE_KEY;
-const supabase          = createClient(SUPABASE_URL, SERVICE_ROLE_KEY || SUPABASE_ANON_KEY);
+const supabase          = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ─── External API Keys ──────────────────────────────────────────
-const SERPER_API_KEY     = process.env.SERPER_API_KEY!;
-const TRUELIST_API_KEY   = process.env.TRUELIST_API_KEY!;
+// ─── External API Keys ─────────────────────────────────────────────────────────
+const SERPER_API_KEY   = process.env.SERPER_API_KEY!;
+const TRUELIST_API_KEY = process.env.TRUELIST_API_KEY!;
 
-// ─── Cool-off after grey-list ──────────────────────────────────────────
-const COOL_OFF_MS = 5 * 60 * 1000; // 5 minutes
-
-// ─── Helpers & constants ─────────────────────────────────────────
+// ─── Helpers & constants ───────────────────────────────────────────────────────
 const EMAIL_PATTERNS = [
   '{firstName}.{lastName}@{domain}',
   '{firstName}{lastName}@{domain}',
@@ -24,7 +20,7 @@ const EMAIL_PATTERNS = [
   '{firstName}@{domain}',
 ];
 
-// ─── Logging metrics ─────────────────────────────────────────
+// ─── Logging metrics ───────────────────────────────────────────────────────────
 async function logMetric(params: {
   eventType:     string;
   domain?:       string;
@@ -51,7 +47,7 @@ async function logMetric(params: {
   }
 }
 
-// ─── Truelist Email Verification ────────────────────────────────────────
+// ─── Truelist Email Verification ──────────────────────────────────────────────
 async function verifyEmailWithTruelist(email: string) {
   const t0 = Date.now();
   try {
@@ -64,48 +60,39 @@ async function verifyEmailWithTruelist(email: string) {
           'Content-Type': 'application/json'
         },
         params: { email },
-        timeout: 10000
+        timeout: 15000
       }
     );
     const result = data.emails[0];
 
+    // cache catch-all if detected
     if (result.email_sub_state === 'accept_all') {
       await supabase
         .from('email_domains')
-        .upsert({
-          domain: result.domain,
-          is_catchall: true
-        }, { onConflict: 'domain' });
+        .upsert({ domain: result.domain, is_catchall: true }, { onConflict: 'domain' });
     }
 
     return {
-      ok: result.email_state === 'ok',
-      risky: result.email_state === 'risky',
+      ok:    result.email_state === 'ok',
       state: result.email_state,
       reason: result.email_sub_state,
       latencyMs: Date.now() - t0
     };
   } catch (e: any) {
     console.error('[verifyEmailWithTruelist] error:', e.message);
-    return {
-      ok: false,
-      rejected: false,
-      reason: 'network_error',
-      error: e.message,
-      latencyMs: Date.now() - t0
-    };
+    return { ok: false, state: 'unknown', reason: 'network_error', latencyMs: Date.now() - t0 };
   }
 }
 
-// ─── Candidate pattern generator ─────────────────────────────────────────
+// ─── Candidate pattern generator ──────────────────────────────────────────────
 function generateEmailCandidates(
   firstName: string,
   lastName:  string,
   domain:    string,
   goodPattern?: string
 ): string[] {
-  firstName = firstName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
-  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[^\u0300-\u036f]/g,'').trim();
+  firstName = firstName.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,'').trim();
+  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,'').trim();
 
   const patterns = goodPattern
     ? [ goodPattern
@@ -127,7 +114,7 @@ function generateEmailCandidates(
   return patterns;
 }
 
-// ─── Serper.dev lookup ────────────────────────────────────────
+// ─── Serper.dev lookup ─────────────────────────────────────────────────────────
 async function lookupWithSerper(name: string, domain: string): Promise<string|null> {
   console.log(`[search] Serper query: "${name} ${domain} email"`);
   try {
@@ -146,7 +133,7 @@ async function lookupWithSerper(name: string, domain: string): Promise<string|nu
   }
 }
 
-// ─── OpenAlex author fetch ────────────────────────────────────────
+// ─── OpenAlex author fetch ─────────────────────────────────────────────────────
 async function getAuthorsFromOpenAlex(
   rorId:   string,
   topicId?:string,
@@ -177,7 +164,7 @@ async function getAuthorsFromOpenAlex(
   }
 }
 
-// ─── API handler ────────────────────────────────────────
+// ─── API handler ───────────────────────────────────────────────────────────────
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.time('[total]');
   if (req.method !== 'GET') {
@@ -215,7 +202,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lastName = rest[rest.length - 1];
       if (firstName.length < 2 || lastName.length < 2) continue;
 
-      // ─── Serper lookup first ────────────────────────────────────────
+      // 1) Serper lookup
       const hit = await lookupWithSerper(a.name, uni.domain);
       if (hit) {
         console.log(`[verify] trying serper result: ${hit}`);
@@ -227,26 +214,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           patternTried: hit.split('@')[0],
           smtpSuccess:  vr.ok,
           latencyMs:    vr.latencyMs,
-          errorMessage: vr.error,
           reason:       vr.reason
         });
-        if (vr.ok || vr.risky) {
+        if (vr.ok || vr.state === 'risky') {
           results.push({
             name:         a.name,
             institution:  uni.name,
             email:        hit,
-            verified:     vr.state,
-            reason:       vr.reason,
+            email_state:  vr.state,
+            email_sub_state: vr.reason,
             orcid:        a.orcid,
             last_verified_at: null,
             last_failed_at:   null
           });
           if (results.length >= 3) break uniLoop;
-          await new Promise(res => setTimeout(res, 2500));
-          continue;
         }
+        await new Promise(r => setTimeout(r, 10000));
       }
 
+      // 2) fallback → guessing
       for (const candidate of generateEmailCandidates(firstName, lastName, uni.domain)) {
         console.log(`[verify] trying candidate: ${candidate}`);
         const vr = await verifyEmailWithTruelist(candidate);
@@ -257,17 +243,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           patternTried: candidate.split('@')[0],
           smtpSuccess:  vr.ok,
           latencyMs:    vr.latencyMs,
-          errorMessage: vr.error,
           reason:       vr.reason
         });
-
-        if (vr.ok || vr.risky) {
+        if (vr.ok || vr.state === 'risky') {
           results.push({
             name:         a.name,
             institution:  uni.name,
             email:        candidate,
-            verified:     vr.state,
-            reason:       vr.reason,
+            email_state:  vr.state,
+            email_sub_state: vr.reason,
             orcid:        a.orcid,
             last_verified_at: null,
             last_failed_at:   null
@@ -275,7 +259,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (results.length >= 3) break uniLoop;
           break;
         }
-        await new Promise(res => setTimeout(res, 2500));
+        await new Promise(r => setTimeout(r, 10000));
       }
     }
   }
