@@ -31,11 +31,11 @@ export const useLeadFinder = () => {
   
   const topicOptions: TopicOption[] = [
     { value: "no-filter", label: "No Topic Filter" },
-    { value: "t10346", label: "Magnetic Confinement Fusion Research" },
-    { value: "t11949", label: "Nuclear Physics and Applications" },
-    { value: "t12611", label: "Neural Networks and Reservoir Computing" },
-    { value: "t10878", label: "CRISPR and Genetic Engineering" },
-    { value: "t11523", label: "Nanomaterials and Printing Technologies" },
+    { value: "T10346", label: "Magnetic Confinement Fusion Research" },
+    { value: "T11949", label: "Nuclear Physics and Applications" },
+    { value: "T12611", label: "Neural Networks and Reservoir Computing" },
+    { value: "T10878", label: "CRISPR and Genetic Engineering" },
+    { value: "T11523", label: "Nanomaterials and Printing Technologies" },
   ];
 
   useEffect(() => {
