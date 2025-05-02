@@ -69,7 +69,6 @@ async function verifyEmailWithTruelist(email: string) {
     );
     const result = data.emails[0];
 
-    // Cache catch-all signal to email_domains
     if (result.email_sub_state === 'accept_all') {
       await supabase
         .from('email_domains')
@@ -106,7 +105,7 @@ function generateEmailCandidates(
   goodPattern?: string
 ): string[] {
   firstName = firstName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
-  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,'').trim();
+  lastName  = lastName .toLowerCase().normalize("NFD").replace(/[^\u0300-\u036f]/g,'').trim();
 
   const patterns = goodPattern
     ? [ goodPattern
@@ -216,6 +215,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lastName = rest[rest.length - 1];
       if (firstName.length < 2 || lastName.length < 2) continue;
 
+      // ─── Serper lookup first ────────────────────────────────────────
+      const hit = await lookupWithSerper(a.name, uni.domain);
+      if (hit) {
+        console.log(`[verify] trying serper result: ${hit}`);
+        const vr = await verifyEmailWithTruelist(hit);
+        console.log('[verifyResult]', vr);
+        await logMetric({
+          eventType:    'smtp_verification',
+          domain:       uni.domain,
+          patternTried: hit.split('@')[0],
+          smtpSuccess:  vr.ok,
+          latencyMs:    vr.latencyMs,
+          errorMessage: vr.error,
+          reason:       vr.reason
+        });
+        if (vr.ok || vr.risky) {
+          results.push({
+            name:         a.name,
+            institution:  uni.name,
+            email:        hit,
+            verified:     vr.state,
+            reason:       vr.reason,
+            orcid:        a.orcid,
+            last_verified_at: null,
+            last_failed_at:   null
+          });
+          if (results.length >= 3) break uniLoop;
+          await new Promise(res => setTimeout(res, 2500));
+          continue;
+        }
+      }
+
       for (const candidate of generateEmailCandidates(firstName, lastName, uni.domain)) {
         console.log(`[verify] trying candidate: ${candidate}`);
         const vr = await verifyEmailWithTruelist(candidate);
@@ -244,6 +275,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (results.length >= 3) break uniLoop;
           break;
         }
+        await new Promise(res => setTimeout(res, 2500));
       }
     }
   }
