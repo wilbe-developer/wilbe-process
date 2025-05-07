@@ -51,9 +51,9 @@ export const useWaitlistSignup = () => {
             toast.error("Referral was recorded but counter update failed. Please contact support.");
           }
           
-          navigate('/sprint/referral', { 
+          navigate('/referral', { 
             state: { 
-              referralLink: `${window.location.origin}/sprint/ref/${newReferralCode}` 
+              referralLink: `${window.location.origin}/ref/${newReferralCode}` 
             } 
           });
           
@@ -73,9 +73,9 @@ export const useWaitlistSignup = () => {
 
       if (error) throw error;
 
-      navigate('/sprint/referral', { 
+      navigate('/referral', { 
         state: { 
-          referralLink: `${window.location.origin}/sprint/ref/${newReferralCode}` 
+          referralLink: `${window.location.origin}/ref/${newReferralCode}` 
         } 
       });
 
