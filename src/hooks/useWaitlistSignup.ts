@@ -11,7 +11,20 @@ export const useWaitlistSignup = () => {
   const signup = async (name: string, email: string, referralCode?: string) => {
     setIsLoading(true);
     try {
-      const newReferralCode = btoa(email).slice(0, 8);
+      // Generate a unique referral code
+      let newReferralCode: string;
+      let isUnique = false;
+
+      while (!isUnique) {
+        newReferralCode = Math.random().toString(36).substring(2, 10);
+        const { data: existing } = await supabase
+          .from('waitlist_signups')
+          .select('id')
+          .eq('referral_code', newReferralCode)
+          .single();
+
+        if (!existing) isUnique = true;
+      }
       
       let referrerId = null;
       if (referralCode) {
@@ -81,8 +94,14 @@ export const useWaitlistSignup = () => {
 
     } catch (error: any) {
       console.error('Error in waitlist signup:', error);
-      if (error.code === '23505') { // unique violation
-        toast.error("This email has already joined the waitlist!");
+      if (error.code === '23505') {
+        if (error.message?.includes('email')) {
+          toast.error("This email has already joined the waitlist!");
+        } else if (error.message?.includes('referral_code')) {
+          toast.error("Something went wrong with the referral code. Please try again.");
+        } else {
+          toast.error("Duplicate entry detected. Please contact support if this persists.");
+        }  
       } else {
         toast.error("Failed to join waitlist. Please try again.");
       }
