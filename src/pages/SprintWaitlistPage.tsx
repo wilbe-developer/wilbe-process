@@ -16,7 +16,7 @@ const SprintWaitlistPage = () => {
         <div className="text-center max-w-3xl mx-auto space-y-6">
           <div className="space-y-4 md:space-y-6">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1A1F2C] leading-tight px-2">
-              This is the era of Scientist CEOs
+              This is the century of Scientist Founders
             </h1>
             <p className="text-base md:text-lg lg:text-xl text-[#403E43] px-2">
               Join our 10 day sprint. <a href="#" className="text-black underline">Get $100K-$250K</a> to launch your startup.
