@@ -88,9 +88,9 @@ const App = () => (
               </Route>
 
               {/* Sprint waitlist routes */}
-              <Route path="/sprint-waitlist" element={<SprintWaitlistPage />} />
-              <Route path="/sprint/referral" element={<SprintReferralPage />} />
-              <Route path="/sprint/ref/:code" element={<SprintWaitlistPage />} />
+              <Route path="/waitlist" element={<SprintWaitlistPage />} />
+              <Route path="/referral" element={<SprintReferralPage />} />
+              <Route path="/ref/:code" element={<SprintWaitlistPage />} />
 
               {/* Member-only protected routes */}
               <Route element={<Layout />}>
