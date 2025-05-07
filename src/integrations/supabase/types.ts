@@ -785,6 +785,8 @@ export type Database = {
           referral_code: string
           referrer_id: string | null
           successful_referrals: number | null
+          utm_medium: string | null
+          utm_source: string | null
         }
         Insert: {
           created_at?: string
@@ -794,6 +796,8 @@ export type Database = {
           referral_code: string
           referrer_id?: string | null
           successful_referrals?: number | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Update: {
           created_at?: string
@@ -803,6 +807,8 @@ export type Database = {
           referral_code?: string
           referrer_id?: string | null
           successful_referrals?: number | null
+          utm_medium?: string | null
+          utm_source?: string | null
         }
         Relationships: [
           {

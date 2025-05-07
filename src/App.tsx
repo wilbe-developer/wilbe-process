@@ -87,7 +87,7 @@ const App = () => (
                 </Route>
               </Route>
 
-              {/* Sprint waitlist routes */}
+              {/* Sprint waitlist routes - preserve query parameters */}
               <Route path="/waitlist" element={<SprintWaitlistPage />} />
               <Route path="/referral" element={<SprintReferralPage />} />
               <Route path="/ref/:code" element={<SprintWaitlistPage />} />

@@ -3,17 +3,21 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWaitlistSignup } from "@/hooks/useWaitlistSignup";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export function WaitlistForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const { code: referralCode } = useParams();
+  const [searchParams] = useSearchParams();
   const { signup, isLoading } = useWaitlistSignup();
+
+  const utmSource = searchParams.get("utm_source") || undefined;
+  const utmMedium = searchParams.get("utm_medium") || undefined;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signup(name, email, referralCode);
+    await signup(name, email, referralCode, utmSource, utmMedium);
   };
 
   // Array of colors for instant hover changes

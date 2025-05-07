@@ -8,7 +8,13 @@ export const useWaitlistSignup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const signup = async (name: string, email: string, referralCode?: string) => {
+  const signup = async (
+    name: string, 
+    email: string, 
+    referralCode?: string, 
+    utmSource?: string, 
+    utmMedium?: string
+  ) => {
     setIsLoading(true);
     try {
       // Generate a unique referral code
@@ -48,7 +54,9 @@ export const useWaitlistSignup = () => {
               name,
               email,
               referral_code: newReferralCode,
-              referrer_id: referrerId
+              referrer_id: referrerId,
+              utm_source: utmSource,
+              utm_medium: utmMedium
             });
 
           if (signupError) throw signupError;
@@ -81,7 +89,9 @@ export const useWaitlistSignup = () => {
           name,
           email,
           referral_code: newReferralCode,
-          referrer_id: referrerId
+          referrer_id: referrerId,
+          utm_source: utmSource,
+          utm_medium: utmMedium
         });
 
       if (error) throw error;
