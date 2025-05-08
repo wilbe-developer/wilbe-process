@@ -8,6 +8,7 @@ import UserApprovalsTab from "../components/admin/tabs/UserApprovalsTab";
 import RolesManager from "../components/admin/RolesManager";
 import ContentManagementTab from "../components/admin/tabs/ContentManagementTab";
 import PlatformSettingsTab from "../components/admin/tabs/PlatformSettingsTab";
+import SprintActivityTab from "../components/admin/tabs/SprintActivityTab";
 
 const AdminPage = () => {
   const { isAdmin } = useAuth();
@@ -34,6 +35,7 @@ const AdminPage = () => {
           <TabsTrigger value="roles">User Roles</TabsTrigger>
           <TabsTrigger value="content">Content Management</TabsTrigger>
           <TabsTrigger value="settings">Platform Settings</TabsTrigger>
+          <TabsTrigger value="sprint">Sprint Activity</TabsTrigger>
         </TabsList>
 
         <TabsContent value="approvals">
@@ -50,6 +52,10 @@ const AdminPage = () => {
 
         <TabsContent value="settings">
           <PlatformSettingsTab />
+        </TabsContent>
+
+        <TabsContent value="sprint">
+          <SprintActivityTab />
         </TabsContent>
       </Tabs>
     </div>
