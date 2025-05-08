@@ -33,11 +33,12 @@ export const useWaitlistSignup = () => {
       }
       
       let referrerId = null;
+      let referrerName = null;
       if (referralCode) {
         console.log("Referral code provided:", referralCode);
         const { data: referrer, error: referrerError } = await supabase
           .from('waitlist_signups')
-          .select('id, successful_referrals')
+          .select('id, name, successful_referrals')
           .eq('referral_code', referralCode)
           .single();
         
@@ -45,6 +46,7 @@ export const useWaitlistSignup = () => {
         
         if (referrer) {
           referrerId = referrer.id;
+          referrerName = referrer.name;
           console.log("Found referrer with ID:", referrerId, "Current referrals:", referrer.successful_referrals);
           
           // First insert the new signup
@@ -72,9 +74,30 @@ export const useWaitlistSignup = () => {
             toast.error("Referral was recorded but counter update failed. Please contact support.");
           }
           
+          const referralLink = `${window.location.origin}/ref/${newReferralCode}`;
+          
+          // Send waitlist notification
+          try {
+            await fetch('/api/send-waitlist-notification', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name,
+                email,
+                referralLink,
+                referrerName,
+                utmSource,
+                utmMedium
+              }),
+            });
+          } catch (notificationError) {
+            console.error("Failed to send notifications:", notificationError);
+            // Continue with navigation even if notification fails
+          }
+          
           navigate('/referral', { 
             state: { 
-              referralLink: `${window.location.origin}/ref/${newReferralCode}` 
+              referralLink
             } 
           });
           
@@ -96,9 +119,30 @@ export const useWaitlistSignup = () => {
 
       if (error) throw error;
 
+      const referralLink = `${window.location.origin}/ref/${newReferralCode}`;
+      
+      // Send waitlist notification
+      try {
+        await fetch('/api/send-waitlist-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            email,
+            referralLink,
+            referrerName,
+            utmSource,
+            utmMedium
+          }),
+        });
+      } catch (notificationError) {
+        console.error("Failed to send notifications:", notificationError);
+        // Continue with navigation even if notification fails
+      }
+
       navigate('/referral', { 
         state: { 
-          referralLink: `${window.location.origin}/ref/${newReferralCode}` 
+          referralLink
         } 
       });
 
