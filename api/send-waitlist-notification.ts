@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       to: email,
       subject: "You joined the Wilbe waitlist",
       html: createEmailHtml(name, referralLink),
-      replyTo: 'capital@wilbe.com'
+      replyTo: 'members@wilbe.com'
     });
 
     // Send Slack notification
