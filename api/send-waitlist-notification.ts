@@ -17,15 +17,14 @@ const createEmailHtml = (name: string, referralLink: string) => `
 <html>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
   <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #1a365d;">Welcome to the Wilbe Waitlist</h2>
+    <h2 style="color: #1a365d;">You've Joined the Wilbe Waitlist</h2>
     <p>Hi ${name},</p>
-    <p>Thank you for joining our waitlist! We're excited to have you as part of the Wilbe community.</p>
+    <p>We'll notify you when the sprint is ready - get prepared!</p>
     <div style="background: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
       <h3 style="margin-top: 0;">Get Early Access:</h3>
       <p>Share your personal referral link with 3 other builders to gain early access:</p>
       <p style="background: #edf2f7; padding: 10px; border-radius: 4px; word-break: break-all;"><strong>${referralLink}</strong></p>
     </div>
-    <p>We'll notify you when the sprint is ready - get prepared!</p>
     <p>Putting Scientists First,<br/>Team Wilbe</p>
   </div>
 </body>
