@@ -1,35 +1,56 @@
 
-import { Header } from "@/components/Header";
 import { WaitlistForm } from "@/components/WaitlistForm";
 import { Helmet } from "react-helmet";
+import HeroSection from "@/components/HeroSection";
+import WhoSection from "@/components/WhoSection";
+import ProcessSection from "@/components/ProcessSection";
+import FocusSection from "@/components/FocusSection";
+import AboutSection from "@/components/AboutSection";
+import WhySection from "@/components/WhySection";
+import Footer from "@/components/Footer";
+import Logo from "@/components/Logo";
+import Section from "@/components/Section";
 
 const SprintWaitlistPage = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-500 via-orange-300 to-white">
       <Helmet>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
       
-      <Header />
+      <div className="p-6 flex justify-center">
+        <Logo 
+          className="h-8" 
+          style={{
+            '--sails-color': 'white',
+            '--text-color': 'white',
+          } as React.CSSProperties}
+        />
+      </div>
       
-      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-12 mt-8 md:mt-16">
-        <div className="text-center max-w-3xl mx-auto space-y-6">
-          <div className="space-y-4 md:space-y-6">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1A1F2C] leading-tight px-2">
-              Scientists you are now free to build at speed. With or without IP.
-            </h1>
-            <p className="text-base md:text-lg lg:text-xl text-[#403E43] px-2">
-              In 10 days unlock all our templates, guidance and community of scientist founders. Put together your most investible venture plan and tell us how much you need to make it happen. Stand out and we can invest up to $250k. Worst case you have a plan.
+      <HeroSection />
+      
+      <div className="bg-white flex-1 flex flex-col">
+        <WhoSection />
+        <ProcessSection />
+        <FocusSection />
+        <AboutSection />
+        <WhySection />
+        
+        {/* Waitlist Form Section */}
+        <Section className="bg-white">
+          <div className="text-center max-w-3xl mx-auto space-y-6">
+            <h2 className="text-3xl font-bold">Join the waitlist</h2>
+            <p className="text-zinc-600">
+              Sign up now to be among the first to access our 10-day sprint to build your most investible venture plan. 
+              We'll notify you as soon as we're ready to review your application.
             </p>
+            <WaitlistForm />
           </div>
-
-          <WaitlistForm />
-        </div>
-      </main>
-
-      <footer className="py-6 md:py-8 text-center text-[#403E43]">
-        Putting Scientists First since 2020.
-      </footer>
+        </Section>
+        
+        <Footer />
+      </div>
     </div>
   );
 };

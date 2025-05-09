@@ -1,0 +1,29 @@
+
+import React from 'react';
+import Section from './Section';
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+
+const HeroSection: React.FC = () => {
+  return (
+    <Section 
+      className="py-20 md:py-32 bg-gradient-to-b from-orange-500 via-orange-300 to-white text-white"
+      withContainer={true}
+    >
+      <div className="text-center space-y-6">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight max-w-7xl mx-auto">
+          Bring your science to the world.<br />
+          Build the company only you can.
+        </h1>
+        <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto">
+          Go from scientist to founder in 10 days. Unlock all our templates, guidance and the clarity to 
+          make critical decisions. Put together your most investable venture plan and tell us how much 
+          you need to make it happen. Stand out, and you'll get your first $100K-250K investment from 
+          us, and join a world-class community of scientist-founders.
+        </p>
+      </div>
+    </Section>
+  );
+};
+
+export default HeroSection;
