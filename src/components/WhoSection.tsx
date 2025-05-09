@@ -31,9 +31,13 @@ const WhoSection: React.FC = () => {
             <CardContent className="p-6 flex flex-col h-full">
               <h3 className="text-xl font-bold mb-4 text-left">{item.title}</h3>
               <div className="flex-grow flex flex-col">
-                <p className="text-zinc-600 mb-10">{item.topText}</p>
-                <div className="w-full border-t border-zinc-200 mb-10"></div>
-                <p className="text-zinc-600 h-[96px]">{item.bottomText}</p>
+                <div className="min-h-[80px]">
+                  <p className="text-zinc-600">{item.topText}</p>
+                </div>
+                <div className="w-full border-t border-zinc-200 my-10"></div>
+                <div className="min-h-[96px]">
+                  <p className="text-zinc-600">{item.bottomText}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
