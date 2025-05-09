@@ -69,7 +69,7 @@ const ProcessSection: React.FC = () => {
       <div className="flex justify-center mt-8">
         <Button 
           onClick={scrollToWaitlist}
-          className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-6 py-6 h-auto"
+          className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-6 py-2 h-auto"
         >
           Join the waitlist
           <ArrowRight />

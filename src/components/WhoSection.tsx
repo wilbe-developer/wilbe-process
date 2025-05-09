@@ -7,15 +7,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const criteria = [
   {
     title: 'Profile',
-    description: 'Scientists and engineers from academia\nor industry'
+    description: 'Scientists and engineers from academia or industry'
   },
   {
     title: 'Stage',
-    description: 'With or without IP, ready to build\na world-changing venture'
+    description: 'With or without IP, ready to build a world-changing venture'
   },
   {
     title: 'Execution',
-    description: 'Ready to commit and build with\nspeed and determination'
+    description: 'Ready to commit and build with speed and determination'
   }
 ];
 
@@ -30,7 +30,7 @@ const WhoSection: React.FC = () => {
           <Card key={index} className="bg-white shadow-sm">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-              <p className="text-zinc-600 whitespace-pre-line">{item.description}</p>
+              <p className="text-zinc-600">{item.description}</p>
             </CardContent>
           </Card>
         ))}

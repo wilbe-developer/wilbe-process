@@ -31,7 +31,7 @@ const HeroSection: React.FC = () => {
         <div className="pt-4">
           <Button 
             onClick={scrollToWaitlist}
-            className="bg-white text-orange-500 hover:bg-white/90 text-lg px-6 py-6 h-auto"
+            className="bg-white text-orange-500 hover:bg-white/90 text-lg px-6 py-2 h-auto"
           >
             Join the waitlist
             <ArrowRight />
