@@ -28,11 +28,13 @@ const WhoSection: React.FC = () => {
       <div className="grid gap-6 md:grid-cols-3">
         {features.map((item, index) => (
           <Card key={index} className="bg-white shadow-sm rounded-none">
-            <CardContent className="p-6 flex flex-col space-y-6">
-              <h3 className="text-xl font-bold text-center">{item.title}</h3>
-              <p className="text-zinc-600">{item.topText}</p>
-              <div className="border-t border-zinc-200 my-2"></div>
-              <p className="text-zinc-600">{item.bottomText}</p>
+            <CardContent className="p-6 flex flex-col h-full">
+              <h3 className="text-xl font-bold text-center h-8 flex items-center justify-center mb-4">{item.title}</h3>
+              <div className="flex-grow flex flex-col">
+                <p className="text-zinc-600 min-h-[72px] flex items-center">{item.topText}</p>
+                <div className="border-t border-zinc-200 my-4"></div>
+                <p className="text-zinc-600 min-h-[96px] flex items-center">{item.bottomText}</p>
+              </div>
             </CardContent>
           </Card>
         ))}
