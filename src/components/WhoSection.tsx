@@ -32,23 +32,23 @@ const WhoSection: React.FC = () => {
       <div className="grid gap-4 md:grid-cols-3">
         {features.map((item, index) => (
           <Card key={index} className="bg-white shadow-sm rounded-none h-full">
-            <CardContent className="p-5 flex flex-col h-full">
+            <CardContent className={`${isMobile ? 'p-4' : 'p-5'} flex flex-col h-full`}>
               {/* Title */}
-              <h3 className="text-xl font-bold mb-4 text-left">{item.title}</h3>
+              <h3 className="text-xl font-bold mb-3 text-left">{item.title}</h3>
               
-              {/* Content container with responsive heights */}
+              {/* Content container */}
               <div className="flex flex-col flex-grow">
-                {/* Top section */}
+                {/* Top section - fixed height on desktop only */}
                 <div className={isMobile ? "" : "h-[120px]"}>
                   <p className="text-zinc-600">{item.topText}</p>
                 </div>
                 
-                {/* Divider with responsive padding */}
-                <div className={isMobile ? "py-2 my-3" : "py-4"}>
+                {/* Divider - reduced spacing on mobile */}
+                <div className={isMobile ? "py-2 my-1" : "py-4"}>
                   <div className="w-full border-t border-zinc-200"></div>
                 </div>
                 
-                {/* Bottom section */}
+                {/* Bottom section - fixed height on desktop only */}
                 <div className={isMobile ? "" : "h-[120px]"}>
                   <p className="text-zinc-600">{item.bottomText}</p>
                 </div>
