@@ -15,7 +15,7 @@ const features = [
     bottomText: 'We help you build your own unique playbook.'
   },
   {
-    title: 'Supportive community',
+    title: 'Community',
     topText: 'Building a science company is a challenge of a lifetime.',
     bottomText: 'Our 300+ BSF alumni including 80 scientist founders are here to support you.'
   }
@@ -30,9 +30,9 @@ const WhoSection: React.FC = () => {
           <Card key={index} className="bg-white shadow-sm rounded-none">
             <CardContent className="p-6 flex flex-col h-full">
               <h3 className="text-xl font-bold mb-4 text-left">{item.title}</h3>
-              <div className="flex-grow flex flex-col justify-between">
+              <div className="flex-grow flex flex-col">
                 <p className="text-zinc-600 h-[72px]">{item.topText}</p>
-                <div className="border-t border-zinc-200 my-4"></div>
+                <div className="w-full border-t border-zinc-200 my-4"></div>
                 <p className="text-zinc-600 h-[96px]">{item.bottomText}</p>
               </div>
             </CardContent>
