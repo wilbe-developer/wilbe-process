@@ -27,18 +27,23 @@ const WhoSection: React.FC = () => {
       <h2 className="text-3xl font-bold mb-8">Building a science company is not about IP, but it is about</h2>
       <div className="grid gap-4 md:grid-cols-3">
         {features.map((item, index) => (
-          <Card key={index} className="bg-white shadow-sm rounded-none">
+          <Card key={index} className="bg-white shadow-sm rounded-none flex flex-col h-full">
             <CardContent className="p-5 flex flex-col h-full">
               <h3 className="text-xl font-bold mb-3 text-left">{item.title}</h3>
-              <div className="flex-grow flex flex-col justify-between">
-                <div className="min-h-[65px] mb-6">
+              <div className="flex flex-col flex-grow">
+                {/* Top text section with fixed height */}
+                <div className="mb-auto">
                   <p className="text-zinc-600">{item.topText}</p>
                 </div>
+                
+                {/* Divider always in the same position */}
+                <div className="py-8">
+                  <div className="w-full border-t border-zinc-200"></div>
+                </div>
+                
+                {/* Bottom text section */}
                 <div>
-                  <div className="w-full border-t border-zinc-200 my-6"></div>
-                  <div className="min-h-[75px] mt-6">
-                    <p className="text-zinc-600">{item.bottomText}</p>
-                  </div>
+                  <p className="text-zinc-600">{item.bottomText}</p>
                 </div>
               </div>
             </CardContent>
