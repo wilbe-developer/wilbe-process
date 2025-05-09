@@ -3,6 +3,7 @@ import React from 'react';
 import Section from './Section';
 import { Card, CardContent } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const features = [
   {
@@ -23,6 +24,8 @@ const features = [
 ];
 
 const WhoSection: React.FC = () => {
+  const isMobile = useIsMobile();
+
   return (
     <Section>
       <h2 className="text-3xl font-bold mb-8">Building a science company is not about IP, but it is about</h2>
@@ -33,20 +36,20 @@ const WhoSection: React.FC = () => {
               {/* Title */}
               <h3 className="text-xl font-bold mb-4 text-left">{item.title}</h3>
               
-              {/* Fixed height content container with two sections */}
+              {/* Content container with responsive heights */}
               <div className="flex flex-col flex-grow">
-                {/* Top section with fixed height */}
-                <div className="h-[120px]">
+                {/* Top section */}
+                <div className={isMobile ? "" : "h-[120px]"}>
                   <p className="text-zinc-600">{item.topText}</p>
                 </div>
                 
-                {/* Divider - positioned the same in all cards */}
-                <div className="py-4">
+                {/* Divider with responsive padding */}
+                <div className={isMobile ? "py-2 my-3" : "py-4"}>
                   <div className="w-full border-t border-zinc-200"></div>
                 </div>
                 
-                {/* Bottom section with fixed height */}
-                <div className="h-[120px]">
+                {/* Bottom section */}
+                <div className={isMobile ? "" : "h-[120px]"}>
                   <p className="text-zinc-600">{item.bottomText}</p>
                 </div>
               </div>
