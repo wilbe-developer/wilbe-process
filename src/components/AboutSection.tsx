@@ -32,7 +32,7 @@ const AboutSection: React.FC = () => {
           Today, our portfolio spans 20 investments with a combined valuation of $650M, and we're proud to support the world's largest network of entrepreneurial scientists—across academia, startups, and industry.
         </p>
         <p className="text-lg">
-          Curious? Learn more at Wilbe.com.
+          Curious? Learn more at <a href="https://wilbe.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/80">wilbe.com</a>.
         </p>
       </div>
 
@@ -42,7 +42,7 @@ const AboutSection: React.FC = () => {
           <div key={index} className="text-center">
             <p className="text-2xl font-bold">{stat.value}</p>
             <p className="text-sm text-white/90">{stat.label}</p>
-            <p className="text-xs text-white/80">{stat.sublabel}</p>
+            <p className="text-sm text-white/90">{stat.sublabel}</p>
           </div>
         ))}
       </div>

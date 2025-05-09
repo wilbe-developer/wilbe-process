@@ -9,22 +9,22 @@ const steps = [
   {
     number: 1,
     title: 'Sign-up - it\'s free, it\'s rolling',
-    description: "Fill out the application form to help us\nchart the best journey for you based on your sector,\nchallenges and stage of development."
+    description: "Fill out the application form to help us chart the best journey for you based on your sector, challenges and stage of development."
   },
   {
     number: 2,
     title: '10 days to show us your best',
-    description: 'In our online process, you can move at your own pace\nto build the foundations. But, complete it in 10 days\nand you get our attention as investors.'
+    description: 'In our online process, you can move at your own pace to build the foundations. But, complete it in 10 days and you get our attention as investors.'
   },
   {
     number: 3,
     title: 'Become a Wilbe Founder',
-    description: 'If it\'s a fit, we invest up to $250K and\npartner with you to unlock the next stage.'
+    description: 'If it\'s a fit, we invest up to $250K and partner with you to unlock the next stage.'
   },
   {
     number: 4,
     title: 'Join the community of scientist leaders',
-    description: "You will be invited to join us at an\nin-person residency where we chart the future steps\nalongside fellow Wilbe founders."
+    description: "You will be invited to join us at an in-person residency where we chart the future steps alongside fellow Wilbe founders."
   }
 ];
 
@@ -57,9 +57,9 @@ const ProcessSection: React.FC = () => {
                 {step.number}
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <h3 className="text-xl font-bold mb-1">{step.title}</h3>
-              <p className="text-zinc-600 whitespace-pre-line">
+              <p className="text-zinc-600">
                 {getFormattedDescription(index, step.description)}
               </p>
             </div>
