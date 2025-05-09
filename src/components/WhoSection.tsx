@@ -27,7 +27,7 @@ const WhoSection: React.FC = () => {
       <h2 className="text-3xl font-bold mb-10">Who is this for?</h2>
       <div className="grid gap-6 md:grid-cols-3">
         {criteria.map((item, index) => (
-          <Card key={index} className="bg-white shadow-sm">
+          <Card key={index} className="bg-white shadow-sm rounded-none">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold mb-2">{item.title}</h3>
               <p className="text-zinc-600">{item.description}</p>

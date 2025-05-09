@@ -9,12 +9,12 @@ const steps = [
   {
     number: 1,
     title: 'Sign-up - it\'s free, it\'s rolling',
-    description: "Fill out the application form to help us\nchart the best journey for you."
+    description: "Fill out the application form to help us\nchart the best journey for you based on your sector,\nchallenges and stage of development."
   },
   {
     number: 2,
     title: '10 days to show us your best',
-    description: 'A sense of urgency means a faster iteration cycle.\nUse our material and templates, we will help.'
+    description: 'In our online process, you can move at your own pace\nto build the foundations. But, complete it in 10 days\nand you get our attention as investors.'
   },
   {
     number: 3,
@@ -24,7 +24,7 @@ const steps = [
   {
     number: 4,
     title: 'Join the community of scientist leaders',
-    description: "You will be invited to join us at an\nin-person residency with fellow founders."
+    description: "You will be invited to join us at an\nin-person residency where we chart the future steps\nalongside fellow Wilbe founders."
   }
 ];
 
@@ -48,7 +48,7 @@ const ProcessSection: React.FC = () => {
 
   return (
     <Section className="bg-white">
-      <h2 className="text-3xl font-bold mb-10">Your journey to become a scientist founder</h2>
+      <h2 className="text-3xl font-bold mb-10">Your journey to Become a Scientist Founder (BSF)</h2>
       <div className="space-y-8 mb-10">
         {steps.map((step, index) => (
           <div key={step.number} className="flex border-b border-zinc-200 pb-6 last:border-b-0">
@@ -69,7 +69,7 @@ const ProcessSection: React.FC = () => {
       <div className="flex justify-center mt-8">
         <Button 
           onClick={scrollToWaitlist}
-          className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-6 py-2 h-auto"
+          className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-6 py-2 h-auto rounded-none"
         >
           Join the waitlist
           <ArrowRight />

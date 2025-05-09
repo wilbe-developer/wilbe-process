@@ -34,16 +34,13 @@ const SprintWaitlistPage = () => {
         <WhoSection />
         <ProcessSection />
         <FocusSection />
-        <AboutSection />
         <WhySection />
+        <AboutSection />
         
         {/* Waitlist Form Section */}
         <Section id="waitlist-form" className="bg-white">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h2 className="text-3xl font-bold">Join the waitlist</h2>
-            <p className="text-zinc-600">
-              Sign up now to be among the first to access our 10-day sprint to build your most investible venture plan.
-            </p>
             <WaitlistForm />
           </div>
         </Section>
