@@ -38,7 +38,7 @@ const SprintWaitlistPage = () => {
         <WhySection />
         
         {/* Waitlist Form Section */}
-        <Section className="bg-white">
+        <Section id="waitlist-form" className="bg-white">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h2 className="text-3xl font-bold">Join the waitlist</h2>
             <p className="text-zinc-600">

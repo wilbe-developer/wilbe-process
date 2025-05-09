@@ -31,7 +31,7 @@ export function WaitlistForm() {
   ];
 
   const getRandomColor = () => hoverColors[Math.floor(Math.random() * hoverColors.length)];
-  const [buttonColor, setButtonColor] = useState('#ff0052');
+  const [buttonColor, setButtonColor] = useState('#F97316'); // Set initial color to orange
 
   return (
     <div className="w-full max-w-md mx-auto space-y-2">

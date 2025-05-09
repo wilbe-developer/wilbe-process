@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 const HeroSection: React.FC = () => {
+  const scrollToWaitlist = () => {
+    const waitlistSection = document.getElementById('waitlist-form');
+    if (waitlistSection) {
+      waitlistSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <Section 
       className="py-20 md:py-32 bg-gradient-to-b from-orange-500 via-orange-300 to-white text-white"
@@ -21,6 +28,15 @@ const HeroSection: React.FC = () => {
           you need to make it happen. Stand out, and you'll get your first $100K-250K investment from 
           us, and join a world-class community of scientist-founders.
         </p>
+        <div className="pt-4">
+          <Button 
+            onClick={scrollToWaitlist}
+            className="bg-white text-orange-500 hover:bg-white/90 text-lg px-6 py-6 h-auto"
+          >
+            Join the waitlist
+            <ArrowRight />
+          </Button>
+        </div>
       </div>
     </Section>
   );

@@ -39,6 +39,13 @@ const ProcessSection: React.FC = () => {
     return desc;
   };
 
+  const scrollToWaitlist = () => {
+    const waitlistSection = document.getElementById('waitlist-form');
+    if (waitlistSection) {
+      waitlistSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <Section className="bg-white">
       <h2 className="text-3xl font-bold mb-10">Your journey to become a scientist founder</h2>
@@ -58,6 +65,15 @@ const ProcessSection: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+      <div className="flex justify-center mt-8">
+        <Button 
+          onClick={scrollToWaitlist}
+          className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-6 py-6 h-auto"
+        >
+          Join the waitlist
+          <ArrowRight />
+        </Button>
       </div>
     </Section>
   );
