@@ -9,7 +9,7 @@ const MemberRoute = () => {
 
   console.log("MemberRoute - Auth state:", { isAuthenticated, isApproved, loading });
 
-  // Show loading state
+  // Show loading states
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
