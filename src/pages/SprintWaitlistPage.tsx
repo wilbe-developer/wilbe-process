@@ -42,8 +42,7 @@ const SprintWaitlistPage = () => {
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h2 className="text-3xl font-bold">Join the waitlist</h2>
             <p className="text-zinc-600">
-              Sign up now to be among the first to access our 10-day sprint to build your most investible venture plan. 
-              We'll notify you as soon as we're ready to review your application.
+              Sign up now to be among the first to access our 10-day sprint to build your most investible venture plan.
             </p>
             <WaitlistForm />
           </div>
