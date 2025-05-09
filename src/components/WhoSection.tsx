@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 const features = [
   {
     title: 'Mindset',
-    topText: 'Academic training forces much slower iteration than in business',
+    topText: 'Academic training often leads to slower iteration cycles compared to business.',
     bottomText: 'We help you increase iteration speed, speed means more data, in science and in business.'
   },
   {
