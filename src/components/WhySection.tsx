@@ -9,28 +9,28 @@ const founders = [
     title: "Co-founder & CEO",
     company: "ExpressionEdits",
     description: "Redefining the status quo of protein expression",
-    image: "/lovable-uploads/kart.png"
+    image: "https://iatercfyoclqxmohyyke.supabase.co/storage/v1/object/public/founders//kart.png"
   },
   {
     name: "Francesco Sciortino",
     title: "Co-founder & CEO",
     company: "Proxima Fusion",
     description: "Bridging the energy of stars to Earth with fusion power plants",
-    image: "/lovable-uploads/francesco.png"
+    image: "https://iatercfyoclqxmohyyke.supabase.co/storage/v1/object/public/founders//francesco.png"
   },
   {
     name: "Assia Kasdi",
     title: "Co-founder & CEO",
     company: "Milvus Advanced",
     description: "Developing affordable substitutes to rare Earth materials",
-    image: "/lovable-uploads/assia.png"
+    image: "https://iatercfyoclqxmohyyke.supabase.co/storage/v1/object/public/founders//assia.png"
   },
   {
     name: "Shamit Shrivastava",
     title: "Co-founder & CEO",
     company: "Apoha",
     description: "Building the first machine that understands sensory data",
-    image: "/lovable-uploads/shamit.png"
+    image: "https://iatercfyoclqxmohyyke.supabase.co/storage/v1/object/public/founders//shamit.png"
   }
 ];
 
